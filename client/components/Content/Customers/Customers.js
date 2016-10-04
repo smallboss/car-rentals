@@ -4,7 +4,7 @@ export default class Customers extends Component {
   render() {
     return (
       <div>
-        <h1>Customers</h1>
+        <h1>Customers button to add user</h1>
       </div>
     )
   }
