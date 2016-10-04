@@ -1,0 +1,15 @@
+.add-user-form .form-group {
+  margin-top: 5px;
+}
+.add-user-form:not([type=submit]) {
+  width: 70%;
+  margin-left: 20px;
+}
+.add-user-form label {
+  padding-right: 20px;
+  text-align: left!important;
+}
+.add-user-form input[type=submit] {
+  float: right;
+  margin-top: 5px;
+}
