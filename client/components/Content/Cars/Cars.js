@@ -20,7 +20,7 @@ class Cars extends Component {
   }
 }
 
-//Объявляйте обязательно типы props
+//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ props
 Cars.propTypes = {
   cars: PropTypes.array.isRequired,
 };
