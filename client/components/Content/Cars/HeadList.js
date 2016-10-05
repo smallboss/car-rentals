@@ -15,7 +15,7 @@ export default class HeadList extends Component {
 
 
     onSearchFieldChange(e){
-        // this.setState({searchField: e.target.value});
+        this.setState({searchField: e.target.value});
 
         // this.props.onChangeSearchField(e)
     }
@@ -50,7 +50,9 @@ export default class HeadList extends Component {
                 </div>
 
                 <div className="right-headList">
-                    <input type="text" onChange={ (e) => this.props.onChangeSearchField(e) } />
+                    <form>
+                        <input type="text" onChange={ (e) => this.props.onChangeSearchField(e.target.value) } />
+                    </form>
                     
                     <div className="navBox">
                         <span className="pages">
@@ -59,8 +61,8 @@ export default class HeadList extends Component {
                             <span className="totalPages">{Math.ceil(totalItems / itemsOnPage)}</span>
                         </span>
                         <span className="arrows">
-                            <button type="button"><span className="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></button>
-                            <button type="button"><span className="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></button>
+                            <button type="button" onClick={this.props.onChangeP}><span className="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></button>
+                            <button type="button" ><span className="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></button>
                         </span>
                     </div>
                 </div>
