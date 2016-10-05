@@ -6,7 +6,7 @@ import React from 'react'
 class Registration extends React.Component {
     render () {
         return (
-            <form className='form-horizontal text-left add-user-form' onSubmit={this.props.register}>
+            <form className='form-horizontal text-left add-user-form' onSubmit={this.props.addUserHandler}>
                 <div className='form-group'>
                     <label htmlFor='name' className='control-label col-xs-2'>Name</label>
                     <div className='col-xs-10'>
@@ -46,7 +46,7 @@ class Registration extends React.Component {
                 <div className='form-group'>
                     <label htmlFor='repeat_password' className='control-label col-xs-2'>Repeat password</label>
                     <div className='col-xs-10'>
-                        <input type='repeat_password' id='repeat_password' className='form-control' required />
+                        <input type='password' id='repeat_password' className='form-control' required />
                     </div>
                 </div><br />
                 <input type='submit' className='btn btn-success' defaultValue='Add user' />

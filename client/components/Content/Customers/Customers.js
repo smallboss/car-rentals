@@ -25,7 +25,8 @@ export default class Customers extends Component {
             email: e.target[2].value,
             birthDate: e.target[3].value,
             phone: e.target[4].value,
-            password: e.target[5].value
+            password: e.target[5].value,
+            role: 'customer'
         }
         ApiCustomers.insert(_user)
     }
@@ -34,7 +35,7 @@ export default class Customers extends Component {
             <div>
                 <h1>Customers</h1>
                 <input type='button' className='btn btn-default' id='add_user_button' className='make-action' data-target='add_user_form' value='Registration' />
-                <input type='button' className='btn btn-default' id='show_users_button' className='make-action' data-target='add_user_form' value='All users' />
+                <input type='button' className='btn btn-default' id='show_users_button' className='make-action' data-target='user_list' value='All users' />
                 <div id='add_user_form' style={{display: 'none'}}>
                     <h3>Register user</h3>
                     <Registration addUserHandler={this.addUserHandler} />
