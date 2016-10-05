@@ -18,10 +18,10 @@ export default class CarRow extends Component {
 
 
     render(){
-        const { car, onHandleSelect } = this.props;
+        const { car, onHandleSelect, onClick } = this.props;
 
         return (
-            <tr>
+            <tr onClick={onClick}>
                 <th><input type="checkbox" ref={(ref) => this.input = ref} onChange={(e) => onHandleSelect(e, car)}/></th>
                 <td>{ car.name }</td>
                 <td>{ car.plateNumber }</td>

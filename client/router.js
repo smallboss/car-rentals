@@ -7,6 +7,7 @@ import Footer from './components/Footer';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar.js';
 import Cars from './components/Content/Cars';
+import CarSingle from './components/Content/Cars/CarSingle.js';
 import Customers from './components/Content/Customers';
 
 const NotFoundPage = () => {
@@ -34,7 +35,9 @@ export const renderRoutes = () => (
   <Router history={browserHistory}>
     <Route path="/" component={routerComponent}>
       <IndexRoute component={App} />
-      <Route path="cars" component={Cars}/>
+      <Route path="cars" component={Cars}>
+        <Route path="cars/:carId" component={CarSingle} />
+      </Route>
       <Route path="customers" component={Customers}/>
       <Route path="*" component={NotFoundPage}/>
     </Route>

@@ -9,20 +9,17 @@ export default class HeadList extends Component {
             searchField: "",
             disableRemove: true
         }
-
-        // this.onSearchFieldChange = this.onSearchFieldChange.bind(this);
     }
 
 
     onSearchFieldChange(e){
         this.setState({searchField: e.target.value});
-
-        // this.props.onChangeSearchField(e)
     }
 
 
     componentWillReceiveProps (props) {
         if(props.numbSelected) this.setState({disableRemove: false});
+        else this.setState({disableRemove: true});
     }
 
 
@@ -30,8 +27,70 @@ export default class HeadList extends Component {
 
         const { currentPage, itemsOnPage, totalItems } = this.props;
 
-        // let disableRemove = (this.state.disableRemove ? 'disabled' : '');
-        let disableRemove = 'disabled'
+        const lastPage = Math.ceil(totalItems / itemsOnPage) ? Math.ceil(totalItems / itemsOnPage) : 1 ;
+
+
+        const renderRemoveButton = () => {
+            let removeButton;
+
+            if (this.state.disableRemove) {
+                removeButton = 
+                    <button 
+                        onClick={this.props.onRemoveCars} 
+                        className='btn btn-danger' 
+                        disabled >
+                        Delete
+                    </button>
+            } else {
+                removeButton = 
+                    <button 
+                        onClick={this.props.onRemoveCars} 
+                        className='btn btn-danger' >
+                        Delete
+                    </button>
+            }
+
+            return removeButton;
+        }
+
+
+        const renderLeftArrow = () => {
+            let leftArrow;
+
+            if (currentPage === 1) {
+                leftArrow = 
+                    <button className="btn" onClick={this.props.pageDown} disabled>
+                        <span className="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+                    </button>
+            } else {
+                leftArrow = 
+                    <button className="btn" onClick={this.props.pageDown}>
+                        <span className="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+                    </button>
+            }
+
+            return leftArrow;
+        }
+
+
+        const renderRightArrow = () => {
+            let rightArrow;
+
+            if (currentPage === Math.ceil(totalItems / itemsOnPage)) {
+                rightArrow = 
+                    <button className="btn" onClick={this.props.pageUp} disabled>
+                        <span className="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+                    </button>
+            } else {
+                rightArrow = 
+                    <button className="btn" onClick={this.props.pageUp}>
+                        <span className="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+                    </button>
+            }
+
+            return rightArrow;
+        }
+
 
 
         return (
@@ -41,11 +100,7 @@ export default class HeadList extends Component {
 
                     <div className="btn-box">
                         <button onClick={this.props.onAddNew} className='btn btn-primary'>Add New</button>
-                        <button 
-                            onClick={this.props.onRemoveCars}
-                            className='btn btn-danger'>
-                            Delete
-                        </button>
+                        {renderRemoveButton()}
                     </div>
                 </div>
 
@@ -58,11 +113,11 @@ export default class HeadList extends Component {
                         <span className="pages">
                             <span className="currentPage">{currentPage}</span>
                             of
-                            <span className="totalPages">{Math.ceil(totalItems / itemsOnPage)}</span>
+                            <span className="totalPages">{lastPage}</span>
                         </span>
                         <span className="arrows">
-                            <button type="button" onClick={this.props.onChangeP}><span className="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></button>
-                            <button type="button" ><span className="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></button>
+                            {renderLeftArrow()}
+                            {renderRightArrow()}
                         </span>
                     </div>
                 </div>

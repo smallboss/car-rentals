@@ -7,7 +7,7 @@ import { ApiCars } from '/imports/api/cars.js';
 import CarRow from './CarRow.js';
 import HeadList from './HeadList.js';
 
-import { map } from 'lodash';
+import { map, debounce } from 'lodash';
 
 
 class Cars extends Component {
@@ -19,24 +19,32 @@ class Cars extends Component {
       foundItems: [],
       searchField: '',
       currentPage: 1,
-      itemsOnPage: 30
+      itemsOnPage: 10
     }
 
     this.handleSelect = this.handleSelect.bind(this);
-    this.handleChangeSearchField = this.handleChangeSearchField.bind(this);
+    this.handleChangeSearchField = debounce(this.handleChangeSearchField.bind(this), 350);
     this.removeCars = this.removeCars.bind(this);
     this.addCar = this.addCar.bind(this);
-    this.pageUp = this.changePagePlus.bind(this);
+    this.pageUp = this.pageUp.bind(this);
+    this.pageDown = this.pageDown.bind(this);
+    this.handleCarSingleOnClick = this.handleCarSingleOnClick.bind(this);
   }
 
-  componentWillReceiveProps(props) {
-    // console.log(this.props.cars.length + 'this')
-    // console.log(props.cars.length + 'props')
-    
-    if (this.props.cars.length != props.cars.length) {
-      this.handleChangeSearchField();
+
+  componentWillReceiveProps(props) {    
+    if (this.props.cars != props.cars) {
+      this.handleChangeSearchField(this.state.searchField, props);
     }
   }
+
+  componentWillUpdate(nextProps, nextState){
+    const lastPage = Math.ceil(nextState.foundItems.length / this.state.itemsOnPage);
+
+    if(nextState.foundItems.length && this.state.currentPage > lastPage)
+      this.setState({currentPage: lastPage});
+  }
+
 
   componentDidMount(){
     this.setState({foundItems: this.props.cars});
@@ -47,18 +55,16 @@ class Cars extends Component {
     ApiCars.insert({_id: new Mongo.ObjectID(), name: 'Subaru', plateNumber: String(Math.random()), status: "avaliable"});
   }
 
+
   removeCars() {
     this.state.selectedCarsID.map((carID) => {
       ApiCars.remove(new Mongo.ObjectID(carID));
 
     })
 
-    // console.log(this.props.cars.length)
-
-    // this.handleChangeSearchField();
-
     this.setState({selectedCarsID: []});
   }
+
 
   handleSelect(e, Car){
     let newSelectedCarsID = this.state.selectedCarsID;
@@ -75,16 +81,17 @@ class Cars extends Component {
   }
 
 
-  handleChangeSearchField(queryText = this.state.searchField){
-    console.log(queryText);
+  handleChangeSearchField(queryText = this.state.searchField, props = this.props){
     const searchQuery = queryText.toLowerCase();
 
-    var displayedCars = this.props.cars.filter(function(el) {
-        const searchValue = el.name.toLowerCase();
-        return searchValue.indexOf(searchQuery) !== -1;
+    var displayedCars = props.cars.filter(function(el) {
+        const carName        = el.name.toLowerCase();
+        const carPlateNumber = el.plateNumber.toLowerCase();
+        const carStatus      = el.status.toLowerCase();
+
+        return (carName.indexOf(searchQuery) !== -1 || carPlateNumber.indexOf(searchQuery) !== -1 || carStatus.indexOf(searchQuery) !== -1)
     });
 
-    // console.log(displayedCars)
 
     this.setState({
       searchField: queryText,
@@ -93,21 +100,32 @@ class Cars extends Component {
   }
 
 
-  changePagePlus(){
-    console.log('to')
+  pageUp(){
     this.setState({currentPage: this.state.currentPage + 1 });
+  }
+
+  pageDown(){
+    this.setState({currentPage: this.state.currentPage - 1 });
+  }
+
+
+  handleCarSingleOnClick(carId) {
+    console.log(carId);
   }
 
 
   render() {
 
     const renderCars = () => {
-
-        // this.state.foundItems.map((itemCar, key) => console.log(itemCar, key) )
         return this.state.foundItems.map((itemCar, key) => {
           if(   (key >= (this.state.currentPage-1) * this.state.itemsOnPage) 
              && (key <   this.state.currentPage    * this.state.itemsOnPage))
-            return <CarRow key={key} car={itemCar} selectedCarsId={this.state.selectedCarsID} onHandleSelect={this.handleSelect}/>
+            return <CarRow 
+                      key={key} 
+                      car={itemCar} 
+                      onClick={this.handleCarSingleOnClick.bind(null, itemCar._id)}
+                      selectedCarsId={this.state.selectedCarsID} 
+                      onHandleSelect={this.handleSelect} />
         }
       )
     }
@@ -118,8 +136,9 @@ class Cars extends Component {
           currentPage={this.state.currentPage}
           itemsOnPage={this.state.itemsOnPage}
           numbSelected={this.state.selectedCarsID.length}
-          totalItems={this.props.cars.length}
-          onChangeP={this.changePagePlus}
+          totalItems={this.state.foundItems.length}
+          pageUp={this.pageUp}
+          pageDown={this.pageDown}
           onChangeSearchField={this.handleChangeSearchField}
           onAddNew={this.addCar} 
           onRemoveCars={this.removeCars} />
