@@ -5,15 +5,10 @@ import React from 'react'
 
 class Customer extends React.Component {
     render () {
-        let { name, userName, email, birthDate, role } = this.props.customer_data
         return (
-            <tr>
-                <td>{name}</td>
-                <td>{userName}</td>
-                <td>{email}</td>
-                <td>{birthDate}</td>
-                <td>{role}</td>
-            </tr>
+            <div>
+                Customer
+            </div>
         )
     }
 }

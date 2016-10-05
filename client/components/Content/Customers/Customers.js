@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Mongo } from 'meteor/mongo'
 import $ from 'jquery'
 import { ApiCustomers } from '../../../../imports/api/customers'
-import Registration from './Registration'
+import Registration from '../Registration'
 import CustomersList from './CustomersList'
 import './styles.css'
 
@@ -29,6 +29,7 @@ export default class Customers extends Component {
             role: 'customer'
         }
         ApiCustomers.insert(_user)
+        e.target.reset()
     }
     render() {
         return (
