@@ -7,44 +7,43 @@ import CustomersList from './CustomersList'
 import './styles.css'
 
 export default class Customers extends Component {
-  addUserHandler (e) {
-    e.preventDefault()
-    let _id = new Mongo.ObjectID()
-    let _user = {
-      _id,
-      name: e.target[0].value,
-      userName: e.target[1].value,
-      email: e.target[2].value,
-      birthDate: e.target[3].value,
-      phone: e.target[4].value,
-      password: e.target[5].value
+    componentDidMount () {
+        [...document.getElementsByClassName('make-action')].forEach((button) => {
+            button.addEventListener('click', (e) => {
+                let _target = $('#' + e.target.id).attr('data-target')
+                $('#' + _target).toggle()
+            })
+        })
     }
-    ApiCustomers.insert(_user)
-  }
-  render() {
-    return (
-        <div>
-          <h1>Customers</h1>
-          <input type='button' className='btn btn-default' id='add_user_button' className='make-action' data-target='add_user_form' value='Registration' />
-          <input type='button' className='btn btn-default' id='show_users_button' className='make-action' data-target='add_user_form' value='All users' />
-          <div id='add_user_form' style={{display: 'none'}}>
-            <h3>Register user</h3>
-            <Registration register={this.addUserHandler} />
-          </div>
-          <div id='users_list'>
-            <h3>User`s list</h3>
-            <CustomersList />
-          </div>
-        </div>
-    )
-  }
+    addUserHandler (e) {
+        e.preventDefault()
+        let _id = new Mongo.ObjectID()
+        let _user = {
+            _id,
+            name: e.target[0].value,
+            userName: e.target[1].value,
+            email: e.target[2].value,
+            birthDate: e.target[3].value,
+            phone: e.target[4].value,
+            password: e.target[5].value
+        }
+        ApiCustomers.insert(_user)
+    }
+    render() {
+        return (
+            <div>
+                <h1>Customers</h1>
+                <input type='button' className='btn btn-default' id='add_user_button' className='make-action' data-target='add_user_form' value='Registration' />
+                <input type='button' className='btn btn-default' id='show_users_button' className='make-action' data-target='add_user_form' value='All users' />
+                <div id='add_user_form' style={{display: 'none'}}>
+                    <h3>Register user</h3>
+                    <Registration addUserHandler={this.addUserHandler} />
+                </div>
+                <div id='users_list'>
+                    <h3>User`s list</h3>
+                    <CustomersList />
+                </div>
+            </div>
+        )
+    }
 }
-
-window.addEventListener('load', () => {
-  [...document.getElementsByClassName('make-action')].forEach((button) => {
-    button.addEventListener('click', (e) => {
-      let _target = $('#' + e.target.id).attr('data-target')
-      $('#' + _target).toggle()
-    })
-  })
-})
