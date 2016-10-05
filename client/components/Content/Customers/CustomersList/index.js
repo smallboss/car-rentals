@@ -9,8 +9,8 @@ import CustomerForTable from '../CustomerForTable'
 import Pagination from '../Pagination'
 
 class CustomersList extends React.Component {
-    constructor(props) {
-        super(props)
+    constructor(props, context) {
+        super(props, context)
         this.state = {
             customers: [],
             currentPage: 1,
@@ -18,6 +18,8 @@ class CustomersList extends React.Component {
             maxPage: 0
         }
         this.handlerPagination = this.handlerPagination.bind(this)
+        this.routerToCustomer = this.routerToCustomer.bind(this)
+        context.router
     }
     componentWillReceiveProps(nextProps) {
         let _customers = nextProps.customers
@@ -25,13 +27,13 @@ class CustomersList extends React.Component {
         this.setState({customers: _customers, maxPage})
     }
     handlerPagination (num) {
-        //e.preventDefault()
-        //let page = +e.target.innerHTML
         this.setState({currentPage: num})
+    }
+    routerToCustomer (id) {
+        this.context.router.push(`/customers/${id}`)
     }
     render () {
         let currentNums = this.state.currentPage * this.state.elemsOnPage
-        console.log(currentNums)
         let _customers = this.state.customers.slice(currentNums - this.state.elemsOnPage, currentNums)
         return (
             <div>
@@ -48,15 +50,21 @@ class CustomersList extends React.Component {
                     <tbody>
                         {_customers.map(customer => {
                             return (
-                                <CustomerForTable customer_data={customer} key={Math.random()} />
+                                <CustomerForTable customer_data={customer} routerToCustomer={this.routerToCustomer} key={Math.random()} />
                             )
                         })}
                     </tbody>
                 </table>
-                {(this.state.maxPage > 1) ? <div className='text-center'><Pagination num={this.state.maxPage} handlerPagination={this.handlerPagination} key={Math.random()} /></div> : ''}
+                {(this.state.maxPage > 1) ? <div className='text-center'>
+                    <Pagination num={this.state.maxPage} handlerPagination={this.handlerPagination} key={Math.random()} />
+                </div> : ''}
             </div>
         )
     }
+}
+
+CustomersList.contextTypes = {
+    router: React.PropTypes.object.isRequired
 }
 
 export default createContainer(() => {
