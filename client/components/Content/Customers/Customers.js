@@ -35,12 +35,12 @@ export default class Customers extends Component {
             <div>
                 <h1>Customers</h1>
                 <input type='button' className='btn btn-default' id='add_user_button' className='make-action' data-target='add_user_form' value='Registration' />
-                <input type='button' className='btn btn-default' id='show_users_button' className='make-action' data-target='user_list' value='All users' />
+                <input type='button' className='btn btn-default' id='show_users_button' className='make-action' data-target='users_list' value='All users' />
                 <div id='add_user_form' style={{display: 'none'}}>
                     <h3>Register user</h3>
                     <Registration addUserHandler={this.addUserHandler} />
                 </div>
-                <div id='users_list'>
+                <div id='users_list' style={{display: 'none'}}>
                     <h3>User`s list</h3>
                     <CustomersList />
                 </div>

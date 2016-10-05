@@ -5,6 +5,7 @@ import { Meteor } from 'meteor/meteor'
 import { createContainer } from 'meteor/react-meteor-data'
 import { ApiCustomers } from '../../../../../imports/api/customers'
 import React from 'react'
+import Customer from '../Customer'
 
 class CustomersList extends React.Component {
     constructor(props) {
@@ -17,10 +18,26 @@ class CustomersList extends React.Component {
         this.setState({...nextProps})
     }
     render () {
-        console.log(this.state.customers)
         return (
             <div>
-                List of Customers
+                <table className='table table-hover'>
+                    <thead>
+                        <tr>
+                            <th>User login</th>
+                            <th>User name</th>
+                            <th>User email</th>
+                            <th>User Birth date</th>
+                            <th>User role</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {this.state.customers.map(customer => {
+                            return (
+                                <Customer customer_data={customer} key={Math.random()} />
+                            )
+                        })}
+                    </tbody>
+                </table>
             </div>
         )
     }
