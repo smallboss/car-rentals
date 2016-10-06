@@ -89,9 +89,9 @@ class Cars extends Component {
     const searchQuery = queryText.toLowerCase();
 
     var displayedCars = props.cars.filter(function(el) {
-        const carName        = el.name.toLowerCase();
-        const carPlateNumber = el.plateNumber.toLowerCase();
-        const carStatus      = el.status.toLowerCase();
+        const carName        = el.name ? el.name.toLowerCase() : '';
+        const carPlateNumber = el.plateNumber ? el.plateNumber.toLowerCase() : '';
+        const carStatus      = el.status ? el.status.toLowerCase() : '';
 
         return (carName.indexOf(searchQuery) !== -1 || carPlateNumber.indexOf(searchQuery) !== -1 || carStatus.indexOf(searchQuery) !== -1)
     });

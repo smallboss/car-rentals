@@ -31,6 +31,34 @@ export default class CarSingle extends Component {
         this.handleSave = this.handleSave.bind(this);
         this.handleEdit = this.handleEdit.bind(this);
         this.handleDelete = this.handleDelete.bind(this);
+        this.onChangeFines = this.onChangeFines.bind(this);
+        this.onChangeTolls = this.onChangeTolls.bind(this);
+        this.onChangeExpense = this.onChangeExpense.bind(this)
+        this.onChangeIncome = this.onChangeIncome.bind(this);
+    }
+
+    onChangeFines(value) {
+        let newCar = this.state.car;
+        newCar.fines = value;
+        this.setState({car: newCar});
+    }
+
+    onChangeTolls(value){
+        let newCar = this.state.car;
+        newCar.tolls = value;
+        this.setState({car: newCar});
+    }
+
+    onChangeExpense(value){
+        let newCar = this.state.car;
+        newCar.totalExpense = value;
+        this.setState({car: newCar});
+    }
+
+    onChangeIncome(value){
+        let newCar = this.state.car;
+        newCar.totalIncome = value;
+        this.setState({car: newCar});
     }
 
     componentWillReceiveProps(nextProps) {
@@ -70,18 +98,16 @@ export default class CarSingle extends Component {
         let newCar = this.state.car;
 
         if (this.state.car._id === 'new'){
-            // let newCar = this.state.car;
             newCar._id = new Mongo.ObjectID();
 
             ApiCars.insert(newCar);
             browserHistory.push(`/cars/${newCar._id._str}`);
         }
         else {
-            // ApiCars.remove(this.state.car._id);
-            // ApiCars.insert(this.state.car);
             const id = newCar._id;
             delete newCar._id;
             ApiCars.update(id, {$set: newCar});
+
         }
     }
 
@@ -120,7 +146,10 @@ export default class CarSingle extends Component {
                     notes,
                     description,
                     totalExpense,
-                    totalIncome } = this.state.car;
+                    totalIncome,
+                    fines,
+                    tolls,
+                    mainteance } = this.state.car;
 
 
             const renderTopFields = () => {
@@ -195,6 +224,8 @@ export default class CarSingle extends Component {
                           <ul className="nav nav-tabs" role="tablist">
                             <li className="active"><a href="#description" aria-controls="home" role="tab" data-toggle="tab">Description</a></li>
                             <li><a href="#maintenance" aria-controls="messages" role="tab" data-toggle="tab">Maintenance and expense</a></li>
+                            <li><a href="#fines" aria-controls="messages" role="tab" data-toggle="tab">Fines</a></li>
+                            <li><a href="#tolls" aria-controls="messages" role="tab" data-toggle="tab">Tolls</a></li>
                             <li><a href="#notes" aria-controls="messages" role="tab" data-toggle="tab">Notes</a></li>
                             <li><a href="#totalExpense" aria-controls="settings" role="tab" data-toggle="tab">Total Expense</a></li>
                             <li><a href="#totalIncome" aria-controls="settings" role="tab" data-toggle="tab">Total income</a></li>
@@ -204,23 +235,67 @@ export default class CarSingle extends Component {
                                 <textarea disabled>{ description }</textarea>
                             </div>
                             <div role="tabpanel" className="tab-pane" id="maintenance">
-                                
+                                <table className="table table-bordered table-hover">
+                                  <thead>
+                                    <tr>
+                                      <th>Job ID</th>
+                                      <th>Job Name</th>
+                                      <th>Description</th>
+                                      <th>Date</th>
+                                      <th>Status</th>
+                                      <th>Amount</th>
+                                      <th>End Date</th>
+                                    </tr>
+                                  </thead>
+
+                                  <tbody>
+                                  {
+                                   // mainteance.map((item, key) => (
+                                   //  return (
+                                   //      <tr>
+                                   //        <td>item.jobID</td>
+                                   //        <td>item.jobName</td>
+                                   //        <td>item.escription</td>
+                                   //        <td>item.date</td>
+                                   //        <td>item.status</td>
+                                   //        <td>item.amount</td>
+                                   //        <td>item.endDate</td>
+                                   //      </tr>
+                                   //  )
+                                   // })
+                               }
+                                  </tbody>
+                                </table>
+                            </div>
+                            <div role="tabpanel" className="tab-pane" id="fines">
+                                <input  type="text" 
+                                        onChange={(e) => this.onChangeFines(e.target.value)}
+                                        value={ fines } />
+                            </div>
+                            <div role="tabpanel" className="tab-pane" id="tolls">
+                                <input  type="text" 
+                                        onChange={(e) => this.onChangeTolls(e.target.value)}
+                                        value={ tolls } />
                             </div>
                             <div role="tabpanel" className="tab-pane" id="notes">
                                 <textarea disabled>{ notes }</textarea>
                             </div>
                             <div role="tabpanel" className="tab-pane" id="totalExpense">
-                                <input type="text" value={ totalExpense } />
+                                <input  type="text" 
+                                        onChange={(e) => this.onChangeExpense(e.target.value)}
+                                        value={ totalExpense } />
                             </div>
                             <div role="tabpanel" className="tab-pane" id="totalIncome">
-                                <input type="text" value={ totalIncome } />
+                                <input  type="text" 
+                                        onChange={(e) => this.onChangeIncome(e.target.value)}
+                                        value={ totalIncome } />
                             </div>
                           </div>
                         </div>
                     )
                 }
 
-                return (renderTabsNoEditable(description, notes, totalExpense, totalIncome));
+                return (renderTabsNoEditable(description, notes, totalExpense, totalIncome, fines, tolls, mainteance));
             }
 
         
@@ -231,7 +306,7 @@ export default class CarSingle extends Component {
 
                     { renderTopFields() }
 
-                        { renderTabs() }
+                    { renderTabs() }
 
                 </div>
             )

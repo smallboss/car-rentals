@@ -67,12 +67,14 @@ export const renderTopFieldsNoEditable = (name, status, plateNumber, profit) => 
 
 
 
-export const renderTabsNoEditable = (description, notes, totalExpense, totalIncome) => {
+export const renderTabsNoEditable = (description, notes, totalExpense, totalIncome, fines, tolls, mainteance) => {
     return (
            <div className="row">
               <ul className="nav nav-tabs" role="tablist">
                 <li className="active"><a href="#description" aria-controls="home" role="tab" data-toggle="tab">Description</a></li>
                 <li><a href="#maintenance" aria-controls="messages" role="tab" data-toggle="tab">Maintenance and expense</a></li>
+                <li><a href="#fines" aria-controls="messages" role="tab" data-toggle="tab">Fines</a></li>
+                <li><a href="#tolls" aria-controls="messages" role="tab" data-toggle="tab">Tolls</a></li>
                 <li><a href="#notes" aria-controls="messages" role="tab" data-toggle="tab">Notes</a></li>
                 <li><a href="#totalExpense" aria-controls="settings" role="tab" data-toggle="tab">Total Expense</a></li>
                 <li><a href="#totalIncome" aria-controls="settings" role="tab" data-toggle="tab">Total income</a></li>
@@ -95,10 +97,30 @@ export const renderTabsNoEditable = (description, notes, totalExpense, totalInco
                         </tr>
                       </thead>
 
-                      <tbody>
-                       
+                    <tbody>
+                      {
+                       // mainteance.map((item, key) => (
+                       //  return (
+                       //      <tr>
+                       //        <td>item.jobID</td>
+                       //        <td>item.jobName</td>
+                       //        <td>item.escription</td>
+                       //        <td>item.date</td>
+                       //        <td>item.status</td>
+                       //        <td>item.amount</td>
+                       //        <td>item.endDate</td>
+                       //      </tr>
+                       //  )
+                       // ))
+                   }
                       </tbody>
                     </table>
+                </div>
+                <div role="tabpanel" className="tab-pane" id="fines">
+                    <input  type="text" value={ fines } />
+                </div>
+                <div role="tabpanel" className="tab-pane" id="tolls">
+                    <input  type="text" value={ tolls } />
                 </div>
                 <div role="tabpanel" className="tab-pane" id="notes">
                     <textarea disabled>{ notes }</textarea>
