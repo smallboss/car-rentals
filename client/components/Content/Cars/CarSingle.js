@@ -6,8 +6,6 @@ import HeadSingle from './HeadSingle.js';
 import { browserHistory } from 'react-router';
 import React, { Component } from 'react';
 
-import { renderTopFieldsNoEditable, renderTabsNoEditable} from './CarSingleHTML.jsx'
-
 import { carStateTypes } from '/imports/startup/typesList.js';
 
 import './carStyle.css'
@@ -35,6 +33,8 @@ export default class CarSingle extends Component {
         this.onChangeTolls = this.onChangeTolls.bind(this);
         this.onChangeExpense = this.onChangeExpense.bind(this)
         this.onChangeIncome = this.onChangeIncome.bind(this);
+        this.onChangeDescription = this.onChangeDescription.bind(this);
+        this.onChangeNotes = this.onChangeNotes.bind(this);
     }
 
     onChangeFines(value) {
@@ -93,6 +93,17 @@ export default class CarSingle extends Component {
         this.setState({car: newCar});
     }
 
+    onChangeDescription(value) {
+        let newCar = this.state.car;
+        newCar.description = value;
+        this.setState({car: newCar});
+    }
+    onChangeNotes(value) {
+        let newCar = this.state.car;
+        newCar.notes = value;
+        this.setState({car: newCar});
+    }
+
 
     handleSave(){
         let newCar = this.state.car;
@@ -125,6 +136,20 @@ export default class CarSingle extends Component {
 
 
 
+    componentDidUpdate(){
+        this.inputName.disabled = 
+        this.inputPlateNumber.disabled = 
+        this.inputStatus.disabled = 
+        this.inputProfit.disabled =
+        this.inputFines.disabled =
+        this.inputTolls.disabled =
+        this.inputExpense.disabled =
+        this.inputIncome.disabled = 
+        this.inputDescription.disabled =
+        this.inputNotes.disabled = this.state.editable;
+    }
+
+
 
     render() {
 
@@ -153,72 +178,67 @@ export default class CarSingle extends Component {
 
 
             const renderTopFields = () => {
-                if (this.state.editable) {
-                    return (
-                            <div className="topFields">
-                                    <div className="row">
-                                        <div className="form-group name col-xs-6">
-                                            <label htmlFor="carName">Name</label>
-                                            <input 
-                                                type="text" 
-                                                ref={(ref) => this.inputName = ref} 
-                                                id="carName" 
-                                                className="form-control"
-                                                onChange={(e) => this.onChangeName(e.target.value)}
-                                                value={ name } />
-                                        </div>
+                return (
+                        <div className="topFields">
+                                <div className="row">
+                                    <div className="form-group name col-xs-6">
+                                        <label htmlFor="carName">Name</label>
+                                        <input 
+                                            type="text" 
+                                            ref={(ref) => this.inputName = ref} 
+                                            id="carName" 
+                                            className="form-control"
+                                            onChange={(e) => this.onChangeName(e.target.value)}
+                                            value={ name } />
+                                    </div>
 
-                                        <div className="form-group status col-xs-6">
-                                            <label htmlFor="carStatus">Status</label>
-                                            <select ref={ (ref) => this.inputStatus = ref } onChange={(e) => this.onChangeStatus(e.target.value)}>
-                                                <option value={status}>{status}</option>
-                                                {
-                                                    carStateTypes.map((el, key) => {
-                                                        if (el !== status){
-                                                            return (
-                                                                <option key={key} value={el}>{el}</option>
-                                                            )
-                                                        }
-                                                        return undefined;
+                                    <div className="form-group status col-xs-6">
+                                        <label htmlFor="carStatus">Status</label>
+                                        <select ref={ (ref) => this.inputStatus = ref } onChange={(e) => this.onChangeStatus(e.target.value)}>
+                                            <option value={status}>{status}</option>
+                                            {
+                                                carStateTypes.map((el, key) => {
+                                                    if (el !== status){
+                                                        return (
+                                                            <option key={key} value={el}>{el}</option>
+                                                        )
                                                     }
-                                                )}
-                                            </select>
-                                        </div>
+                                                    return undefined;
+                                                }
+                                            )}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="row">
+                                    <div className="form-group plateNumber col-xs-6">
+                                        <label htmlFor="carPlateNumber">Plate#</label>
+                                        <input 
+                                            type="text" 
+                                            ref={ (ref) => this.inputPlateNumber = ref } 
+                                            id="carPlateNumber" 
+                                            className="form-control" 
+                                            onChange={(e) => this.onChangePlateNumber(e.target.value)}
+                                            value={ plateNumber } />
                                     </div>
 
-                                    <div className="row">
-                                        <div className="form-group plateNumber col-xs-6">
-                                            <label htmlFor="carPlateNumber">Plate#</label>
-                                            <input 
-                                                type="text" 
-                                                ref={ (ref) => this.inputPlateNumber = ref } 
-                                                id="carPlateNumber" 
-                                                className="form-control" 
-                                                onChange={(e) => this.onChangePlateNumber(e.target.value)}
-                                                value={ plateNumber } />
-                                        </div>
-
-                                        <div className="form-group profit col-xs-6">
-                                            <label htmlFor="carprofit">Profit</label>
-                                            <input 
-                                                type="text" 
-                                                ref={ (ref) => this.inputProfit = ref } 
-                                                id="carProfit"
-                                                className="form-control" 
-                                                onChange={(e) => this.onChangeProfit(e.target.value)}
-                                                value={ profit } />
-                                        </div>
+                                    <div className="form-group profit col-xs-6">
+                                        <label htmlFor="carprofit">Profit</label>
+                                        <input 
+                                            type="text" 
+                                            ref={ (ref) => this.inputProfit = ref } 
+                                            id="carProfit"
+                                            className="form-control" 
+                                            onChange={(e) => this.onChangeProfit(e.target.value)}
+                                            value={ profit } />
                                     </div>
-                            </div>
-                    )
-                }
-
-                return renderTopFieldsNoEditable(name, status, plateNumber, profit)
+                                </div>
+                        </div>
+                 )
             }
 
 
             const renderTabs = () => {
-                if (this.state.editable) {
                     return (
                         <div className="row">
                           <ul className="nav nav-tabs" role="tablist">
@@ -232,7 +252,11 @@ export default class CarSingle extends Component {
                           </ul>
                           <div className="tab-content">
                             <div role="tabpanel" className="tab-pane active" id="description">
-                                <textarea disabled>{ description }</textarea>
+                                <textarea 
+                                    ref={ (ref) => this.inputDescription = ref }
+                                    onChange={(e) => this.onChangeDescription(e.target.value)} 
+                                    value={description}>
+                                </textarea>
                             </div>
                             <div role="tabpanel" className="tab-pane" id="maintenance">
                                 <table className="table table-bordered table-hover">
@@ -270,32 +294,37 @@ export default class CarSingle extends Component {
                             <div role="tabpanel" className="tab-pane" id="fines">
                                 <input  type="text" 
                                         onChange={(e) => this.onChangeFines(e.target.value)}
-                                        value={ fines } />
+                                        value={ fines } 
+                                        ref={ (ref) => this.inputFines = ref } />
                             </div>
                             <div role="tabpanel" className="tab-pane" id="tolls">
                                 <input  type="text" 
                                         onChange={(e) => this.onChangeTolls(e.target.value)}
-                                        value={ tolls } />
+                                        value={ tolls } 
+                                        ref={ (ref) => this.inputTolls = ref } />
                             </div>
                             <div role="tabpanel" className="tab-pane" id="notes">
-                                <textarea disabled>{ notes }</textarea>
+                                <textarea 
+                                    ref={ (ref) => this.inputNotes = ref }
+                                    onChange={(e) => this.onChangeNotes(e.target.value)} 
+                                    value={notes}>
+                                </textarea>
                             </div>
                             <div role="tabpanel" className="tab-pane" id="totalExpense">
                                 <input  type="text" 
                                         onChange={(e) => this.onChangeExpense(e.target.value)}
-                                        value={ totalExpense } />
+                                        value={ totalExpense } 
+                                        ref={ (ref) => this.inputExpense = ref } />
                             </div>
                             <div role="tabpanel" className="tab-pane" id="totalIncome">
                                 <input  type="text" 
                                         onChange={(e) => this.onChangeIncome(e.target.value)}
-                                        value={ totalIncome } />
+                                        value={ totalIncome } 
+                                        ref={ (ref) => this.inputIncome = ref } />
                             </div>
                           </div>
                         </div>
                     )
-                }
-
-                return (renderTabsNoEditable(description, notes, totalExpense, totalIncome, fines, tolls, mainteance));
             }
 
         
