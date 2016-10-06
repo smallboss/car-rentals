@@ -40,15 +40,8 @@ class Customer extends React.Component {
             imgId,
             imgLicense
         if (_images) {
-            imgId = _images.imgId.replace('text/html', 'image/png')
-            imgLicense = _images.imgLicense.replace('text/html', 'image/png')
-
-            $("<img>", {
-                'src': imgId,
-                'width': '250px', 
-                'height': '250px'})
-                .appendTo('#img_preview');
-            
+            imgId = _images.imgId
+            imgLicense = _images.imgLicense            
         }            
         return (
             <div className='panel panel-default'>
@@ -116,8 +109,7 @@ class Customer extends React.Component {
                             <div id='div_scans'>
                                 <div id='img_preview'></div>
                                 <img src={imgId} style={{width: '100px', height: '100px'}} />
-                                <img src={imgLicense} />
-                                {imgId}
+                                <img src={imgLicense} style={{width: '100px', height: '100px'}} />                                
                             </div>
                         </div>
                     </div>
