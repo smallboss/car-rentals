@@ -13,7 +13,6 @@ export default class CarRow extends Component {
             if(item == props.car._id)
                 this.input.checked = true;
         })
-        
     }
 
 
@@ -21,11 +20,11 @@ export default class CarRow extends Component {
         const { car, onHandleSelect, onClick } = this.props;
 
         return (
-            <tr onClick={onClick}>
+            <tr>
                 <th><input type="checkbox" ref={(ref) => this.input = ref} onChange={(e) => onHandleSelect(e, car)}/></th>
-                <td>{ car.name }</td>
-                <td>{ car.plateNumber }</td>
-                <td>{ car.status }</td>
+                <td onClick={onClick} >{ car.name }</td>
+                <td onClick={onClick} >{ car.plateNumber }</td>
+                <td onClick={onClick} >{ car.status }</td>
             </tr>
         )
     }

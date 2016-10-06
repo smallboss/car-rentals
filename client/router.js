@@ -35,9 +35,9 @@ export const renderRoutes = () => (
   <Router history={browserHistory}>
     <Route path="/" component={routerComponent}>
       <IndexRoute component={App} />
-      <Route path="cars" component={Cars}>
-        <Route path="cars/:carId" component={CarSingle} />
-      </Route>
+      <Route path="cars" component={Cars}/>
+      <Route path="cars/:carId" component={CarSingle} />
+      
       <Route path="customers" component={Customers}/>
       <Route path="*" component={NotFoundPage}/>
     </Route>

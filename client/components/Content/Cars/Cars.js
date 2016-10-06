@@ -1,4 +1,5 @@
 import React, { Component, PropTypes } from 'react';
+import { browserHistory } from 'react-router'
 
 import { createContainer } from 'meteor/react-meteor-data';
 
@@ -11,8 +12,8 @@ import { map, debounce } from 'lodash';
 
 
 class Cars extends Component {
-  constructor(props) {
-    super(props); 
+  constructor(props, context) {
+    super(props, context); 
 
     this.state = {
       selectedCarsID: [],
@@ -29,8 +30,10 @@ class Cars extends Component {
     this.pageUp = this.pageUp.bind(this);
     this.pageDown = this.pageDown.bind(this);
     this.handleCarSingleOnClick = this.handleCarSingleOnClick.bind(this);
-  }
 
+    context.router
+  }
+  
 
   componentWillReceiveProps(props) {    
     if (this.props.cars != props.cars) {
@@ -52,7 +55,8 @@ class Cars extends Component {
 
 
   addCar() {
-    ApiCars.insert({_id: new Mongo.ObjectID(), name: 'Subaru', plateNumber: String(Math.random()), status: "avaliable"});
+    browserHistory.push('/cars/new')
+    // ApiCars.insert({_id: new Mongo.ObjectID(), name: 'Subaru', plateNumber: String(Math.random()), status: "avaliable"});
   }
 
 
@@ -111,6 +115,8 @@ class Cars extends Component {
 
   handleCarSingleOnClick(carId) {
     console.log(carId);
+    browserHistory.push(`/cars/${carId}`)
+    // this.context.router.push(`/cars/${carId}`)
   }
 
 
@@ -166,6 +172,13 @@ class Cars extends Component {
 Cars.propTypes = {
   cars: PropTypes.array.isRequired,
 };
+
+
+
+Cars.contextTypes = {
+    router: React.PropTypes.object.isRequired
+}
+
 
 export default createContainer(() => {
   Meteor.subscribe('cars');

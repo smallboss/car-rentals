@@ -1,0 +1,1 @@
+export const carStateTypes = ['avaliable', 'rented', 'in maintenance'];
