@@ -1,10 +1,11 @@
 import React from 'react';
+import { carStateTypes } from '/imports/startup/typesList.js';
 
 export const renderTopFieldsNoEditable = (name, status, plateNumber, profit) => {
     return (
             <div className="topFields">
                     <div className="row">
-                        <div className="form-group name">
+                        <div className="form-group name col-xs-6">
                             <label htmlFor="carName">Name</label>
                             <input 
                                 type="text" 
@@ -16,20 +17,26 @@ export const renderTopFieldsNoEditable = (name, status, plateNumber, profit) => 
                                 disabled/>
                         </div>
 
-                        <div className="form-group status">
+                        <div className="form-group status col-xs-6">
                             <label htmlFor="carStatus">Status</label>
-                            <input 
-                                type="text" 
-                                ref={ (ref) => this.inputStatus = ref } 
-                                id="carStatus" 
-                                className="form-control"
-                                value={ status } 
-                                disabled/>
+                            <select disabled>
+                                <option value={status}>{status}</option>
+                                {
+                                    carStateTypes.map((el, key) => {
+                                        if (el !== status){
+                                            return (
+                                                <option key={key} value={el}>{el}</option>
+                                            )
+                                        }
+                                        return undefined;
+                                    }
+                                )}
+                            </select>
                         </div>
                     </div>
 
                     <div className="row">
-                        <div className="form-group plateNumber">
+                        <div className="form-group plateNumber col-xs-6">
                             <label htmlFor="carPlateNumber">Plate#</label>
                             <input 
                                 type="text" 
@@ -41,7 +48,7 @@ export const renderTopFieldsNoEditable = (name, status, plateNumber, profit) => 
                                 disabled/>
                         </div>
 
-                        <div className="form-group profit">
+                        <div className="form-group profit col-xs-6">
                             <label htmlFor="carprofit">Profit</label>
                             <input 
                                 type="text" 
@@ -75,7 +82,23 @@ export const renderTabsNoEditable = (description, notes, totalExpense, totalInco
                     <textarea disabled>{ description }</textarea>
                 </div>
                 <div role="tabpanel" className="tab-pane" id="maintenance">
-                    
+                    <table className="table table-bordered table-hover">
+                      <thead>
+                        <tr>
+                          <th>Job ID</th>
+                          <th>Job Name</th>
+                          <th>Description</th>
+                          <th>Date</th>
+                          <th>Status</th>
+                          <th>Amount</th>
+                          <th>End Date</th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                       
+                      </tbody>
+                    </table>
                 </div>
                 <div role="tabpanel" className="tab-pane" id="notes">
                     <textarea disabled>{ notes }</textarea>

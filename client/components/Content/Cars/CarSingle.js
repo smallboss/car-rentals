@@ -10,6 +10,8 @@ import { renderTopFieldsNoEditable, renderTabsNoEditable} from './CarSingleHTML.
 
 import { carStateTypes } from '/imports/startup/typesList.js';
 
+import './carStyle.css'
+
 
 export default class CarSingle extends Component {
     constructor(props) {
@@ -32,7 +34,10 @@ export default class CarSingle extends Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        this.setState({car: nextProps.car});
+        this.setState({
+            car: nextProps.car,
+            editable: (!nextProps.car || nextProps.car._id === 'new')
+        });
     }
 
 
@@ -55,7 +60,6 @@ export default class CarSingle extends Component {
     }
 
     onChangeStatus(value) {
-        console.log(value)
         let newCar = this.state.car;
         newCar.status = value;
         this.setState({car: newCar});
@@ -63,17 +67,21 @@ export default class CarSingle extends Component {
 
 
     handleSave(){
+        let newCar = this.state.car;
+
         if (this.state.car._id === 'new'){
-            let newCar = this.state.car;
+            // let newCar = this.state.car;
             newCar._id = new Mongo.ObjectID();
 
             ApiCars.insert(newCar);
             browserHistory.push(`/cars/${newCar._id._str}`);
         }
         else {
-            ApiCars.remove(this.state.car._id);
-            ApiCars.insert(this.state.car);
-            // ApiCars.update(this.state.car._id, {$set: { name: this.state.car.name}});
+            // ApiCars.remove(this.state.car._id);
+            // ApiCars.insert(this.state.car);
+            const id = newCar._id;
+            delete newCar._id;
+            ApiCars.update(id, {$set: newCar});
         }
     }
 
@@ -120,7 +128,7 @@ export default class CarSingle extends Component {
                     return (
                             <div className="topFields">
                                     <div className="row">
-                                        <div className="form-group name">
+                                        <div className="form-group name col-xs-6">
                                             <label htmlFor="carName">Name</label>
                                             <input 
                                                 type="text" 
@@ -131,10 +139,10 @@ export default class CarSingle extends Component {
                                                 value={ name } />
                                         </div>
 
-                                        <div className="form-group status">
+                                        <div className="form-group status col-xs-6">
                                             <label htmlFor="carStatus">Status</label>
-                                            <select ref={ (ref) => this.inputStatus = ref } >
-                                                <option onChange={(e) => this.onChangeStatus(e.target.value)} value={status}>{status}</option>
+                                            <select ref={ (ref) => this.inputStatus = ref } onChange={(e) => this.onChangeStatus(e.target.value)}>
+                                                <option value={status}>{status}</option>
                                                 {
                                                     carStateTypes.map((el, key) => {
                                                         if (el !== status){
@@ -150,7 +158,7 @@ export default class CarSingle extends Component {
                                     </div>
 
                                     <div className="row">
-                                        <div className="form-group plateNumber">
+                                        <div className="form-group plateNumber col-xs-6">
                                             <label htmlFor="carPlateNumber">Plate#</label>
                                             <input 
                                                 type="text" 
@@ -161,7 +169,7 @@ export default class CarSingle extends Component {
                                                 value={ plateNumber } />
                                         </div>
 
-                                        <div className="form-group profit">
+                                        <div className="form-group profit col-xs-6">
                                             <label htmlFor="carprofit">Profit</label>
                                             <input 
                                                 type="text" 
