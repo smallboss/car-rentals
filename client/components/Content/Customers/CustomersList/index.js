@@ -13,7 +13,7 @@ class CustomersList extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
-            customers: [],
+            customers: this.props.customers,
             currentPage: 1,
             elemsOnPage: 3,
             maxPage: 0,
@@ -21,6 +21,10 @@ class CustomersList extends React.Component {
         }
         this.handlerPagination = this.handlerPagination.bind(this)
         this.handlerDeleteCustomer = this.handlerDeleteCustomer.bind(this)
+    }
+    componentWillMount () {
+        let maxPage = Math.ceil(this.props.customers.length / this.state.elemsOnPage)
+        this.setState({customers: this.props.customers, maxPage})
     }
     componentWillReceiveProps(nextProps) {
         let _customers = nextProps.customers
@@ -64,6 +68,7 @@ class CustomersList extends React.Component {
         let _customers = this.state.customers.slice(currentNums - this.state.elemsOnPage, currentNums)
         return (
             <div>
+                <h3>Customer`s list</h3>
                 <table className='table table-hover'>
                     <thead>
                         <tr>
