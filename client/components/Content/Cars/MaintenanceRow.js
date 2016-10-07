@@ -40,7 +40,7 @@ export default class MaintenanceRow extends Component {
                 this.inputSelect.checked = true;
         })
 
-        this.setState({editable: props.editable});
+        this.setState({maintenance: props.maintenance, editable: props.editable});
 
     }
 
@@ -97,7 +97,9 @@ export default class MaintenanceRow extends Component {
         const { onHandleSelect } = this.props;
         const { _id, jobName, description, status, date, endDate, amount } = this.state.maintenance;
 
-        console.log(_id);
+
+
+        console.log(jobName, _id);
 
         return (
             <tr>
