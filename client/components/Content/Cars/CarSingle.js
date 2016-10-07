@@ -8,6 +8,8 @@ import React, { Component } from 'react';
 
 import { carStateTypes } from '/imports/startup/typesList.js';
 
+import MaintenanceRow from './MaintenanceRow.js';
+
 import './carStyle.css'
 
 
@@ -15,10 +17,17 @@ export default class CarSingle extends Component {
     constructor(props) {
         super(props);
 
+        
+
+        const isNew = (this.props.car && this.props.car._id === 'new') ? true : false;
+        
+        console.log('isNew', isNew)
 
         this.state = {
             car: this.props.car,
-            editable: (!this.props.car || this.props.car._id === 'new')
+            maintenance: [],
+            selectedMaintenanceID: [],
+            editable: isNew
         }
 
 
@@ -35,6 +44,10 @@ export default class CarSingle extends Component {
         this.onChangeIncome = this.onChangeIncome.bind(this);
         this.onChangeDescription = this.onChangeDescription.bind(this);
         this.onChangeNotes = this.onChangeNotes.bind(this);
+        this.handleSelect = this.handleSelect.bind(this);
+        this.onAddNewMaintenance = this.onAddNewMaintenance.bind(this);
+        this.onRemoveMaintenance = this.onRemoveMaintenance.bind(this);
+        this.trueDisabledButtomRemove = this.trueDisabledButtomRemove.bind(this);
     }
 
     onChangeFines(value) {
@@ -62,12 +75,23 @@ export default class CarSingle extends Component {
     }
 
     componentWillReceiveProps(nextProps) {
+        let c = nextProps.car;
+        console.log('RES CAR new: ', nextProps.car)
+        console.log('RES CAR old: ', this.state.car)
+        if (this.state.car) {c.maintenance = this.state.car.maintenance;}
+
+
+        const isNew = (this.props.car && this.props.car._id === 'new') ? true : false;
+
+
+        console.log('isNew', isNew)
+
+        
         this.setState({
-            car: nextProps.car,
-            editable: (!nextProps.car || nextProps.car._id === 'new')
+            car: c,
+            editable: isNew
         });
     }
-
 
     onChangeName(value) {
         let newCar = this.state.car;
@@ -108,6 +132,8 @@ export default class CarSingle extends Component {
     handleSave(){
         let newCar = this.state.car;
 
+        if(!newCar.maintenance) newCar.maintenance = new Array();
+
         if (this.state.car._id === 'new'){
             newCar._id = new Mongo.ObjectID();
 
@@ -134,9 +160,76 @@ export default class CarSingle extends Component {
         ApiCars.remove(this.state.car._id);
     }
 
+    onAddNewMaintenance(){
+        let newCarData = this.state.car;
+
+        if (!newCarData.maintenance) newCarData.maintenance = new Array();
+
+        const maintenance = {
+            _id: new Mongo.ObjectID()
+        };
+
+        newCarData.maintenance.push(maintenance);
+
+        this.setState({car: newCarData});
+    }
+
+    onRemoveMaintenance() {
+        let newCarData = this.state.car;
+        let newMaintenances = new Array();
+
+
+        this.state.selectedMaintenanceID.map((maintenanceID) => {
+            newCarData.maintenance.map((maintenance) => {
+                if (maintenance._id != maintenanceID) {
+                    newMaintenances.push(maintenance);
+                }
+                else console.log('DEL:', maintenanceID)
+            })
+        })
+
+        console.log('NEW MASS:', newMaintenances)
+
+        newCarData.maintenance = newMaintenances;
+
+        this.setState({car: newCarData, selectedMaintenanceID: []});
+    }
+
+
+    handleSelect(e, maintenanceID){
+        let newSelectedMaintenanceID = this.state.selectedMaintenanceID;
+
+        const index = newSelectedMaintenanceID.indexOf(maintenanceID)
+
+        if (index === -1 ) 
+            newSelectedMaintenanceID.push(maintenanceID);
+        else 
+            newSelectedMaintenanceID.splice(index, 1);
+
+
+        this.setState({selectedMaintenanceID: newSelectedMaintenanceID});
+    }
+
+
+    trueDisabledButtomRemove() {
+        this.buttonRemove.disabled = !this.state.selectedMaintenanceID.length 
+                                            ? true 
+                                            : this.state.editable;
+    }
+
+
+    componentDidMount () { 
+        console.log('DID M CAR: ', this.state.car)
+        
+        const isNew = (this.props.car && this.props.car._id === 'new') ? true : false;
+
+        this.setState({editable: isNew})
+    }
 
 
     componentDidUpdate(){
+        console.log('EDITABLE', this.state.editable);
+        console.log('DID UP CAR: ', this.state.car)
         this.inputName.disabled = 
         this.inputPlateNumber.disabled = 
         this.inputStatus.disabled = 
@@ -146,7 +239,11 @@ export default class CarSingle extends Component {
         this.inputExpense.disabled =
         this.inputIncome.disabled = 
         this.inputDescription.disabled =
-        this.inputNotes.disabled = this.state.editable;
+        this.inputNotes.disabled = !this.state.editable;
+
+        // mainteance 
+        this.buttonAdd.disabled = !this.state.editable;
+        this.trueDisabledButtomRemove();
     }
 
 
@@ -174,7 +271,9 @@ export default class CarSingle extends Component {
                     totalIncome,
                     fines,
                     tolls,
-                    mainteance } = this.state.car;
+                    maintenance } = this.state.car;
+
+            if(!maintenance) maintenance = new Array();
 
 
             const renderTopFields = () => {
@@ -259,36 +358,48 @@ export default class CarSingle extends Component {
                                 </textarea>
                             </div>
                             <div role="tabpanel" className="tab-pane" id="maintenance">
+                                <div>
+                                    <button 
+                                        onClick={this.onAddNewMaintenance} 
+                                        ref={(ref) => this.buttonAdd = ref}
+                                        className='btn btn-primary'>
+                                        Add New
+                                    </button>
+                                    <button 
+                                        onClick={this.onRemoveMaintenance} 
+                                        ref={(ref) => this.buttonRemove = ref}
+                                        className='btn btn-danger' >
+                                        Delete
+                                    </button>
+                                </div>
                                 <table className="table table-bordered table-hover">
-                                  <thead>
-                                    <tr>
-                                      <th>Job ID</th>
-                                      <th>Job Name</th>
-                                      <th>Description</th>
-                                      <th>Date</th>
-                                      <th>Status</th>
-                                      <th>Amount</th>
-                                      <th>End Date</th>
-                                    </tr>
-                                  </thead>
+                                   <thead>
+                                     <tr>
+                                       <th><input type="checkbox" disabled/></th>
+                                       <th>Job ID</th>
+                                       <th>Job Name</th>
+                                       <th>Description</th>
+                                       <th>Date</th>
+                                       <th>Status</th>
+                                       <th>Amount</th>
+                                       <th>End Date</th>
+                                     </tr>
+                                   </thead>
 
-                                  <tbody>
-                                  {
-                                   // mainteance.map((item, key) => (
-                                   //  return (
-                                   //      <tr>
-                                   //        <td>item.jobID</td>
-                                   //        <td>item.jobName</td>
-                                   //        <td>item.escription</td>
-                                   //        <td>item.date</td>
-                                   //        <td>item.status</td>
-                                   //        <td>item.amount</td>
-                                   //        <td>item.endDate</td>
-                                   //      </tr>
-                                   //  )
-                                   // })
-                               }
-                                  </tbody>
+                                   <tbody>
+                                   {
+                                     maintenance.map((item, key) => {
+                                         return (
+                                            <MaintenanceRow 
+                                                key={key}
+                                                editable={this.state.editable}
+                                                maintenance={item}
+                                                onHandleSelect={this.handleSelect}
+                                                selectedMaintenanceID={this.state.selectedMaintenanceID}/>
+                                         )
+                                     })
+                                   }
+                                   </tbody>
                                 </table>
                             </div>
                             <div role="tabpanel" className="tab-pane" id="fines">
@@ -349,8 +460,6 @@ export default class CarSingle extends Component {
 export default createContainer(({params}) => {
     Meteor.subscribe('cars');
 
-    console.log(params)
-
     if (params.carId !== 'new'){
         return {
             car: ApiCars.findOne(new Mongo.ObjectID(params.carId))
@@ -361,7 +470,7 @@ export default createContainer(({params}) => {
         car: {
             _id: 'new',
             name: '',
-            status: 'avaliable',
+            status: '',
             profit: 0,
             planeNumber: ''
 

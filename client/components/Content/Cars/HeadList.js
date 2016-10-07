@@ -23,35 +23,16 @@ export default class HeadList extends Component {
     }
 
 
+    componentDidUpdate() {
+        this.buttonRemove.disabled = this.state.disableRemove;
+    }
+
+
     render(){
 
         const { currentPage, itemsOnPage, totalItems } = this.props;
 
         const lastPage = Math.ceil(totalItems / itemsOnPage) ? Math.ceil(totalItems / itemsOnPage) : 1 ;
-
-
-        const renderRemoveButton = () => {
-            let removeButton;
-
-            if (this.state.disableRemove) {
-                removeButton = 
-                    <button 
-                        onClick={this.props.onRemoveCars} 
-                        className='btn btn-danger' 
-                        disabled >
-                        Delete
-                    </button>
-            } else {
-                removeButton = 
-                    <button 
-                        onClick={this.props.onRemoveCars} 
-                        className='btn btn-danger' >
-                        Delete
-                    </button>
-            }
-
-            return removeButton;
-        }
 
 
         const renderLeftArrow = () => {
@@ -100,7 +81,12 @@ export default class HeadList extends Component {
 
                     <div className="btn-box">
                         <button onClick={this.props.onAddNew} className='btn btn-primary'>Add New</button>
-                        {renderRemoveButton()}
+                        <button 
+                            onClick={this.props.onRemoveCars} 
+                            ref={(ref) => this.buttonRemove = ref}
+                            className='btn btn-danger' >
+                            Delete
+                        </button>
                     </div>
                 </div>
 
