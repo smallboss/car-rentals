@@ -18,7 +18,12 @@ class Customer extends React.Component {
         this.handlerEditCustomer = this.handlerEditCustomer.bind(this)
     }
     componentWillMount () {
-        let customer = this.props.customer || []
+        let customer = this.props.customer || {}
+        if(!customer._id) {
+            customer._id = new Mongo.ObjectID()
+            customer.role = 'customer'
+            customer._new = 1
+        }
         this.setState({customer: customer})
     }
     componentDidMount () {
@@ -26,6 +31,9 @@ class Customer extends React.Component {
             li.addEventListener('click', this.handlerNavUserEdit)
         })
         $('#div_images').show()
+        if(this.state.customer._new) {
+            $('#button_edit').click()
+        }
     }
     componentWillReceiveProps (nextProps) {
         console.log(nextProps)
@@ -60,7 +68,7 @@ class Customer extends React.Component {
                         input.addEventListener('change', (eFile) => {
                             let file = eFile.target.files[0],
                                 _target = eFile.target.id,
-                                _images = this.state.customer._images,
+                                _images = this.state.customer._images || {},
                                 _newFile,
                                 _newCustomer
                             if(file.size > 110000) {
@@ -97,8 +105,14 @@ class Customer extends React.Component {
                 $('#button_save').prop('disabled', true)
                 _id = this.state.customer._id
                 _newState = this.state.customer;
-                delete this.state.customer._id
-                ApiCustomers.update(_id, {$set: _newState})
+                if(_newState._new) {
+                    delete _newState._new
+                    ApiCustomers.insert(_newState)
+                    this.setState({customers: _newState})
+                } else {
+                    delete this.state.customer._id
+                    ApiCustomers.update(_id, {$set: _newState})   
+                }                
                 break
             default:
                 break
@@ -110,8 +124,8 @@ class Customer extends React.Component {
             imgId,
             imgLicense
         if (_images) {
-            imgId = _images.imgId
-            imgLicense = _images.imgLicense            
+            imgId = _images.imgId || ''
+            imgLicense = _images.imgLicense || ''             
         }            
         return (
             <div className='panel panel-default'>
@@ -147,7 +161,7 @@ class Customer extends React.Component {
                         <div className='col-xs-6'>
                             <label htmlFor='email' className='col-xs-2'>Email</label>
                             <div className='col-xs-8 form-horizontal'>
-                                <input type='text' id='email' className='form-control' value={email} readOnly/>
+                                <input type='email' id='email' className='form-control' value={email} readOnly/>
                             </div>
                         </div>
                     </div>
@@ -155,7 +169,7 @@ class Customer extends React.Component {
                         <div className='col-xs-6'>
                             <label htmlFor='birhdate' className='col-xs-2'>Birth Date</label>
                             <div className='col-xs-8 form-horizontal'>
-                                <input type='text' id='birthDate' className='form-control' value={birthDate} readOnly/>
+                                <input type='date' id='birthDate' className='form-control' value={birthDate} readOnly/>
                             </div>
                         </div>
                     </div>
@@ -199,7 +213,11 @@ class Customer extends React.Component {
 export default createContainer(({params}) => {
     Meteor.subscribe('customers')
     let _id = params.id
-    return {
-        customer: ApiCustomers.findOne({_id: new Mongo.ObjectID(_id)})
-    }
+    if(_id === 'new') {
+        return {}
+    } else {
+        return {
+            customer: ApiCustomers.findOne({_id: new Mongo.ObjectID(_id)})
+        }   
+    }    
 }, Customer)

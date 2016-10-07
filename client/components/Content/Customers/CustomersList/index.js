@@ -5,7 +5,9 @@ import { Meteor } from 'meteor/meteor'
 import { createContainer } from 'meteor/react-meteor-data'
 import { ApiCustomers } from '../../../../../imports/api/customers'
 import React from 'react'
+import { browserHistory } from 'react-router'
 import $ from 'jquery'
+import { searcher } from '../../../../helpers/searcher'
 import CustomerForTable from '../CustomerForTable'
 import Pagination from '../Pagination'
 
@@ -21,6 +23,7 @@ class CustomersList extends React.Component {
         }
         this.handlerPagination = this.handlerPagination.bind(this)
         this.handlerDeleteCustomer = this.handlerDeleteCustomer.bind(this)
+        this.handlerSearchCustomer = this.handlerSearchCustomer.bind(this)
     }
     componentWillMount () {
         let maxPage = Math.ceil(this.props.customers.length / this.state.elemsOnPage)
@@ -63,12 +66,30 @@ class CustomersList extends React.Component {
             default: break
         }
     }
+    handlerSearchCustomer (e) {
+        let searchValue = e.target.value.toLowerCase(),
+            stateFromValue = [],
+            _props = this.props.customers
+
+        if(searchValue.length > 0) {
+            let arrToFind = ['name', 'email']
+            stateFromValue = searcher(_props, arrToFind, searchValue) || []
+        } else {
+            stateFromValue = this.props.customers
+        }
+        let maxPage = Math.ceil(stateFromValue.length / this.state.elemsOnPage)
+        this.setState({customers: stateFromValue, maxPage})
+    }
     render () {        
         let currentNums = this.state.currentPage * this.state.elemsOnPage
         let _customers = this.state.customers.slice(currentNums - this.state.elemsOnPage, currentNums)
         return (
             <div>
                 <h3>Customer`s list</h3>
+                <div className='col-xs-9'></div>
+                <div className='col-xs-3'>
+                    <input type='search' className='form-control' placeholder='Search' onChange={this.handlerSearchCustomer} />
+                </div>                
                 <table className='table table-hover'>
                     <thead>
                         <tr>
@@ -89,6 +110,7 @@ class CustomersList extends React.Component {
                     </tbody>
                 </table>
                 <input type='button' className='btn btn-danger' name='remover-users' value='Delete users' onClick={this.handlerDeleteCustomer} />
+                <input type='button' className='btn btn-success m-x-1' name='add-user' value='Add user' onClick={() => {let _new = 'new'; browserHistory.push(`/customer/${_new}`)}} />
                 {(this.state.maxPage > 1) ? <div className='text-center'>
                     <Pagination num={this.state.maxPage} handlerPagination={this.handlerPagination} key={Math.random()} />
                 </div> : ''}                
