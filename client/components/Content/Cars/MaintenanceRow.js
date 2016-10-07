@@ -97,7 +97,7 @@ export default class MaintenanceRow extends Component {
         const { onHandleSelect } = this.props;
         const { _id, jobName, description, status, date, endDate, amount } = this.state.maintenance;
 
-        console.log(_id);
+        // console.log(_id);
 
         return (
             <tr>
