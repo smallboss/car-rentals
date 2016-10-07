@@ -7,12 +7,14 @@ import { createContainer } from 'meteor/react-meteor-data'
 import { ApiCustomers } from '../../../../../imports/api/customers'
 import React from 'react'
 import $ from 'jquery'
+import { browserHistory } from 'react-router'
 import './style.css'
 
 class Customer extends React.Component {
     constructor (props) {
         super(props)
         this.state = {customer: this.props.customer}        
+        this.handlerEditCustomer = this.handlerEditCustomer.bind(this)
     }
     componentWillMount () {
         let customer = this.props.customer || []
@@ -24,6 +26,7 @@ class Customer extends React.Component {
         [...document.getElementsByClassName('li-nav')].forEach(li => {
             li.addEventListener('click', this.handlerNavUserEdit)
         })
+        $('#div_images').show()
     }
     componentWillReceiveProps (nextProps) {
         console.log(nextProps)
@@ -31,12 +34,50 @@ class Customer extends React.Component {
         this.setState({customer: customer[0]})
     }
     handlerNavUserEdit (e) {
-        let li_s = $('.nav-user-edit li').removeClass('active-href-nav')
+        let li_s = $('.nav-user-edit li').removeClass('active-href-nav'),
+            _target = $(this).data('target')
         $(this).addClass('active-href-nav')
+        $('.inner-div-users-edit').hide()
+        $('#' + _target).show()
+    }
+    handlerRemoveCustomer (id) {
+        let _confirm = confirm('Are You sure to delete this customer?')
+        if(_confirm) {
+            ApiCustomers.remove({_id: new Mongo.ObjectID(id._str)})
+            browserHistory.push('/customers_list')   
+        }        
+    }
+    handlerEditCustomer (e) {
+        let id = e.target.id;
+        switch (id) {
+            case 'button_edit':
+                $('#button_save').removeAttr('disabled')
+                $('.form-control').removeAttr('readOnly')
+                $('.form-control').removeAttr('disabled');
+                [...document.getElementsByClassName('form-control')].forEach(input => {
+                    input.addEventListener('input', (eventInput) => {
+                        let customer = this.state.customer,
+                            _target = eventInput.target.id,
+                            _newValue = eventInput.target.value
+                        if(_newValue.length > 0) {
+                            customer[_target] = _newValue
+                            this.setState({...customer})   
+                        }                        
+                    })
+                })
+                break
+            case 'button_save':
+                $('.form-control').prop('readOnly')
+                $('.form-control').setAttribute('disabled')
+                $('#button_save').setAttribute('disabled')
+                break
+            default:
+                break
+        }
     }
     render () {
         console.log(this.state.customer)
-        let { name, userName, address, email, birthDate, phone, role, _images} = this.state.customer,
+        let { _id, name, userName, address, email, birthDate, phone, role, _images, carRequests, rentals, payments, fines, tolls} = this.state.customer,
             imgId,
             imgLicense
         if (_images) {
@@ -48,22 +89,22 @@ class Customer extends React.Component {
                 <div className='panel-heading'>
                     <h4>{name} / {userName}</h4>
                     <input type='button' className='btn btn-primary p-x-1' value='Print' />
-                    <input type='button' className='btn btn-primary p-x-1 m-x-1' value='Save' />
-                    <input type='button' className='btn btn-primary p-x-1' value='Edit' />
-                    <input type='button' className='btn btn-primary p-x-1 m-x-1' value='Delete' />
+                    <input type='button' id='button_save' className='btn btn-primary p-x-1 m-x-1' value='Save'  onClick={this.handlerEditCustomer} disabled />
+                    <input type='button' id='button_edit' className='btn btn-primary p-x-1' value='Edit' onClick={this.handlerEditCustomer} />
+                    <input type='button' className='btn btn-primary p-x-1 m-x-1' value='Delete' onClick={() => { this.handlerRemoveCustomer(_id) }} />
                 </div>
                 <div className='panel-body'>
                     <div className='row'>
                         <div className='col-xs-6'>
                             <label htmlFor='name' className='col-xs-2'>Name</label>
                             <div className='col-xs-8 form-horizontal'>
-                                <input type='text' className='form-control' value={name} readOnly/>
+                                <input type='text' id='name' className='form-control' value={name} readOnly/>
                             </div>
                         </div>
                         <div className='col-xs-6'>
                             <label htmlFor='address' className='col-xs-2'>Address</label>
                             <div className='col-xs-8 form-horizontal'>
-                                <input type='text' className='form-control' value={address} readOnly/>
+                                <input type='text' id='address' className='form-control' value={address} readOnly/>
                             </div>
                         </div>
                     </div>
@@ -71,13 +112,13 @@ class Customer extends React.Component {
                         <div className='col-xs-6'>
                             <label htmlFor='phone' className='col-xs-2'>Phone</label>
                             <div className='col-xs-8 form-horizontal'>
-                                <input type='text' className='form-control' value={phone} readOnly/>
+                                <input type='text' id='phone' className='form-control' value={phone} readOnly/>
                             </div>
                         </div>
                         <div className='col-xs-6'>
                             <label htmlFor='email' className='col-xs-2'>Email</label>
                             <div className='col-xs-8 form-horizontal'>
-                                <input type='text' className='form-control' value={email} readOnly/>
+                                <input type='text' id='email' className='form-control' value={email} readOnly/>
                             </div>
                         </div>
                     </div>
@@ -85,32 +126,39 @@ class Customer extends React.Component {
                         <div className='col-xs-6'>
                             <label htmlFor='birhdate' className='col-xs-2'>Birth Date</label>
                             <div className='col-xs-8 form-horizontal'>
-                                <input type='text' className='form-control' value={birthDate} readOnly/>
+                                <input type='text' id='birthDate' className='form-control' value={birthDate} readOnly/>
                             </div>
-                        </div>
-                        <div className='col-xs-6'>
-
                         </div>
                     </div>
                     <div className='row m-y-1'>
                         <div className='col-xs-12'>
                             <ul className='nav nav-tabs nav-user-edit'>
-                                <li role='presentation' className='li-nav active-href-nav' name='div_scans'><a>Scans</a></li>
-                                <li role='presentation' className='li-nav'><a>Car Request</a></li>
-                                <li role='presentation' className='li-nav'><a>Rentals</a></li>
-                                <li role='presentation' className='li-nav'><a>Payments</a></li>
-                                <li role='presentation' className='li-nav'><a>Fines</a></li>
-                                <li role='presentation' className='li-nav'><a>Tolls</a></li>
+                                <li role='presentation' className='li-nav active-href-nav' data-target='div_images'><a>Scans</a></li>
+                                <li role='presentation' className='li-nav' data-target='div_car_request'><a>Car Request</a></li>
+                                <li role='presentation' className='li-nav' data-target='div_rentals'><a>Rentals</a></li>
+                                <li role='presentation' className='li-nav' data-target='div_payments'><a>Payments</a></li>
+                                <li role='presentation' className='li-nav' data-target='div_fines'><a>Fines</a></li>
+                                <li role='presentation' className='li-nav' data-target='div_tolls'><a>Tolls</a></li>
                             </ul>
                         </div>
                     </div>
                     <div className='row'>
                         <div className='col-xs-12'>
-                            <div id='div_scans'>
-                                <div id='img_preview'></div>
-                                <img src={imgId} style={{width: '100px', height: '100px'}} />
-                                <img src={imgLicense} style={{width: '100px', height: '100px'}} />                                
+                            <div id='div_images' className='inner-div-users-edit'>
+                                <div className='col-xs-6'>
+                                    <img src={imgId} />
+                                    <input type='file' id='new_file_id' className='form-control' disabled/>
+                                </div>
+                                <div className='col-xs-6'>
+                                    <img src={imgLicense} />
+                                    <input type='file' id='new_file_license' className='form-control' disabled/>
+                                </div>                          
                             </div>
+                            <div id='div_car_request'  className='inner-div-users-edit'>Car requests</div>
+                            <div id='div_rentals' className='inner-div-users-edit'>rentals</div>
+                            <div id='div_payments' className='inner-div-users-edit'>payments</div>
+                            <div id='div_fines' className='inner-div-users-edit'>fines</div>
+                            <div id='div_tolls' className='inner-div-users-edit'>tolls</div>
                         </div>
                     </div>
                 </div>
