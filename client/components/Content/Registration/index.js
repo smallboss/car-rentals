@@ -5,6 +5,7 @@ import React from 'react'
 import { Mongo } from 'meteor/mongo'
 import { createContainer } from 'meteor/react-meteor-data'
 import { ApiCustomers } from '../../../../imports/api/customers'
+import { imgToBase64 } from '../../../helpers/handlerImages'
 
 function toDataUrl(url, callback) {
     console.log(url)
@@ -32,7 +33,37 @@ class Registration extends React.Component {
             _user,
             _images
         let fileId = _target[8].files[0],
-            fileLicense = _target[9].files[0],
+            fileLicense = _target[9].files[0]
+        if(fileId.size > 110000 || fileLicense.size > 110000) {
+            alert('Please upload image less than 100kb')
+            e.preventDefault()
+            return false
+        }
+        imgToBase64(fileId, (base64Id) => {
+            imgId = base64Id
+            imgToBase64(fileLicense, (base64License) => {
+                imgLicense = base64License                
+                _images = {
+                    imgId,
+                    imgLicense
+                }
+                _user = {
+                    _id,
+                    name: _target[0].value,
+                    userName: _target[1].value,
+                    email: _target[2].value,
+                    birthDate: _target[3].value,
+                    phone: _target[4].value,
+                    address: _target[5].value,
+                    password: _target[6].value,
+                    role: 'customer',
+                    _images
+                }
+                ApiCustomers.insert(_user)
+                _target.reset()
+            })
+        })
+        /*
             reader = new FileReader()
         reader.readAsDataURL(fileId)
         reader.onloadend = () => {
@@ -60,34 +91,7 @@ class Registration extends React.Component {
                 ApiCustomers.insert(_user)
                 _target.reset()
             }
-        }
-        /*
-        toDataUrl(_target[8].files[0], (base64Id) => {
-            console.log(_target[8])
-            console.log(base64Id)
-            imgId = base64Id
-            /*toDataUrl(_target[9].files[0], (base64License) => {
-                imgLicense = base64License
-                _images = {
-                    imgId,
-                    imgLicense
-                }
-                _user = {
-                    _id,
-                    name: _target[0].value,
-                    userName: _target[1].value,
-                    email: _target[2].value,
-                    birthDate: _target[3].value,
-                    phone: _target[4].value,
-                    address: _target[5].value,
-                    password: _target[6].value,                    
-                    role: 'customer',
-                    _images
-                }
-                ApiCustomers.insert(_user)
-                _target.reset()
-            })
-        })*/
+        }*/
     }
     render () {
         return (

@@ -8,6 +8,7 @@ import { ApiCustomers } from '../../../../../imports/api/customers'
 import React from 'react'
 import $ from 'jquery'
 import { browserHistory } from 'react-router'
+import { imgToBase64 } from '../../../../helpers/handlerImages'
 import './style.css'
 
 class Customer extends React.Component {
@@ -18,9 +19,7 @@ class Customer extends React.Component {
     }
     componentWillMount () {
         let customer = this.props.customer || []
-        if(customer.length > 0) {
-            this.setState({customer: customer[0]})   
-        }        
+        this.setState({customer: customer})
     }
     componentDidMount () {
         [...document.getElementsByClassName('li-nav')].forEach(li => {
@@ -31,7 +30,7 @@ class Customer extends React.Component {
     componentWillReceiveProps (nextProps) {
         console.log(nextProps)
         let customer = nextProps.customer
-        this.setState({customer: customer[0]})
+        this.setState({customer: customer})
     }
     handlerNavUserEdit (e) {
         let li_s = $('.nav-user-edit li').removeClass('active-href-nav'),
@@ -48,28 +47,58 @@ class Customer extends React.Component {
         }        
     }
     handlerEditCustomer (e) {
-        let id = e.target.id;
+        let id = e.target.id,
+            _id,
+            _newState
         switch (id) {
             case 'button_edit':
                 $('#button_save').removeAttr('disabled')
                 $('.form-control').removeAttr('readOnly')
                 $('.form-control').removeAttr('disabled');
                 [...document.getElementsByClassName('form-control')].forEach(input => {
-                    input.addEventListener('input', (eventInput) => {
-                        let customer = this.state.customer,
-                            _target = eventInput.target.id,
-                            _newValue = eventInput.target.value
-                        if(_newValue.length > 0) {
-                            customer[_target] = _newValue
-                            this.setState({...customer})   
-                        }                        
-                    })
+                    if(input.type == 'file') {
+                        input.addEventListener('change', (eFile) => {
+                            let file = eFile.target.files[0],
+                                _target = eFile.target.id,
+                                _images = this.state.customer._images,
+                                _newFile,
+                                _newCustomer
+                            if(file.size > 110000) {
+                                alert('Please upload image less than 100kb')
+                                eFile.preventDefault()
+                                return false
+                            }
+                            imgToBase64(file, (result) => {
+                                _newFile = result
+                                _images[_target] = _newFile
+                                _newCustomer = {
+                                    ...this.state.customer,
+                                    _images
+                                }
+                                this.setState({customer: _newCustomer})
+                            })
+                        })
+                    } else {
+                        input.addEventListener('input', (eInput) => {
+                            let customer = this.state.customer,
+                                _target = eInput.target.id,
+                                _newValue = eInput.target.value
+                            if(_newValue.length > 0) {
+                                customer[_target] = _newValue
+                                this.setState({...customer})
+                            }
+                        })   
+                    }                    
                 })
+                document.getElementById('button_save').addEventListener('click', this.handlerEditCustomer)
                 break
             case 'button_save':
-                $('.form-control').prop('readOnly')
-                $('.form-control').setAttribute('disabled')
-                $('#button_save').setAttribute('disabled')
+                $('.form-control').prop('disabled', true)
+                $('#button_save').prop('disabled', true)
+                _id = this.state.customer._id
+                _newState = this.state.customer;
+                delete this.state.customer._id
+                ApiCustomers.update(_id, {$set: _newState})
                 break
             default:
                 break
@@ -89,7 +118,7 @@ class Customer extends React.Component {
                 <div className='panel-heading'>
                     <h4>{name} / {userName}</h4>
                     <input type='button' className='btn btn-primary p-x-1' value='Print' />
-                    <input type='button' id='button_save' className='btn btn-primary p-x-1 m-x-1' value='Save'  onClick={this.handlerEditCustomer} disabled />
+                    <input type='button' id='button_save' className='btn btn-primary p-x-1 m-x-1' value='Save' disabled />
                     <input type='button' id='button_edit' className='btn btn-primary p-x-1' value='Edit' onClick={this.handlerEditCustomer} />
                     <input type='button' className='btn btn-primary p-x-1 m-x-1' value='Delete' onClick={() => { this.handlerRemoveCustomer(_id) }} />
                 </div>
@@ -147,11 +176,11 @@ class Customer extends React.Component {
                             <div id='div_images' className='inner-div-users-edit'>
                                 <div className='col-xs-6'>
                                     <img src={imgId} />
-                                    <input type='file' id='new_file_id' className='form-control' disabled/>
+                                    <input type='file' id='imgId' className='form-control' disabled/>
                                 </div>
                                 <div className='col-xs-6'>
                                     <img src={imgLicense} />
-                                    <input type='file' id='new_file_license' className='form-control' disabled/>
+                                    <input type='file' id='imgLicense' className='form-control' disabled/>
                                 </div>                          
                             </div>
                             <div id='div_car_request'  className='inner-div-users-edit'>Car requests</div>
@@ -171,6 +200,6 @@ export default createContainer(({params}) => {
     Meteor.subscribe('customers')
     let _id = params.id
     return {
-        customer: ApiCustomers.find({_id: new Mongo.ObjectID(_id)}).fetch()        
+        customer: ApiCustomers.findOne({_id: new Mongo.ObjectID(_id)})
     }
 }, Customer)

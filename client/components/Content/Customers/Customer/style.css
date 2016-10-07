@@ -11,3 +11,9 @@
     border: 1px solid grey;
     border-bottom: 0px;
 }
+#div_images img {
+    max-width: 100%;
+}
+.inner-div-users-edit {
+    display: none;
+}
