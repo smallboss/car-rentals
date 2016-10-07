@@ -8,7 +8,8 @@ export default class MaintenanceRow extends Component {
         super(props);
 
         this.state = {
-            maintenance: this.props.maintenance
+            maintenance: this.props.maintenance,
+            editable: this.props.editable
         }
 
         this.onChangeJobName = this.onChangeJobName.bind(this);
@@ -20,9 +21,16 @@ export default class MaintenanceRow extends Component {
     }
 
 
-    componentWillUpdate(nextProps){
-        console.log('nextProps', nextProps)
+    componentDidMount(){
+        this.inputSelect.disabled =
+        this.inputName.disabled =
+        this.inputDescription.disabled =
+        this.inputDate.disabled =
+        this.inputAmount.disabled =
+        this.inputEndDate.disabled =
+        this.inputStatus.disabled = !this.state.editable;
     }
+
 
     componentWillReceiveProps (props) {
         this.inputSelect.checked = false;
@@ -32,8 +40,8 @@ export default class MaintenanceRow extends Component {
                 this.inputSelect.checked = true;
         })
 
+        this.setState({editable: props.editable});
 
-        console.log('PROPS', this.props.editable)
     }
 
 
@@ -81,13 +89,15 @@ export default class MaintenanceRow extends Component {
         this.inputDate.disabled =
         this.inputAmount.disabled =
         this.inputEndDate.disabled =
-        this.inputStatus.disabled = !this.props.editable;
+        this.inputStatus.disabled = !this.state.editable;
     }
 
 
     render(){
         const { onHandleSelect } = this.props;
         const { _id, jobName, description, status, date, endDate, amount } = this.state.maintenance;
+
+        console.log(_id);
 
         return (
             <tr>

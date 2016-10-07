@@ -10,6 +10,8 @@ import { carStateTypes } from '/imports/startup/typesList.js';
 
 import MaintenanceRow from './MaintenanceRow.js';
 
+import { clone } from 'lodash';
+
 import './carStyle.css'
 
 
@@ -17,11 +19,9 @@ export default class CarSingle extends Component {
     constructor(props) {
         super(props);
 
-        
 
         const isNew = (this.props.car && this.props.car._id === 'new') ? true : false;
-        
-        console.log('isNew', isNew)
+
 
         this.state = {
             car: this.props.car,
@@ -50,6 +50,7 @@ export default class CarSingle extends Component {
         this.trueDisabledButtomRemove = this.trueDisabledButtomRemove.bind(this);
     }
 
+
     onChangeFines(value) {
         let newCar = this.state.car;
         newCar.fines = value;
@@ -74,17 +75,13 @@ export default class CarSingle extends Component {
         this.setState({car: newCar});
     }
 
+
     componentWillReceiveProps(nextProps) {
         let c = nextProps.car;
-        console.log('RES CAR new: ', nextProps.car)
-        console.log('RES CAR old: ', this.state.car)
         if (this.state.car) {c.maintenance = this.state.car.maintenance;}
 
 
         const isNew = (this.props.car && this.props.car._id === 'new') ? true : false;
-
-
-        console.log('isNew', isNew)
 
         
         this.setState({
@@ -144,7 +141,6 @@ export default class CarSingle extends Component {
             const id = newCar._id;
             delete newCar._id;
             ApiCars.update(id, {$set: newCar});
-
         }
     }
 
@@ -175,24 +171,50 @@ export default class CarSingle extends Component {
     }
 
     onRemoveMaintenance() {
-        let newCarData = this.state.car;
-        let newMaintenances = new Array();
 
+        // let car = this.state.car;
 
+        let car = clone(this.state.car);
         this.state.selectedMaintenanceID.map((maintenanceID) => {
-            newCarData.maintenance.map((maintenance) => {
-                if (maintenance._id != maintenanceID) {
-                    newMaintenances.push(maintenance);
+            car.maintenance.map((maintenance, key) => {
+                if (maintenance._id == maintenanceID) {
+                    delete car.maintenance[key];
                 }
-                else console.log('DEL:', maintenanceID)
             })
         })
 
-        console.log('NEW MASS:', newMaintenances)
+        console.log("this.state.car", this.state.car);
+        console.log("newCarData", car);
 
-        newCarData.maintenance = newMaintenances;
+        const carId = this.state.car._id;
 
-        this.setState({car: newCarData, selectedMaintenanceID: []});
+
+        // let newCar = this.state.car;
+
+        // if(!newCar.maintenance) newCar.maintenance = new Array();
+
+        // if (this.state.car._id === 'new'){
+        //     newCar._id = new Mongo.ObjectID();
+
+        //     ApiCars.insert(newCar);
+        //     browserHistory.push(`/cars/${newCar._id._str}`);
+        // }
+        // else {
+            // car.splice(car.indexOf('_id'), 1);
+            delete car._id;
+            console.log("carId", car);
+            ApiCars.update(carId, car);
+
+
+        // // }
+
+        car._id = carId;
+
+        // console.log('NEW MASS:', newMaintenances)
+
+        // newCarData.maintenance = newMaintenances;
+
+        this.setState({car, selectedMaintenanceID: []});
     }
 
 
@@ -206,6 +228,8 @@ export default class CarSingle extends Component {
         else 
             newSelectedMaintenanceID.splice(index, 1);
 
+        console.log('newSelectedMaintenanceID', newSelectedMaintenanceID)
+
 
         this.setState({selectedMaintenanceID: newSelectedMaintenanceID});
     }
@@ -214,13 +238,11 @@ export default class CarSingle extends Component {
     trueDisabledButtomRemove() {
         this.buttonRemove.disabled = !this.state.selectedMaintenanceID.length 
                                             ? true 
-                                            : this.state.editable;
+                                            : !this.state.editable;
     }
 
 
-    componentDidMount () { 
-        console.log('DID M CAR: ', this.state.car)
-        
+    componentDidMount () {         
         const isNew = (this.props.car && this.props.car._id === 'new') ? true : false;
 
         this.setState({editable: isNew})
@@ -228,8 +250,10 @@ export default class CarSingle extends Component {
 
 
     componentDidUpdate(){
-        console.log('EDITABLE', this.state.editable);
-        console.log('DID UP CAR: ', this.state.car)
+        // mainteance buttons
+        this.buttonAdd.disabled = !this.state.editable;
+        this.trueDisabledButtomRemove();
+
         this.inputName.disabled = 
         this.inputPlateNumber.disabled = 
         this.inputStatus.disabled = 
@@ -240,10 +264,6 @@ export default class CarSingle extends Component {
         this.inputIncome.disabled = 
         this.inputDescription.disabled =
         this.inputNotes.disabled = !this.state.editable;
-
-        // mainteance 
-        this.buttonAdd.disabled = !this.state.editable;
-        this.trueDisabledButtomRemove();
     }
 
 
@@ -391,7 +411,7 @@ export default class CarSingle extends Component {
                                      maintenance.map((item, key) => {
                                          return (
                                             <MaintenanceRow 
-                                                key={key}
+                                                key={`maintenance${key}`} 
                                                 editable={this.state.editable}
                                                 maintenance={item}
                                                 onHandleSelect={this.handleSelect}
