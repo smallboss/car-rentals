@@ -128,6 +128,12 @@
 .m-x-1 {
     margin: 0 10px;
 }
+.m-y-1 {
+    margin: 10px 0;
+}
 .p-x-1 {
     padding: 0 10px;
+}
+.p-y-1 {
+    padding: 10px 0;
 }
