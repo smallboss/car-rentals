@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { map } from 'lodash';
+import { map, clone } from 'lodash';
 
 import { maintenanceStateTypes } from '/imports/startup/typesList.js';
 
@@ -21,27 +21,16 @@ export default class MaintenanceRow extends Component {
     }
 
 
-    componentDidMount(){
-        this.inputSelect.disabled =
-        this.inputName.disabled =
-        this.inputDescription.disabled =
-        this.inputDate.disabled =
-        this.inputAmount.disabled =
-        this.inputEndDate.disabled =
-        this.inputStatus.disabled = !this.state.editable;
-    }
-
-
     componentWillReceiveProps (props) {
         this.inputSelect.checked = false;
 
-        map(props.selectedMaintenanceID, (item) => {
-            if(item == props.maintenance._id)
+        map(props.selectedMaintenance, (item) => {
+            if(item._id == props.maintenance._id)
                 this.inputSelect.checked = true;
         })
 
-        this.setState({maintenance: props.maintenance, editable: props.editable});
 
+        this.setState({maintenance: props.maintenance, editable: props.editable});
     }
 
 
@@ -49,6 +38,7 @@ export default class MaintenanceRow extends Component {
     onChangeJobName(value){
         let newMaintenance = this.state.maintenance;
         newMaintenance.jobName = value;
+        this.props.onEditingField(newMaintenance);
         this.setState({maintenance: newMaintenance});
     }
 
@@ -82,89 +72,149 @@ export default class MaintenanceRow extends Component {
 // END ============== CHANGERS FIELDS ============================
 
 
-    componentDidUpdate(){
-        this.inputSelect.disabled =
-        this.inputName.disabled =
-        this.inputDescription.disabled =
-        this.inputDate.disabled =
-        this.inputAmount.disabled =
-        this.inputEndDate.disabled =
-        this.inputStatus.disabled = !this.state.editable;
+componentDidUpdate(){
+    if (this.state.editable) {
+        // console.log('DIDUP')
+        const maintenance = clone(this.state.maintenance);
+        // this.props.onEditingField(maintenance);
     }
+}
 
 
     render(){
         const { onHandleSelect } = this.props;
         const { _id, jobName, description, status, date, endDate, amount } = this.state.maintenance;
 
-<<<<<<< HEAD
 
+        const buttonSave = () => {
+            return (
+                    <button
+                        onClick={() => this.props.onSave(this.state.maintenance)}
+                        ref={(ref) => this.buttonSave = ref}
+                        className='btn btn-danger'>
+                        Save
+                    </button>
+            )
+        }
 
-        console.log(jobName, _id);
-=======
-        // console.log(_id);
->>>>>>> fc833039aa9b525d3ae04da0ea4a093c2ed0fc83
 
         return (
             <tr>
-                <th><input type="checkbox" ref={(ref) => this.inputSelect = ref} onChange={(e) => onHandleSelect(e, _id)}/></th>
+                <th>
+                    <input type="checkbox" ref={(ref) => this.inputSelect = ref} onChange={(e) => onHandleSelect(e, this.state.maintenance)}/>
+                </th>
                 <td>
-                    <input 
-                        type="text"
-                        onChange={this.onChangeJobID}
-                        ref={(ref) => this.inputMaintenance = ref}
-                        value={_id} />
+                    {/* ================ _id ============== */}
+
+                    { this.state.editable ? buttonSave() : null }
+                    
+                    <span>{_id._str}</span>
                 </td>
                 <td>
-                    <input 
-                        type="text"
-                        onChange={(e) => this.onChangeJobName(e.target.value)}
-                        ref={(ref) => this.inputName = ref}
-                        value={jobName} />
+                    {/* ================ jobName ============== */}
+                    {(() => {
+                        if(this.state.editable){
+                            return (
+                                <input 
+                                    type="text"
+                                    onChange={(e) => this.onChangeJobName(e.target.value)}
+                                    ref={(ref) => this.inputName = ref}
+                                    value={jobName} />
+                            )
+                        } 
+
+                        return <span>{jobName}</span>
+                    })()}
                 </td>
                 <td>
-                    <input 
-                        type="text"
-                        onChange={(e) => this.onChangeDescription(e.target.value)}
-                        ref={(ref) => this.inputDescription = ref}
-                        value={description} />
+                    {/* ================ description ============== */}
+                    {(() => {
+                        if(this.state.editable){
+                            return (
+                                <input 
+                                    type="text"
+                                    onChange={(e) => this.onChangeDescription(e.target.value)}
+                                    ref={(ref) => this.inputDescription = ref}
+                                    value={description} />
+                            )
+                        } 
+
+                        return <span>{description}</span>
+                    })()}
                 </td>
                 <td>
-                    <input 
-                        type="date"
-                        onChange={(e) => this.onChangeDate(e.target.value)}
-                        ref={(ref) => this.inputDate = ref}
-                        value={date} />
+                    {/* ================ date ============== */}
+                    {(() => {
+                        if(this.state.editable){
+                            return (
+                                 <input 
+                                    type="date"
+                                    onChange={(e) => this.onChangeDate(e.target.value)}
+                                    ref={(ref) => this.inputDate = ref}
+                                    value={date} />
+                            )
+                        } 
+
+                        return <span>{date}</span>
+                    })()}
                 </td>
                 <td>
-                    <select ref={(ref) => this.inputStatus = ref}
-                            onChange={(e) => this.onChangeStatus(e.target.value)}>
-                        <option value={status}>{status}</option>
-                        {
-                            maintenanceStateTypes.map((el, key) => {
-                                if (el !== status){
-                                    return (
-                                        <option key={key} value={el}>{el}</option>
-                                    )
-                                }
-                                return undefined;
-                            }
-                        )}
-                    </select>
+                    {/* ================ status ============== */}
+                    {(() => {
+                        if(this.state.editable){
+                            return(
+                                <select ref={(ref) => this.inputStatus = ref}
+                                        onChange={(e) => this.onChangeStatus(e.target.value)}>
+                                    <option value={status}>{status}</option>
+                                    {
+                                        maintenanceStateTypes.map((el, key) => {
+                                            if (el !== status){
+                                                return (
+                                                    <option key={key} value={el}>{el}</option>
+                                                )
+                                            }
+                                            return undefined;
+                                        }
+                                    )}
+                                </select>
+                            )
+                        } 
+
+                        return <span>{status}</span>
+                    })()}
                 </td>
                 <td>
-                    <input 
-                        type="text"
-                        onChange={(e) => this.onChangeAmount(e.target.value)}
-                        ref={(ref) => this.inputAmount = ref}
-                        value={amount} />
+                    {/* ================ amount ============== */}
+                    {(() => {
+                        if(this.state.editable){
+                            return (
+                                <input 
+                                    type="text"
+                                    onChange={(e) => this.onChangeAmount(e.target.value)}
+                                    ref={(ref) => this.inputAmount = ref}
+                                    value={amount} />
+                            )
+                        } 
+
+                        return <span>{amount}</span>
+                    })()}
+                    
                 </td>
                 <td>
-                    <input 
-                        type="date"
-                        onChange={(e) => this.onChangeEndDate(e.target.value)}
-                        ref={(ref) => this.inputEndDate = ref}
-                        value={endDate} />
+                    {/* ================ endDate ============== */}
+                    {(() => {
+                        if(this.state.editable){
+                            return (
+                                <input 
+                                    type="date"
+                                    onChange={(e) => this.onChangeEndDate(e.target.value)}
+                                    ref={(ref) => this.inputEndDate = ref}
+                                    value={endDate} />
+                            )
+                        } 
+
+                        return <span>{endDate}</span>
+                    })()}
                 </td>
             </tr>
         )

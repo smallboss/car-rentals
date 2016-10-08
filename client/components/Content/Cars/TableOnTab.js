@@ -1,9 +1,7 @@
 import React, { Component, PropTypes } from 'react';
+import { clone, map, find } from 'lodash';
 
-import CarRow from './CarRow.js';
-import HeadList from './HeadList.js';
-
-import { map, debounce } from 'lodash';
+import MaintenanceRow from './MaintenanceRow.js';
 
 
 export default class TableOnTab extends Component {
@@ -12,13 +10,44 @@ export default class TableOnTab extends Component {
 
 
         this.state = {
-            selectedItemsID: []
+            selectedItems: [],
+            allowEdit: false
         }
 
 
         this.onAddNew = this.onAddNew.bind(this);
-        this.onRemoveItems = this.onRemoveItems.bind(this);
+        this.onEdit = this.onEdit.bind(this);
+        this.handleSelect = this.handleSelect.bind(this);
+        this.onSaveMaintenance = this.onSaveMaintenance.bind(this);
+        this.editListEditing = this.editListEditing.bind(this);
     }   
+
+
+    handleSelect(e, maintenance){
+        let newSelectedMaintenance = this.state.selectedItems;
+        
+
+        let index = -1;
+
+        newSelectedMaintenance.map((el, key) => {
+            if (el._id == maintenance._id) {
+                index = key;
+            }
+        })
+
+
+        if (index === -1)
+          newSelectedMaintenance.push(maintenance);
+        else
+          newSelectedMaintenance.splice(index, 1);
+
+        const allowEdit = (!newSelectedMaintenance.length && this.state.allowEdit) 
+                                ? false
+                                : this.state.allowEdit
+
+
+        this.setState({selectedItems: newSelectedMaintenance, allowEdit});
+    }
 
 
     onAddNew(){
@@ -26,66 +55,150 @@ export default class TableOnTab extends Component {
     }
 
 
-    onRemoveItems() {
+    onEdit(){
+        const cloneAllowEdit = clone(this.state.allowEdit);
 
+        this.setState({allowEdit: !cloneAllowEdit});
     }
+
+    componentDidUpdate(){
+        if(this.buttonEdit) {
+            this.buttonEdit.disabled =
+            this.buttonRemove.disabled = !this.state.selectedItems.length;
+        }
+
+
+        console.log('this.state.selectedItems', this.state.selectedItems)
+    }
+
 
     componentDidMount(){
-
+        if(this.buttonEdit) {
+            this.buttonEdit.disabled =
+            this.buttonRemove.disabled = !this.state.selectedItems.length;
+        }
     }
+
+    onSaveMaintenance(maintenance){
+        let newSelMaintenanceList = clone(this.state.selectedItems)
+
+        newSelMaintenanceList.map((el, key) => {
+            if (el._id == maintenance._id) {
+                newSelMaintenanceList.splice(key, 1);
+            }
+        })
+
+
+        const selectedItemsID = clone(this.state.selectedItemsID)
+
+        this.props.onSaveMaintenance(maintenance, selectedItemsID);
+
+        console.log('newSelMaintenanceList', newSelMaintenanceList)
+
+        this.setState({selectedItems: newSelMaintenanceList});
+    }
+
+
+    editListEditing(newMaintenance){
+        let newSelectedItems = clone(this.state.selectedItems);
+
+        let index = -1;
+        
+        newSelectedItems.map((el, key) => {
+            if (el._id == newMaintenance._id)
+                index = key;
+        })
+
+        
+
+        if (index !== -1) {
+            newSelectedItems[index] = newMaintenance;
+        } else {
+            newSelectedItems.push(newMaintenance)
+        }
+
+        this.setState({selectedItems: newSelectedItems});
+    }
+
+
 
 
     render(){
-
-
-                                // <table className="table table-bordered table-hover">
-                                //   <thead>
-                                //     <tr>
-                                //       <th>Job ID</th>
-                                //       <th>Job Name</th>
-                                //       <th>Description</th>
-                                //       <th>Date</th>
-                                //       <th>Status</th>
-                                //       <th>Amount</th>
-                                //       <th>End Date</th>
-                                //     </tr>
-                                //   </thead>
-
-                                //   <tbody>
-                                //   {
-                                //     mainteance.map((item, key) => {
-                                //         return (
-                                //             <tr key={key}>
-                                //               <td><input type="text" velue={item.jobID} /></td>
-                                //               <td><input type="text" velue={item.jobName} /></td>
-                                //               <td><input type="text" velue={item.escription} /></td>
-                                //               <td><input type="text" velue={item.date} /></td>
-                                //               <td><input type="text" velue={item.status} /></td>
-                                //               <td><input type="text" velue={item.amount} /></td>
-                                //               <td><input type="text" velue={item.endDate} /></td>
-                                //             </tr>
-                                //         )
-                                //     })
-                                //   }
-                                //   </tbody>
-                                // </table>
-
+        const { selectedItems } = this.state;
 
         return (
             <div className="TableOnTab">
-                <div className="headListOnTab">
-
-                    <div className="btn-box">
-                        <button onClick={this.onAddNew} className='btn btn-primary'>Add New</button>
-                        <button 
-                            onClick={this.onRemoveItems} 
-                            className='btn btn-danger' 
-                            ref={(ref) => this.buttonRemove = ref } >
-                            Delete
-                        </button>
-                    </div>
-
+                <div>
+                  <button
+                    onClick={this.props.onAddNew}
+                    ref={(ref) => this.buttonAdd = ref}
+                    className='btn btn-primary'>
+                    Add New
+                  </button>
+                  <button 
+                    className="btn btn-warning" 
+                    ref={(ref) => this.buttonEdit = ref}
+                    onClick={this.onEdit}>
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => this.props.onRemove(selectedItems)}
+                    ref={(ref) => this.buttonRemove = ref}
+                    className='btn btn-danger'>
+                    Delete
+                  </button>
                 </div>
+                <table className="table table-bordered table-hover">
+                  <thead>
+                      <tr>
+                        <th><input type="checkbox" disabled/></th>
+                        <th>Job ID</th>
+                        <th>Job Name</th>
+                        <th>Description</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Amount</th>
+                        <th>End Date</th>
+                      </tr>
+                  </thead>
+
+                  <tbody>
+                  {
+                    this.props.maintenanceList.map((item, key) => {
+                        
+                        let isInEditList = false;
+                        let index = -1;
+
+                        selectedItems.map((el, key) => {
+                            if (el._id == item._id) {
+                                isInEditList = true;
+                                index = key;
+                                console.log('isInEditList', item._id)
+                            }
+                        })
+
+
+                        const isEditable = (isInEditList && this.state.allowEdit) 
+                                                ? true 
+                                                : false
+
+                        const pasteMaintenance = isInEditList ? clone(selectedItems[index]) 
+                                                              : clone(item);
+
+                      return (
+                            <MaintenanceRow
+                                key={`maintenance-${key}`}
+                                editable={isEditable}
+                                maintenance={pasteMaintenance}
+                                onSave={(maintenance) => this.onSaveMaintenance(maintenance)}
+                                onHandleSelect={this.handleSelect}
+                                selectedMaintenance={selectedItems}
+                                onEditingField={this.editListEditing}/>
+                      )
+                    })
+                  }
+                  </tbody>
+                </table>
             </div>
         )
     }

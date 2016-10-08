@@ -57,7 +57,7 @@ export default class HeadList extends Component {
         const renderRightArrow = () => {
             let rightArrow;
 
-            if (currentPage === Math.ceil(totalItems / itemsOnPage)) {
+            if (currentPage === Math.ceil(totalItems / itemsOnPage) || totalItems === 0) {
                 rightArrow = 
                     <button className="btn" onClick={this.props.pageUp} disabled>
                         <span className="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>

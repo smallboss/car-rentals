@@ -5,12 +5,11 @@ import { ApiCars } from '/imports/api/cars.js'
 import HeadSingle from './HeadSingle.js';
 import { browserHistory } from 'react-router';
 import React, { Component } from 'react';
+import { clone } from 'lodash';
 
 import { carStateTypes } from '/imports/startup/typesList.js';
+import TableOnTab from './TableOnTab.js';
 
-import MaintenanceRow from './MaintenanceRow.js';
-
-import { clone } from 'lodash';
 
 import './carStyle.css'
 
@@ -47,7 +46,7 @@ export default class CarSingle extends Component {
     this.handleSelect = this.handleSelect.bind(this);
     this.onAddNewMaintenance = this.onAddNewMaintenance.bind(this);
     this.onRemoveMaintenance = this.onRemoveMaintenance.bind(this);
-    this.trueDisabledButtomRemove = this.trueDisabledButtomRemove.bind(this);
+    this.onSaveMaintenance = this.onSaveMaintenance.bind(this);
   }
 
 
@@ -143,7 +142,7 @@ export default class CarSingle extends Component {
     else {
       const id = newCar._id;
       delete newCar._id;
-      console.log("UPDATE");
+
       ApiCars.update(id, {$set: newCar});
     }
   }
@@ -159,74 +158,86 @@ export default class CarSingle extends Component {
   }
 
   onAddNewMaintenance() {
-    let newCarData = this.state.car;
+    let newCarData = clone(this.props.car);
 
-    if (!newCarData.maintenance) newCarData.maintenance = new Array();
 
-    const maintenance = {
-      _id: new Mongo.ObjectID()
-    };
+    // if (!newCarData.maintenance) newCarData.maintenance = new Array();
 
-    newCarData.maintenance.push(maintenance);
+    // const maintenance = {
+    //   _id: new Mongo.ObjectID()
+    // };
+
+    // newCarData.maintenance.push(maintenance);
+
+
+    const carId = newCarData._id;
+    delete newCarData._id;
+
+    // ApiCars.update(carId, newCarData);
+
+    newCarData._id = carId;
 
     this.setState({car: newCarData});
   }
 
-  onRemoveMaintenance() {
-
-    // let car = this.state.car;
-
-    let car = clone(this.state.car);
+  onRemoveMaintenance(selectedItems) {
+    let car = clone(this.props.car);
     let maintenance = car.maintenance;
-    this.state.selectedMaintenanceID.map((maintenanceID) => {
+
+    selectedItems.map((delMaintenance) => {
       car.maintenance.map((carMaintenance, key) => {
-        if (carMaintenance._id == maintenanceID) {
-          console.log(maintenance.splice(key, 1))
+        if (carMaintenance._id == delMaintenance) {
+          maintenance.splice(key, 1);
         }
       })
     });
 
-    console.log(maintenance);
-
     car.maintenance = maintenance;
 
-    console.log("this.state.car", this.state.car);
-    console.log("newCarData", car);
 
-    const carId = this.state.car._id;
-
-    // let newCar = this.state.car;
-
-    // if(!newCar.maintenance) newCar.maintenance = new Array();
-
-    // if (this.state.car._id === 'new'){
-    //     newCar._id = new Mongo.ObjectID();
-
-    //     ApiCars.insert(newCar);
-    //     browserHistory.push(`/cars/${newCar._id._str}`);
-    // }
-    // else {
-    // car.splice(car.indexOf('_id'), 1);
+    const carId = car._id;
     delete car._id;
-    console.log("carId", car);
+
     ApiCars.update(carId, car);
 
-
-    // // }
-
     car._id = carId;
-
-    // console.log('NEW MASS:', newMaintenances)
-
-    // newCarData.maintenance = newMaintenances;
 
     this.setState({car, selectedMaintenanceID: []});
   }
 
 
-  handleSelect(e, maintenanceID) {
-    let newSelectedMaintenanceID = this.state.selectedMaintenanceID;
+  onSaveMaintenance(maintenance, selectedItemsID){
+    let newCarData = clone(this.props.car);
 
+
+    newCarData.maintenance.map((carMaintenance, key) => {
+      if (carMaintenance._id == maintenance._id) {
+        newCarData.maintenance[key] = maintenance;
+      }
+    })
+
+
+    const carId = newCarData._id;
+    delete newCarData._id;
+
+    ApiCars.update(carId, newCarData);
+
+    newCarData.maintenance.map((carMaintenance, key) => {
+      if (carMaintenance._id == maintenance._id) {
+        newCarData.maintenance[key] = maintenance;
+      }
+    })
+
+    newCarData._id = carId;
+
+    this.setState({car: newCarData});
+  }
+
+  handleSelect(e, maintenanceID, maintenance) {
+    if (maintenance) {
+      console.log('maintenanceID', maintenanceID)
+    }
+    let newSelectedMaintenanceID = this.state.selectedMaintenanceID;
     const index = newSelectedMaintenanceID.indexOf(maintenanceID)
 
     if (index === -1)
@@ -234,42 +245,20 @@ export default class CarSingle extends Component {
     else
       newSelectedMaintenanceID.splice(index, 1);
 
-    console.log('newSelectedMaintenanceID', newSelectedMaintenanceID)
-
-
     this.setState({selectedMaintenanceID: newSelectedMaintenanceID});
   }
 
 
-  trueDisabledButtomRemove() {
-    this.buttonRemove.disabled = !this.state.selectedMaintenanceID.length
-      ? true
-      : !this.state.editable;
-  }
-
-
   componentDidMount() {
+        // mainteance buttons
+    if (this.buttonEdit) {
+      this.buttonEdit.disabled = false;
+    }
+                    
+
     const isNew = (this.props.car && this.props.car._id === 'new') ? true : false;
 
     this.setState({editable: isNew})
-  }
-
-
-  componentDidUpdate() {
-    // mainteance buttons
-    this.buttonAdd.disabled = !this.state.editable;
-    this.trueDisabledButtomRemove();
-
-    this.inputName.disabled =
-      this.inputPlateNumber.disabled =
-        this.inputStatus.disabled =
-          this.inputProfit.disabled =
-            this.inputFines.disabled =
-              this.inputTolls.disabled =
-                this.inputExpense.disabled =
-                  this.inputIncome.disabled =
-                    this.inputDescription.disabled =
-                      this.inputNotes.disabled = !this.state.editable;
   }
 
 
@@ -299,21 +288,6 @@ export default class CarSingle extends Component {
         maintenance } = this.state.car;
 
       if (!maintenance) maintenance = new Array();
-
-      console.log(maintenance);
-
-      const renderMaintenance = () => {
-        console.log(this.state.car.maintenance);
-        return this.state.car.maintenance.map((item, key) => {
-          return (
-            <MaintenanceRow
-              editable={this.state.editable}
-              maintenance={item}
-              onHandleSelect={this.handleSelect}
-              selectedMaintenanceID={this.state.selectedMaintenanceID}/>
-          )
-        })
-      }
 
 
       const renderTopFields = () => {
@@ -393,48 +367,22 @@ export default class CarSingle extends Component {
             </ul>
             <div className="tab-content">
               <div role="tabpanel" className="tab-pane active" id="description">
-                                <textarea
-                                  ref={ (ref) => this.inputDescription = ref }
-                                  onChange={(e) => this.onChangeDescription(e.target.value)}
-                                  value={description}>
-                                </textarea>
+                <textarea
+                  ref={ (ref) => this.inputDescription = ref }
+                  onChange={(e) => this.onChangeDescription(e.target.value)}
+                  value={description}>
+                </textarea>
               </div>
               <div role="tabpanel" className="tab-pane" id="maintenance">
-                <div>
-                  <button
-                    onClick={this.onAddNewMaintenance}
-                    ref={(ref) => this.buttonAdd = ref}
-                    className='btn btn-primary'>
-                    Add New
-                  </button>
-                  <button
-                    onClick={this.onRemoveMaintenance}
-                    ref={(ref) => this.buttonRemove = ref}
-                    className='btn btn-danger'>
-                    Delete
-                  </button>
-                </div>
-                <table className="table table-bordered table-hover">
-                  <thead>
-                  <tr>
-                    <th><input type="checkbox" disabled/></th>
-                    <th>Job ID</th>
-                    <th>Job Name</th>
-                    <th>Description</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                    <th>Amount</th>
-                    <th>End Date</th>
-                  </tr>
-                  </thead>
 
-                  <tbody>
-                  {
+          { /* ===================== TableOnTab ===================== */} 
 
-                    renderMaintenance()
-                  }
-                  </tbody>
-                </table>
+                <TableOnTab  
+                        maintenanceList={this.state.car.maintenance}
+                        onAddNew={this.onAddNewMaintenance}
+                        onSaveMaintenance={this.onSaveMaintenance}
+                        onRemove={this.onRemoveMaintenance}/>
+
               </div>
               <div role="tabpanel" className="tab-pane" id="fines">
                 <input type="text"
@@ -449,11 +397,11 @@ export default class CarSingle extends Component {
                        ref={ (ref) => this.inputTolls = ref }/>
               </div>
               <div role="tabpanel" className="tab-pane" id="notes">
-                                <textarea
-                                  ref={ (ref) => this.inputNotes = ref }
-                                  onChange={(e) => this.onChangeNotes(e.target.value)}
-                                  value={notes}>
-                                </textarea>
+                <textarea
+                  ref={ (ref) => this.inputNotes = ref }
+                  onChange={(e) => this.onChangeNotes(e.target.value)}
+                  value={notes}>
+                </textarea>
               </div>
               <div role="tabpanel" className="tab-pane" id="totalExpense">
                 <input type="text"
@@ -495,7 +443,6 @@ export default createContainer(({params}) => {
   Meteor.subscribe('cars');
 
   if (params.carId !== 'new') {
-    console.log(params);
     return {
       car: ApiCars.findOne(new Mongo.ObjectID(params.carId))
     }
@@ -507,8 +454,8 @@ export default createContainer(({params}) => {
       name: '',
       status: '',
       profit: 0,
-      planeNumber: ''
-
+      planeNumber: '',
+      maintenance: []
     }
   }
 
