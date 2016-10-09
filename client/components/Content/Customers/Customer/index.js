@@ -9,6 +9,7 @@ import React from 'react'
 import $ from 'jquery'
 import { browserHistory } from 'react-router'
 import { imgToBase64 } from '../../../../helpers/handlerImages'
+import Table from '../Table'
 import './style.css'
 
 class Customer extends React.Component {
@@ -16,10 +17,11 @@ class Customer extends React.Component {
         super(props)
         this.state = {customer: this.props.customer}        
         this.handlerEditCustomer = this.handlerEditCustomer.bind(this)
+        this.handlerChildState = this.handlerChildState.bind(this)
     }
     componentWillMount () {
         let customer = this.props.customer || {}
-        if(!customer._id) {
+        if(customer.length == 0) {
             customer._id = new Mongo.ObjectID()
             customer.role = 'customer'
             customer._new = 1
@@ -118,15 +120,52 @@ class Customer extends React.Component {
                 break
         }
     }
+    handlerChildState(target, data) {
+        let _state = this.state.customer,
+            _id = this.state.customer._id
+        _state[target] = data
+        delete this.state.customer._id
+        console.log(_state)
+        ApiCustomers.update(_id, {$set: _state})        
+    }
     render () {
         console.log(this.state.customer)
-        let { _id, name, userName, address, email, birthDate, phone, role, _images, carRequests, rentals, payments, fines, tolls} = this.state.customer,
+        let { _id, name, userName, address, email, birthDate, phone, role, _images} = this.state.customer || [],
+            carRequests = (this.state.customer.carRequests) ? this.state.customer.carRequests : [
+                {
+                    _id: new Mongo.ObjectID(),
+                    dateCreateRequest: '',
+                    dateFrom: '',
+                    dateTo: '',
+                    requestText: ''
+                }
+            ],
+            rentals = (this.state.customer.rentals) ? this.state.customer.carRequests : [
+                {
+                    _id: new Mongo.ObjectID(),
+                    carId: '',
+                    dateFrom: '',
+                    dateTo: ''
+                }
+            ],
+            payments = (this.state.customer.payments) ? this.state.customer.payments : [
+                {
+                    _id: new Mongo.ObjectID(),
+                    datePayment: '',
+                    statePayment: '',
+                    QuantityPayment: ''
+                }
+            ],
+            { fines } = this.state.customer || '',
+            { tolls } = this.state.customer || '',
             imgId,
             imgLicense
         if (_images) {
             imgId = _images.imgId || ''
             imgLicense = _images.imgLicense || ''             
-        }            
+        }
+        console.log('down is state customer')
+        console.log(this.state.customer)
         return (
             <div className='panel panel-default'>
                 <div className='panel-heading'>
@@ -197,11 +236,31 @@ class Customer extends React.Component {
                                     <input type='file' id='imgLicense' className='form-control' disabled/>
                                 </div>                          
                             </div>
-                            <div id='div_car_request'  className='inner-div-users-edit'>Car requests</div>
-                            <div id='div_rentals' className='inner-div-users-edit'>rentals</div>
-                            <div id='div_payments' className='inner-div-users-edit'>payments</div>
-                            <div id='div_fines' className='inner-div-users-edit'>fines</div>
-                            <div id='div_tolls' className='inner-div-users-edit'>tolls</div>
+                            <div id='div_car_request'  className='inner-div-users-edit'>
+                                <Table arrToTable={carRequests} currentComponent='carRequests' handlerChildState={this.handlerChildState} />
+                            </div>
+                            <div id='div_rentals' className='inner-div-users-edit'>
+                                <Table arrToTable={rentals} currentComponent='rentals' handlerChildState={this.handlerChildState} />
+                            </div>
+                            <div id='div_payments' className='inner-div-users-edit'>
+                                <Table arrToTable={payments} currentComponent='payments' handlerChildState={this.handlerChildState} />
+                            </div>
+                            <div id='div_fines' className='inner-div-users-edit'>
+                                <div className='form-group'>
+                                    <label htmlFor='fines' className='col-xs-2'>Fines</label>
+                                    <div className='col-xs-7'>
+                                        <input type='text' id='fines' className='form-control' value={fines} disabled />
+                                    </div>                                    
+                                </div>                                
+                            </div>
+                            <div id='div_tolls' className='inner-div-users-edit'>
+                                <div className='form-group'>
+                                    <label htmlFor='tolls' className='col-xs-2'>Tolls</label>
+                                    <div className='col-xs-7'>
+                                        <input type='text' id='tolls' className='form-control' value={tolls} disabled />
+                                    </div>                                    
+                                </div>                                
+                            </div>
                         </div>
                     </div>
                 </div>
