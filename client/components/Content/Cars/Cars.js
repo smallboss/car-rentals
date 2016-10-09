@@ -55,8 +55,9 @@ class Cars extends Component {
 
 
   addCar() {
-    browserHistory.push('/cars/new')
-    // ApiCars.insert({_id: new Mongo.ObjectID(), name: 'Subaru', plateNumber: String(Math.random()), status: "avaliable"});
+    const _id = new Mongo.ObjectID();
+    ApiCars.insert({ _id, maintenance: [] });
+    browserHistory.push(`/cars/new${_id}`);
   }
 
 
@@ -114,7 +115,6 @@ class Cars extends Component {
 
 
   handleCarSingleOnClick(carId) {
-    console.log(carId);
     browserHistory.push(`/cars/${carId}`)
     // this.context.router.push(`/cars/${carId}`)
   }
@@ -147,7 +147,8 @@ class Cars extends Component {
           pageDown={this.pageDown}
           onChangeSearchField={this.handleChangeSearchField}
           onAddNew={this.addCar} 
-          onRemoveCars={this.removeCars} />
+          onRemoveCars={this.removeCars}
+          isSelected={this.state.selectedCarsID.length} />
 
         <table className="table table-bordered table-hover">
           <thead>
