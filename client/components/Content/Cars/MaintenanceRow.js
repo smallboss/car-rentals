@@ -97,14 +97,6 @@ export default class MaintenanceRow extends Component {
         const { onHandleSelect } = this.props;
         const { _id, jobName, description, status, date, endDate, amount } = this.state.maintenance;
 
-<<<<<<< HEAD
-
-
-        console.log(jobName, _id);
-=======
-        // console.log(_id);
->>>>>>> fc833039aa9b525d3ae04da0ea4a093c2ed0fc83
-
         return (
             <tr>
                 <th><input type="checkbox" ref={(ref) => this.inputSelect = ref} onChange={(e) => onHandleSelect(e, _id)}/></th>
