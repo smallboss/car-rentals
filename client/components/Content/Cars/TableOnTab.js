@@ -20,6 +20,7 @@ export default class TableOnTab extends Component {
         this.handleSelect = this.handleSelect.bind(this);
         this.onSaveMaintenance = this.onSaveMaintenance.bind(this);
         this.editListEditing = this.editListEditing.bind(this);
+        this.onRemoveMaintenance = this.onRemoveMaintenance.bind(this);
     }   
 
 
@@ -66,9 +67,6 @@ export default class TableOnTab extends Component {
             this.buttonEdit.disabled =
             this.buttonRemove.disabled = !this.state.selectedItems.length;
         }
-
-
-        console.log('this.state.selectedItems', this.state.selectedItems)
     }
 
 
@@ -82,6 +80,7 @@ export default class TableOnTab extends Component {
     onSaveMaintenance(maintenance){
         let newSelMaintenanceList = clone(this.state.selectedItems)
 
+
         newSelMaintenanceList.map((el, key) => {
             if (el._id == maintenance._id) {
                 newSelMaintenanceList.splice(key, 1);
@@ -89,11 +88,8 @@ export default class TableOnTab extends Component {
         })
 
 
-        const selectedItemsID = clone(this.state.selectedItemsID)
-
+        const selectedItemsID = clone(this.state.selectedItemsID);
         this.props.onSaveMaintenance(maintenance, selectedItemsID);
-
-        console.log('newSelMaintenanceList', newSelMaintenanceList)
 
         this.setState({selectedItems: newSelMaintenanceList});
     }
@@ -120,7 +116,10 @@ export default class TableOnTab extends Component {
         this.setState({selectedItems: newSelectedItems});
     }
 
-
+    onRemoveMaintenance(){
+        this.props.onRemove(clone(this.state.selectedItems));
+        this.setState({selectedItems: []});
+    }
 
 
     render(){
@@ -142,7 +141,7 @@ export default class TableOnTab extends Component {
                     Edit
                   </button>
                   <button
-                    onClick={() => this.props.onRemove(selectedItems)}
+                    onClick={this.onRemoveMaintenance}
                     ref={(ref) => this.buttonRemove = ref}
                     className='btn btn-danger'>
                     Delete
@@ -163,7 +162,8 @@ export default class TableOnTab extends Component {
                   </thead>
 
                   <tbody>
-                  {
+                  { 
+
                     this.props.maintenanceList.map((item, key) => {
                         
                         let isInEditList = false;
@@ -173,7 +173,6 @@ export default class TableOnTab extends Component {
                             if (el._id == item._id) {
                                 isInEditList = true;
                                 index = key;
-                                console.log('isInEditList', item._id)
                             }
                         })
 

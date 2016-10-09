@@ -38,7 +38,7 @@ export default class HeadList extends Component {
         const renderLeftArrow = () => {
             let leftArrow;
 
-            if (currentPage === 1) {
+            if (currentPage === 1 || this.props.isSelected) {
                 leftArrow = 
                     <button className="btn" onClick={this.props.pageDown} disabled>
                         <span className="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
@@ -57,7 +57,7 @@ export default class HeadList extends Component {
         const renderRightArrow = () => {
             let rightArrow;
 
-            if (currentPage === Math.ceil(totalItems / itemsOnPage) || totalItems === 0) {
+            if (currentPage === Math.ceil(totalItems / itemsOnPage) || totalItems === 0 || this.props.isSelected) {
                 rightArrow = 
                     <button className="btn" onClick={this.props.pageUp} disabled>
                         <span className="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
