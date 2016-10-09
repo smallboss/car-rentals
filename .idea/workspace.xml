@@ -415,7 +415,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="15" column="0" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
->>>>>>> origin
+
           <folding />
         </state>
       </provider>
@@ -509,13 +509,13 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-<<<<<<< HEAD
+
           <folding>
             <marker date="1475865983207" expanded="true" signature="-1:-1" placeholder="&lt;xml/&gt;" />
           </folding>
-=======
+
           <folding />
->>>>>>> origin
+
         </state>
       </provider>
     </entry>
@@ -615,13 +615,13 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="60">
           <caret line="4" column="12" selection-start-line="4" selection-start-column="12" selection-end-line="4" selection-end-column="12" />
-<<<<<<< HEAD
+
           <folding>
             <marker date="1475865983207" expanded="true" signature="-1:-1" placeholder="&lt;xml/&gt;" />
           </folding>
-=======
+
           <folding />
->>>>>>> origin
+
         </state>
       </provider>
     </entry>
@@ -661,13 +661,13 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="150">
           <caret line="10" column="1" selection-start-line="10" selection-start-column="1" selection-end-line="10" selection-end-column="1" />
-<<<<<<< HEAD
+
           <folding>
             <marker date="1475865983202" expanded="true" signature="126:171" placeholder="&lt;xml/&gt;" />
           </folding>
-=======
+
           <folding />
->>>>>>> origin
+
         </state>
       </provider>
     </entry>
@@ -699,7 +699,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/client/components/Content/Cars/Cars.js">
       <provider selected="true" editor-type-id="text-editor">
-<<<<<<< HEAD
+
         <state vertical-scroll-proportion="0.0">
           <caret line="16" column="0" selection-start-line="16" selection-start-column="0" selection-end-line="16" selection-end-column="0" />
           <folding>
@@ -711,11 +711,11 @@
             <marker date="1475865983075" expanded="true" signature="4292:4472" placeholder="&lt;xml/&gt;" />
             <marker date="1475865983075" expanded="true" signature="4503:4555" placeholder="&lt;xml/&gt;" />
           </folding>
-=======
+
         <state relative-caret-position="90">
           <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
           <folding />
->>>>>>> origin
+
         </state>
       </provider>
     </entry>
