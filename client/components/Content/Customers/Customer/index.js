@@ -73,8 +73,8 @@ class Customer extends React.Component {
                                 _images = this.state.customer._images || {},
                                 _newFile,
                                 _newCustomer
-                            if(file.size > 110000) {
-                                alert('Please upload image less than 100kb')
+                            if(file.size > 1100000) {
+                                alert('Please upload image less than 1mb')
                                 eFile.preventDefault()
                                 return false
                             }
