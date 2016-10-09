@@ -41,22 +41,14 @@ Router.refresh = function () {
 export const renderRoutes = () => (
   <Router history={browserHistory}>
     <Route path="/" component={routerComponent}>
-<<<<<<< HEAD
       <IndexRoute component={App} />
+      <Route path="registration" component={Registration}/>
       <Route path="cars" component={Cars}/>
       <Route path="cars/:carId" component={CarSingle} />
-      
-      <Route path="customers" component={Customers}/>
-      <Route path="*" component={NotFoundPage}/>
-=======
-        <IndexRoute component={App} />
-        <Route path="registration" component={Registration}/>
-        <Route path="cars" component={Cars}/>
-        <Route path="customers" component={Customers} />
-        <Route path="customers_list" component={CustomersList} />
-        <Route path='customer/:id' component={Customer} />
-        <Route path="*" component={NotFoundPage}/>
->>>>>>> origin
+  <Route path="customers" component={Customers} />
+  <Route path="customers_list" component={CustomersList} />
+  <Route path='customer/:id' component={Customer} />
+  <Route path="*" component={NotFoundPage}/>
     </Route>
   </Router>
 );

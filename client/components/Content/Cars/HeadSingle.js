@@ -7,11 +7,12 @@ export default class HeadSingle extends Component {
 
     render(){
         return (
-            <div className="HeadSingle">
+            <div className="panel-heading HeadSingle">
                 <div className="buttonBox">
-                    <button type="button" className="btn btn-success" onClick={this.props.onSave}>Save</button>
-                    <button type="button" className="btn btn-warning" onClick={this.props.onEdit}>Edit</button>
-                    <button type="button" className="btn btn-danger" onClick={this.props.onDelete}>Delete</button>
+                    <h3 class="text-primary">Single-car</h3>
+                    <button type="button" className="btn btn-primary p-x-1 m-x-1" onClick={this.props.onSave}>Save</button>
+                    <button type="button" className="btn btn-primary p-x-1 m-x-1" onClick={this.props.onEdit}>Edit</button>
+                    <button type="button" className="btn btn-primary p-x-1 m-x-1" onClick={this.props.onDelete}>Delete</button>
                 </div>
             </div>
         )

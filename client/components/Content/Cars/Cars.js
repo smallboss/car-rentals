@@ -164,20 +164,21 @@ class Cars extends Component {
            {renderCars()}
           </tbody>
         </table>
+
       </div>
     )
   }
 }
 
-<<<<<<< HEAD
-//Îáúÿâëÿéòå îáÿçàòåëüíî òèïû props
-=======
-//���������� ����������� ���� props
->>>>>>> origin
+
+
+
+
+
+
 Cars.propTypes = {
   cars: PropTypes.array.isRequired,
 };
-
 
 
 Cars.contextTypes = {

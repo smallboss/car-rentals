@@ -13,3 +13,20 @@
     float: right;
     margin-top: 5px;
 }
+
+.right-headList {
+    margin-top: 55px;
+}
+
+.topFields {
+    margin: 20px 0;
+}
+
+.navBox {
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
+#description {
+    margin: 20px 0;
+}

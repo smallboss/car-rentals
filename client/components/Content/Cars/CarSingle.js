@@ -21,8 +21,8 @@ export default class CarSingle extends Component {
     this.state = {
       car: clone(this.props.car),
       dispCar: clone(this.props.car),
-      isNew:this.props.isNew,
-      
+      isNew: this.props.isNew,
+
       selectedMaintenanceID: [],
       editable: this.props.isNew
     }
@@ -153,7 +153,6 @@ export default class CarSingle extends Component {
     delete newCar._id;
 
 
-
     ApiCars.update(id, {$set: newCar});
 
     newCar_id = id;
@@ -161,7 +160,7 @@ export default class CarSingle extends Component {
 
     this.setState({car: newCar, dispCar: newCar, editable: false});
 
-    console.log('this.state.isNew',this.state.isNew)
+    console.log('this.state.isNew', this.state.isNew)
 
     // if (this.state.isNew)
     //   browserHistory.push(`/cars/${id._str}`);
@@ -225,7 +224,7 @@ export default class CarSingle extends Component {
   }
 
 
-  onSaveMaintenance(maintenance, selectedItemsID){
+  onSaveMaintenance(maintenance, selectedItemsID) {
     let newCarData = clone(this.props.car);
 
 
@@ -305,83 +304,91 @@ export default class CarSingle extends Component {
           <div className="topFields">
             <div className="row">
               <div className="form-group name col-xs-6">
-                <label htmlFor="carName">Name</label>
+                <label htmlFor="carName" className='col-xs-2'>Name</label>
                 {(() => {
-                  if(this.state.editable){
+                  if (this.state.editable) {
                     return (
-                      <input
-                        type="text"
-                        id="carName"
-                        className="form-control"
-                        onChange={(e) => this.onChangeName(e.target.value)}
-                        value={ this.state.dispCar.name }/>
-                      )
-                  } 
+                      <div className='col-xs-8 form-horizontal'>
+                        <input
+                          type="text"
+                          id="carName"
+                          className="form-control "
+                          onChange={(e) => this.onChangeName(e.target.value)}
+                          value={ this.state.dispCar.name }/>
+                      </div>
+                    )
+                  }
 
-                  return <div>{name}</div>
+                  return <div className='col-xs-8'>{name}</div>
                 })()}
               </div>
 
               <div className="form-group status col-xs-6">
-                <label htmlFor="carStatus">Status</label>
+                <label htmlFor="carStatus" className='col-xs-2'>Status</label>
                 {(() => {
-                  if(this.state.editable){
+                  if (this.state.editable) {
                     return (
-                      <select onChange={(e) => this.onChangeStatus(e.target.value)}>
-                        <option value={this.state.dispCar.status}>{this.state.dispCar.status}</option>
-                        {
-                          carStateTypes.map((el, key) => {
-                              if (el !== status) {
-                                return (
-                                  <option key={key} value={el}>{el}</option>
-                                )
+                      <div className='col-xs-8 form-horizontal'>
+                        <select className=' form-control' onChange={(e) => this.onChangeStatus(e.target.value)}>
+                          <option className='' value={this.state.dispCar.status}>{this.state.dispCar.status}</option>
+                          {
+                            carStateTypes.map((el, key) => {
+                                if (el !== status) {
+                                  return (
+                                    <option key={key} value={el}>{el}</option>
+                                  )
+                                }
+                                return undefined;
                               }
-                              return undefined;
-                            }
-                          )}
-                      </select>
+                            )}
+                        </select>
+                      </div>
                     )
-                  } 
+                  }
 
-                  return <div>{status}</div>
+                  return <div className='col-xs-8'>{status}</div>
                 })()}
               </div>
             </div>
 
             <div className="row">
               <div className="form-group plateNumber col-xs-6">
-                <label htmlFor="carPlateNumber">Plate#</label>
-                 {(() => {
-                  if(this.state.editable){
+                <label htmlFor="carPlateNumber" className='col-xs-2'>Plate#</label>
+                {(() => {
+                  if (this.state.editable) {
                     return (
-                      <input
-                        type="text"
-                        id="carPlateNumber"
-                        className="form-control"
-                        onChange={(e) => this.onChangePlateNumber(e.target.value)}
-                        value={ this.state.dispCar.plateNumber }/>
+                      <div className='col-xs-8 form-horizontal'>
+                        <input
+                          type="text"
+                          id="carPlateNumber"
+                          className="form-control "
+                          onChange={(e) => this.onChangePlateNumber(e.target.value)}
+                          value={ this.state.dispCar.plateNumber }/>
+                      </div>
                     )
-                  } 
+                  }
 
-                  return <div>{plateNumber}</div>
+                  return <div className='col-xs-8'>{plateNumber}</div>
                 })()}
               </div>
 
               <div className="form-group profit col-xs-6">
-                <label htmlFor="carprofit">Profit</label>
-                  {(() => {
-                  if(this.state.editable){
+                <label htmlFor="carprofit" className='col-xs-2'>Profit</label>
+                {(() => {
+                  if (this.state.editable) {
                     return (
-                      <input
-                        type="text"
-                        id="carProfit"
-                        className="form-control"
-                        onChange={(e) => this.onChangeProfit(e.target.value)}
-                        value={ this.state.dispCar.profit }/>
+                      <div className=' col-xs-8 form-horizontal'>
+                        <input
+                          type="text"
+                          id="carProfit"
+                          className="form-control "
+                          onChange={(e) => this.onChangeProfit(e.target.value)}
+                          value={ this.state.dispCar.profit }/>
+                      </div>
                     )
-                  } 
+                  }
 
-                  return <div>{profit}</div>
+                  return <div className='col-xs-8'>{profit}</div>
                 })()}
               </div>
             </div>
@@ -405,94 +412,100 @@ export default class CarSingle extends Component {
               <li><a href="#totalIncome" aria-controls="settings" role="tab" data-toggle="tab">Total income</a></li>
             </ul>
             <div className="tab-content">
-              <div role="tabpanel" className="tab-pane active" id="description">
+              <div role="tabpanel" className="tab-pane p-x-1 active" id="description">
                 {(() => {
-                  if(this.state.editable){
+                  if (this.state.editable) {
                     return (
                       <textarea
+                        className='form-control'
                         onChange={(e) => this.onChangeDescription(e.target.value)}
                         value={this.state.dispCar.description}>
                       </textarea>
                     )
-                  } 
+                  }
 
-                  return <div>{description}</div>
+                  return <textarea className="form-control" rows="3" disabled>{description}</textarea>
                 })()}
               </div>
               <div role="tabpanel" className="tab-pane" id="maintenance">
 
-          { /* ===================== TableOnTab ===================== */} 
+                { /* ===================== TableOnTab ===================== */}
 
-                <TableOnTab  
-                        maintenanceList={this.state.car.maintenance}
-                        onAddNew={this.onAddNewMaintenance}
-                        onSaveMaintenance={this.onSaveMaintenance}
-                        onRemove={this.onRemoveMaintenance}/>
+                <TableOnTab
+                  maintenanceList={this.state.car.maintenance}
+                  onAddNew={this.onAddNewMaintenance}
+                  onSaveMaintenance={this.onSaveMaintenance}
+                  onRemove={this.onRemoveMaintenance}/>
 
               </div>
               <div role="tabpanel" className="tab-pane" id="fines">
                 {(() => {
-                  if(this.state.editable){
+                  if (this.state.editable) {
                     return (
                       <input type="text"
+                             className='form-control'
                              onChange={(e) => this.onChangeFines(e.target.value)}
                              value={ this.state.dispCar.fines }/>
                     )
-                  } 
+                  }
 
                   return <div>{fines}</div>
                 })()}
               </div>
               <div role="tabpanel" className="tab-pane" id="tolls">
                 {(() => {
-                  if(this.state.editable){
+                  if (this.state.editable) {
                     return (
                       <input type="text"
+                             className='form-control'
                              onChange={(e) => this.onChangeTolls(e.target.value)}
-                             value={ this.state.dispCar.tolls } />
+                             value={ this.state.dispCar.tolls }/>
                     )
-                  } 
+                  }
 
                   return <div>{tolls}</div>
                 })()}
               </div>
               <div role="tabpanel" className="tab-pane" id="notes">
                 {(() => {
-                  if(this.state.editable){
+                  if (this.state.editable) {
                     return (
                       <textarea
+                        className='form-control'
                         ref={ (ref) => this.inputNotes = ref }
                         onChange={(e) => this.onChangeNotes(e.target.value)}
                         value={this.state.dispCar.notes}>
                       </textarea>
                     )
-                  } 
+                  }
 
                   return <div>{notes}</div>
                 })()}
               </div>
               <div role="tabpanel" className="tab-pane" id="totalExpense">
                 {(() => {
-                  if(this.state.editable){
+                  if (this.state.editable) {
                     return (
                       <input type="text"
+                             className='form-control'
                              onChange={(e) => this.onChangeExpense(e.target.value)}
                              value={ this.state.dispCar.totalExpense }/>
                     )
-                  } 
+                  }
 
                   return <div>{totalExpense}</div>
                 })()}
               </div>
               <div role="tabpanel" className="tab-pane" id="totalIncome">
                 {(() => {
-                  if(this.state.editable){
+                  if (this.state.editable) {
                     return (
                       <input type="text"
-                        onChange={(e) => this.onChangeIncome(e.target.value)}
-                        value={ this.state.dispCar.totalIncome }/>
+                             className='form-control'
+                             onChange={(e) => this.onChangeIncome(e.target.value)}
+                             value={ this.state.dispCar.totalIncome }/>
                     )
-                  } 
+                  }
 
                   return <div>{totalIncome}</div>
                 })()}
@@ -504,13 +517,14 @@ export default class CarSingle extends Component {
 
 
       return (
-        <div className="CarSingle container">
+        <div className="CarSingle panel panel-default">
 
           { renderHeadSingle() }
+          <div className='panel-body'>
+            { renderTopFields() }
 
-          { renderTopFields() }
-
-          { renderTabs() }
+            { renderTabs() }
+          </div>
 
         </div>
       )
