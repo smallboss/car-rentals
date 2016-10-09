@@ -184,7 +184,7 @@ export default class TableOnTab extends Component {
                         const pasteMaintenance = isInEditList ? clone(selectedItems[index]) 
                                                               : clone(item);
 
-                      return (
+                        return (
                             <MaintenanceRow
                                 key={`maintenance-${key}`}
                                 editable={isEditable}
@@ -193,7 +193,7 @@ export default class TableOnTab extends Component {
                                 onHandleSelect={this.handleSelect}
                                 selectedMaintenance={selectedItems}
                                 onEditingField={this.editListEditing}/>
-                      )
+                        )
                     })
                   }
                   </tbody>

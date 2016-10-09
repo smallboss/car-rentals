@@ -110,10 +110,8 @@ export default class CarSingle extends Component {
 
 
   componentWillReceiveProps(nextProps) {
-    console.log('nextProps', nextProps)
-    console.log('this.state.car', this.state.car)
-    console.log('this.state.dispcar', this.state.dispCar)
     let c = nextProps.car;
+
     if (this.state.car) {
       if (this.state.editable) {
         c.name = clone(this.state.car.name);
@@ -160,8 +158,6 @@ export default class CarSingle extends Component {
 
 
     this.setState({car: newCar, dispCar: newCar, editable: false});
-
-    console.log('this.state.isNew',this.state.isNew)
 
     // if (this.state.isNew)
     //   browserHistory.push(`/cars/${id._str}`);
