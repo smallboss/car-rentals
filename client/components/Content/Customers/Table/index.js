@@ -18,7 +18,7 @@ class Table extends React.Component {
         let arrToTable = this.props.arrToTable
         this.state = {arrToTable, editAble: 0, addNewField: 0, arrToDelete: []}
         this.handlerEditButtons = this.handlerEditButtons.bind(this)
-        this.handlerChecker = this.handlerChecker.bind(this)
+        this.handlerChecker = this.handlerChecker.bind(this)        
     }
     componentDidMount(){
         let _buttons = this._r_buttonArea.children
@@ -101,6 +101,7 @@ class Table extends React.Component {
     }
     render () {
         console.log(this.state)
+        let classNameNewField = (!this.state.addNewField) ? 'hidden' : ''
         let _stateToTh = Object.keys(this.state.arrToTable[0], key => obj[key])
         return (
             <div>
@@ -129,7 +130,8 @@ class Table extends React.Component {
                     <tbody>
                         {this.state.arrToTable.map((elem, i) => {
                             let _stateToTd = Object.keys(this.state.arrToTable[i], key => elem[key])
-                            if(this.state.arrToTable[0][_stateToTh[1]].length > 0 && _stateToTd.length > 0) {
+                            //if(this.state.arrToTable[0][_stateToTh[1]].length > 0 && _stateToTd.length > 0) {
+                            if(elem[_stateToTd[1]].toString().length > 0) {
                                 return (
                                     <tr key={Math.random()}>
                                         <td><input type='checkbox' id={elem._id._str} onChange={this.handlerChecker} /></td>
@@ -152,24 +154,20 @@ class Table extends React.Component {
                                             }                                            
                                         })}
                                     </tr>
-                                )
-                            //} else if(_stateToTd.length == 0 || this.state.addNewField) {
-                            } else if(_stateToTd.length == 0 || this.state.addNewField) {
-                                return (
-                                    <tr key={Math.random()} ref={ref => this._r_addNewField = ref}>
-                                        <td>#</td>
-                                        <td><input type='button' className='btn btn-success' name='save_notes' value='Save' onClick={this.handlerEditButtons} /></td>
-                                        {_stateToTh.map(prop => {
-                                            if(prop !== '_id'){
-                                                return (
-                                                    <td key={Math.random()}><input type='text' id={prop} className='form-control' placeholder='Input new value' /></td>
-                                                )   
-                                            }                                            
-                                        }) }
-                                    </tr>
-                                )
-                            }                            
+                                )                            
+                            }
                         })}
+                        <tr key={Math.random()} className={classNameNewField} ref={ref => this._r_addNewField = ref}>
+                            <td>#</td>
+                            <td><input type='button' className='btn btn-success' name='save_notes' value='Save' onClick={this.handlerEditButtons} /></td>
+                            {_stateToTh.map(prop => {
+                                if(prop != '_id') {
+                                    return (
+                                        <td key={Math.random()}><input type='text' id={prop} className='form-control' placeholder='Input new value' /></td>
+                                    )
+                                }
+                            }) }
+                        </tr>
                     </tbody>
                 </table>
             </div>
