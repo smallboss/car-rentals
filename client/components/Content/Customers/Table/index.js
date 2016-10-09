@@ -4,14 +4,6 @@
 import React from 'react'
 import { Mongo } from 'meteor/mongo'
 
-function propsNameToHtml (obj) {
-    let result = ''
-    for (let val in obj) {
-        result += '<th>' + val + '</th>'
-    }
-    return result
-}
-
 class Table extends React.Component {
     constructor (props) {
         super(props)
@@ -19,6 +11,7 @@ class Table extends React.Component {
         this.state = {arrToTable, editAble: 0, addNewField: 0, arrToDelete: []}
         this.handlerEditButtons = this.handlerEditButtons.bind(this)
         this.handlerChecker = this.handlerChecker.bind(this)
+        this.handlerInputs = this.handlerInputs.bind(this)
     }
     componentDidMount(){
         let _buttons = this._r_buttonArea.children
@@ -27,7 +20,7 @@ class Table extends React.Component {
         })
     }
     shouldComponentUpdate (nextProps, nextState) {
-        let _check = (nextState.arrToDelete.length > 0 ) ? 0 : 1
+        let _check = (nextState.arrToDelete.length > 0 || this.state.editAble) ? 0 : 1
         return _check
     }
     handlerEditButtons (e) {
@@ -65,7 +58,7 @@ class Table extends React.Component {
                 currentArray = this.state.arrToTable
                 _source = this._r_addNewField.children
                 _arrNew = Object.keys(_source)
-                if(_source[2].childNodes[0].value.length == 0 || _source[3].childNodes[0].value.length == 0 || _source[4].childNodes[0].value.length == 0){
+                if(this.state.addNewField && (_source[2].childNodes[0].value.length == 0 || _source[3].childNodes[0].value.length == 0 || _source[4].childNodes[0].value.length == 0)){
                     alert('Fields must be contained')
                     return false
                 }
@@ -79,7 +72,7 @@ class Table extends React.Component {
                 objToAdd._id = new Mongo.ObjectID()
                 currentArray.unshift(objToAdd)
                 this.props.handlerChildState(this.props.currentComponent, currentArray)
-                this.setState({arrToTable: currentArray, addNewField: 0})
+                this.setState({arrToTable: currentArray, addNewField: 0, editAble: 0})
                 break
             default:
                 break
@@ -99,8 +92,21 @@ class Table extends React.Component {
         }
         this.setState({arrToDelete: curArrToDel})
     }
+    handlerInputs (target, e) {
+        let _id = target,
+            _name = e.target.name,
+            _value = e.target.value,
+            _curArr = this.state.arrToTable
+        _curArr.forEach(elem => {
+            if(elem._id._str == _id){
+                elem[_name] = _value
+            }
+        })
+        this.setState({arrToTable: _curArr})
+    }
     render () {
         console.log(this.state)
+        let classNameNewField = (!this.state.addNewField) ? 'hidden' : ''
         let _stateToTh = Object.keys(this.state.arrToTable[0], key => obj[key])
         return (
             <div>
@@ -129,7 +135,7 @@ class Table extends React.Component {
                     <tbody>
                         {this.state.arrToTable.map((elem, i) => {
                             let _stateToTd = Object.keys(this.state.arrToTable[i], key => elem[key])
-                            if(this.state.arrToTable[0][_stateToTh[1]].length > 0 && _stateToTd.length > 0) {
+                            if(elem[_stateToTd[1]].toString().length > 0) {
                                 return (
                                     <tr key={Math.random()}>
                                         <td><input type='checkbox' id={elem._id._str} onChange={this.handlerChecker} /></td>
@@ -139,7 +145,7 @@ class Table extends React.Component {
                                                 if(this.state.editAble) {
                                                     return (
                                                         <td key={Math.random()}>
-                                                            <input type='text' className='form-control' defaultValue={elem[val]} />
+                                                            <input type='text' className='form-control' name={val} defaultValue={elem[val]} onChange={(e) => {this.handlerInputs(elem._id._str, e)}} />
                                                         </td>
                                                     )   
                                                 } else {
@@ -152,24 +158,20 @@ class Table extends React.Component {
                                             }                                            
                                         })}
                                     </tr>
-                                )
-                            //} else if(_stateToTd.length == 0 || this.state.addNewField) {
-                            } else if(_stateToTd.length == 0 || this.state.addNewField) {
-                                return (
-                                    <tr key={Math.random()} ref={ref => this._r_addNewField = ref}>
-                                        <td>#</td>
-                                        <td><input type='button' className='btn btn-success' name='save_notes' value='Save' onClick={this.handlerEditButtons} /></td>
-                                        {_stateToTh.map(prop => {
-                                            if(prop !== '_id'){
-                                                return (
-                                                    <td key={Math.random()}><input type='text' id={prop} className='form-control' placeholder='Input new value' /></td>
-                                                )   
-                                            }                                            
-                                        }) }
-                                    </tr>
-                                )
-                            }                            
+                                )                            
+                            }
                         })}
+                        <tr key={Math.random()} className={classNameNewField} ref={ref => this._r_addNewField = ref}>
+                            <td>#</td>
+                            <td><input type='button' className='btn btn-success' name='save_notes' value='Save' onClick={this.handlerEditButtons} /></td>
+                            {_stateToTh.map(prop => {
+                                if(prop != '_id') {
+                                    return (
+                                        <td key={Math.random()}><input type='text' id={prop} className='form-control' placeholder='Input new value' /></td>
+                                    )
+                                }
+                            }) }
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -178,3 +180,5 @@ class Table extends React.Component {
 }
 
 export default Table
+
+//if(this.state.arrToTable[0][_stateToTh[1]].length > 0 && _stateToTd.length > 0) {

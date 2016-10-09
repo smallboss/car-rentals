@@ -73,8 +73,8 @@ class Customer extends React.Component {
                                 _images = this.state.customer._images || {},
                                 _newFile,
                                 _newCustomer
-                            if(file.size > 110000) {
-                                alert('Please upload image less than 100kb')
+                            if(file.size > 1100000) {
+                                alert('Please upload image less than 1mb')
                                 eFile.preventDefault()
                                 return false
                             }
@@ -131,7 +131,7 @@ class Customer extends React.Component {
     render () {
         console.log(this.state.customer)
         let { _id, name, userName, address, email, birthDate, phone, role, _images} = this.state.customer || [],
-            carRequests = (this.state.customer.carRequests) ? this.state.customer.carRequests : [
+            carRequest = (this.state.customer.carRequest) ? this.state.customer.carRequest : [
                 {
                     _id: new Mongo.ObjectID(),
                     dateCreateRequest: '',
@@ -140,7 +140,7 @@ class Customer extends React.Component {
                     requestText: ''
                 }
             ],
-            rentals = (this.state.customer.rentals) ? this.state.customer.carRequests : [
+            rentals = (this.state.customer.rentals) ? this.state.customer.rentals : [
                 {
                     _id: new Mongo.ObjectID(),
                     carId: '',
@@ -237,7 +237,7 @@ class Customer extends React.Component {
                                 </div>                          
                             </div>
                             <div id='div_car_request'  className='inner-div-users-edit'>
-                                <Table arrToTable={carRequests} currentComponent='carRequests' handlerChildState={this.handlerChildState} />
+                                <Table arrToTable={carRequest} currentComponent='carRequest' handlerChildState={this.handlerChildState} />
                             </div>
                             <div id='div_rentals' className='inner-div-users-edit'>
                                 <Table arrToTable={rentals} currentComponent='rentals' handlerChildState={this.handlerChildState} />

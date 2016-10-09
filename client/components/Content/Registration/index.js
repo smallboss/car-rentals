@@ -34,8 +34,8 @@ class Registration extends React.Component {
             _images
         let fileId = _target[8].files[0],
             fileLicense = _target[9].files[0]
-        if(fileId.size > 110000 || fileLicense.size > 110000) {
-            alert('Please upload image less than 100kb')
+        if(fileId.size > 1100000 || fileLicense.size > 1100000) {
+            alert('Please upload image less than 1mb')
             e.preventDefault()
             return false
         }
