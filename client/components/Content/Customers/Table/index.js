@@ -7,11 +7,14 @@ import { Mongo } from 'meteor/mongo'
 class Table extends React.Component {
     constructor (props) {
         super(props)
-        let arrToTable = this.props.arrToTable
+        let arrToTable = props.arrToTable
         this.state = {arrToTable, editAble: 0, addNewField: 0, arrToDelete: []}
         this.handlerEditButtons = this.handlerEditButtons.bind(this)
         this.handlerChecker = this.handlerChecker.bind(this)
         this.handlerInputs = this.handlerInputs.bind(this)
+    }
+    componentWillReceiveProps(nextProps){
+        this.setState({arrToTable: nextProps.arrToTable})
     }
     componentDidMount(){
         let _buttons = this._r_buttonArea.children
@@ -113,10 +116,7 @@ class Table extends React.Component {
                 <div className='row' ref={ref => {this._r_buttonArea = ref}}>
                     <input type='button' name='remove_notes' className='btn btn-danger' value='Remove notes' />
                     <input type='button' name='add_note' className='btn btn-success m-x-1 vis' value='Add note' />
-                    <div className='pull-right'>
-                        <input type='button' name='edit_notes' className='btn btn-primary m-x-1' value='Edit notes' />
-                        <input type='button' name='save_notes' className='btn btn-primary m-x-1' value='Save notes' />
-                    </div>
+                    <input type='button' name='edit_notes' className='btn btn-primary m-x-1' value='Edit notes' />
                 </div>                
                 <table className='table table-hover table-bordered m-y-1'>
                     <thead>
@@ -133,6 +133,17 @@ class Table extends React.Component {
                         </tr>
                     </thead>
                     <tbody>
+                    <tr key={Math.random()} className={classNameNewField} ref={ref => this._r_addNewField = ref}>
+                        <td>#</td>
+                        <td><input type='button' className='btn btn-success' name='save_notes' value='Save' onClick={this.handlerEditButtons} /></td>
+                        {_stateToTh.map(prop => {
+                            if(prop != '_id') {
+                                return (
+                                    <td key={Math.random()}><input type='text' id={prop} className='form-control' placeholder='Input new value' /></td>
+                                )
+                            }
+                        }) }
+                    </tr>
                         {this.state.arrToTable.map((elem, i) => {
                             let _stateToTd = Object.keys(this.state.arrToTable[i], key => elem[key])
                             if(elem[_stateToTd[1]].toString().length > 0) {
@@ -160,18 +171,7 @@ class Table extends React.Component {
                                     </tr>
                                 )                            
                             }
-                        })}
-                        <tr key={Math.random()} className={classNameNewField} ref={ref => this._r_addNewField = ref}>
-                            <td>#</td>
-                            <td><input type='button' className='btn btn-success' name='save_notes' value='Save' onClick={this.handlerEditButtons} /></td>
-                            {_stateToTh.map(prop => {
-                                if(prop != '_id') {
-                                    return (
-                                        <td key={Math.random()}><input type='text' id={prop} className='form-control' placeholder='Input new value' /></td>
-                                    )
-                                }
-                            }) }
-                        </tr>
+                        })}                        
                     </tbody>
                 </table>
             </div>
