@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import { clone, map, find } from 'lodash';
+import { clone, map, reverse, cloneDeep } from 'lodash';
 
 import MaintenanceRow from './MaintenanceRow.js';
 
@@ -10,12 +10,11 @@ export default class TableOnTab extends Component {
 
 
         this.state = {
+            maintenanceList: reverse(clone(this.props.maintenanceList)),
             selectedItems: [],
             allowEdit: false
         }
 
-
-        this.onAddNew = this.onAddNew.bind(this);
         this.onEdit = this.onEdit.bind(this);
         this.handleSelect = this.handleSelect.bind(this);
         this.onSaveMaintenance = this.onSaveMaintenance.bind(this);
@@ -50,10 +49,31 @@ export default class TableOnTab extends Component {
         this.setState({selectedItems: newSelectedMaintenance, allowEdit});
     }
 
+    componentWillReceiveProps(nextProps){
+        let newSelectedItems = clone(this.state.selectedItems);
+        let newAllowEdit = this.state.allowEdit;
 
-    onAddNew(){
+        if (this.state.maintenanceList.length+1 == nextProps.maintenanceList.length) {
+            console.log('ADD')
+            newSelectedItems.push(clone(nextProps.maintenanceList[nextProps.maintenanceList.length-1]));
+            newAllowEdit = true;
+        }
 
+        console.log('newSelectedItems',newSelectedItems)
+
+        this.setState({
+            maintenanceList: reverse(clone(nextProps.maintenanceList)),
+            selectedItems: newSelectedItems,
+            allowEdit: newAllowEdit
+        })
     }
+
+
+    componentWillUpdate(nextState){
+        console.log('nextState', nextState)
+        console.log('this.state.selectedItems', this.state.selectedItems)
+    }
+
 
 
     onEdit(){
@@ -117,13 +137,18 @@ export default class TableOnTab extends Component {
     }
 
     onRemoveMaintenance(){
-        this.props.onRemove(clone(this.state.selectedItems));
+        console.log('DEL')
+        const t = clone(this.state.selectedItems);
+        this.props.onRemove(t);
+        console.log('DEL1')
         this.setState({selectedItems: []});
     }
 
 
     render(){
-        const { selectedItems } = this.state;
+        const { selectedItems, allowEdit } = this.state;
+
+        console.log('allowEdit', allowEdit);
 
         return (
             <div className="TableOnTab">
@@ -164,7 +189,7 @@ export default class TableOnTab extends Component {
                   <tbody>
                   { 
 
-                    this.props.maintenanceList.map((item, key) => {
+                    this.state.maintenanceList.map((item, key) => {
                         
                         let isInEditList = false;
                         let index = -1;
@@ -175,6 +200,8 @@ export default class TableOnTab extends Component {
                                 index = key;
                             }
                         })
+
+                        console.log('item', item)
 
 
                         const isEditable = (isInEditList && this.state.allowEdit) 
@@ -192,7 +219,8 @@ export default class TableOnTab extends Component {
                                 onSave={(maintenance) => this.onSaveMaintenance(maintenance)}
                                 onHandleSelect={this.handleSelect}
                                 selectedMaintenance={selectedItems}
-                                onEditingField={this.editListEditing}/>
+                                onEditingField={this.editListEditing}
+                                focusing={!key}/>
                         )
                     })
                   }

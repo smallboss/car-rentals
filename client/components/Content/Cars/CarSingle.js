@@ -5,7 +5,7 @@ import { ApiCars } from '/imports/api/cars.js'
 import HeadSingle from './HeadSingle.js';
 import { browserHistory } from 'react-router';
 import React, { Component } from 'react';
-import { clone } from 'lodash';
+import { clone, cloneDeep, reverse } from 'lodash';
 
 import { carStateTypes } from '/imports/startup/typesList.js';
 import TableOnTab from './TableOnTab.js';
@@ -526,12 +526,19 @@ export default createContainer(({params}) => {
   if (params.carId.indexOf('new') === 0) {
     isNew = true;
     carId = params.carId.substring(3);
+    window.history.pushState('object or string', 'Title', `/cars/${carId}`);
+    window.history.back();
   }
 
-  let loadCar = ApiCars.findOne(new Mongo.ObjectID(carId));
+
+  const idForQuery = new Mongo.ObjectID(carId);
+
+  if (!idForQuery) {
+    browserHistory.push('/cars');
+  }
 
   return {
-    car: loadCar,
+    car: ApiCars.findOne(idForQuery),
     isNew: isNew
   }
 
