@@ -1,28 +1,22 @@
 import React, { Component } from 'react';
-import Registration from './Registration'
+import { Link } from 'react-router'
 import './styles.css'
 
 export default class Customers extends Component {
-    addUserHandler (e) {
-        e.preventDefault()
-        let _user = {
-            name: e.target[0].value,
-            userName: e.target[1].value,
-            email: e.target[2].value,
-            birthDate: e.target[3].value,
-            phone: e.target[4].value,
-            password: e.target[5].value
-        }
+    componentDidMount () {
+        [...document.getElementsByClassName('make-action')].forEach((button) => {
+            button.addEventListener('click', (e) => {
+                let _target = $('#' + e.target.id).attr('data-target')
+                $('#' + _target).toggle()
+            })
+        })
     }
     render() {
         return (
             <div>
                 <h1>Customers</h1>
-                <input className='btn btn-default' id='add_user_button' name='make-action' defaultValue='Registration' />
-                <div id='add_user_form'>
-                    <h3>Register user</h3>
-                    <Registration register={this.addUserHandler} />
-                </div>
+                <Link to='/registration'>Registration</Link>
+                <Link to='/customers_list' className='p-x-1'>Customers List</Link>                
             </div>
         )
     }

@@ -1,0 +1,19 @@
+.nav-user-edit {
+
+}
+.nav-user-edit li {
+
+}
+.nav-user-edit a:hover {
+    cursor: pointer;
+}
+.active-href-nav {
+    border: 1px solid grey;
+    border-bottom: 0px;
+}
+#div_images img {
+    max-width: 100%;
+}
+.inner-div-users-edit {
+    display: none;
+}

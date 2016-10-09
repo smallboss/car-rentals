@@ -7,8 +7,8 @@ export default class Sidebar extends Component {
     return (
     <div id="sidebar-wrapper">
       <ul className="sidebar-nav">
-        <li><Link to="customers">Customers</Link></li>
-        <li><Link to="cars">Cars</Link></li>
+        <li><Link to="/customers">Customers</Link></li>
+        <li><Link to="/cars">Cars</Link></li>
         <li className="dropdown">
           <a type="button" data-toggle="dropdown">Invoicing
             <span className="caret"></span></a>
