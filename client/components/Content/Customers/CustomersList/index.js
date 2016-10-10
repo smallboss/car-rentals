@@ -70,10 +70,9 @@ class CustomersList extends React.Component {
         let searchValue = e.target.value.toLowerCase(),
             stateFromValue = [],
             _props = this.props.customers
-
         if(searchValue.length > 0) {
             let arrToFind = ['name', 'email']
-            stateFromValue = searcher(_props, arrToFind, searchValue) || []
+            stateFromValue = searcher(_props, arrToFind, searchValue)
         } else {
             stateFromValue = this.props.customers
         }
@@ -122,6 +121,6 @@ class CustomersList extends React.Component {
 export default createContainer(() => {
     Meteor.subscribe('customers')
     return {
-        customers: ApiCustomers.find({}).fetch()
+        customers: ApiCustomers.find({role: 'customer'}).fetch()
     }
 }, CustomersList)
