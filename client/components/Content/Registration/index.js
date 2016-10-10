@@ -25,32 +25,52 @@ class Registration extends React.Component {
                 alert('Please upload image less than 1mb')
                 e.preventDefault()
                 return false
-            }    
-        }
-        imgToBase64(fileId, (base64Id) => {
-            imgId = base64Id
-            imgToBase64(fileLicense, (base64License) => {
-                imgLicense = base64License                
-                _images = {
-                    imgId,
-                    imgLicense
-                }
-                _user = {
-                    _id,
-                    name: _target[0].value,
-                    userName: _target[1].value,
-                    email: _target[2].value,
-                    birthDate: _target[3].value,
-                    phone: _target[4].value,
-                    address: _target[5].value,
-                    password: _target[6].value,
-                    role: 'customer',
-                    _images
-                }
-                ApiCustomers.insert(_user)
-                _target.reset()
+            }
+            imgToBase64(fileId, (base64Id) => {
+                imgId = base64Id
+                imgToBase64(fileLicense, (base64License) => {
+                    imgLicense = base64License
+                    _images = {
+                        imgId,
+                        imgLicense
+                    }
+                    _user = {
+                        _id,
+                        name: _target[0].value,
+                        userName: _target[1].value,
+                        email: _target[2].value,
+                        birthDate: _target[3].value,
+                        phone: _target[4].value,
+                        address: _target[5].value,
+                        password: _target[6].value,
+                        role: 'customer',
+                        _images
+                    }
+                    ApiCustomers.insert(_user)
+                    _target.reset()
+                })
             })
-        })
+        } else {
+            _images = {
+                imgId: '',
+                imgLicense: ''
+            }
+            _user = {
+                _id,
+                name: _target[0].value,
+                userName: _target[1].value,
+                email: _target[2].value,
+                birthDate: _target[3].value,
+                phone: _target[4].value,
+                address: _target[5].value,
+                password: _target[6].value,
+                role: 'customer',
+                _images
+            }
+            ApiCustomers.insert(_user)
+            _target.reset()
+        }
+        
     }
     render () {
         return (
