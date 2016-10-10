@@ -7,6 +7,7 @@ import Footer from './components/Footer';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar.js';
 import Cars from './components/Content/Cars';
+import CarSingle from './components/Content/Cars/CarSingle.js';
 import Customers from './components/Content/Customers';
 import Customer from './components/Content/Customers/Customer'
 import Registration from './components/Content/Registration'
@@ -40,13 +41,14 @@ Router.refresh = function () {
 export const renderRoutes = () => (
   <Router history={browserHistory}>
     <Route path="/" component={routerComponent}>
-        <IndexRoute component={App} />
-        <Route path="registration" component={Registration}/>
-        <Route path="cars" component={Cars}/>
-        <Route path="customers" component={Customers} />
-        <Route path="customers_list" component={CustomersList} />
-        <Route path='customer/:id' component={Customer} />
-        <Route path="*" component={NotFoundPage}/>
+      <IndexRoute component={App} />
+      <Route path="registration" component={Registration}/>
+      <Route path="cars" component={Cars}/>
+      <Route path="cars/:carId" component={CarSingle} />
+  <Route path="customers" component={Customers} />
+  <Route path="customers_list" component={CustomersList} />
+  <Route path='customer/:id' component={Customer} />
+  <Route path="*" component={NotFoundPage}/>
     </Route>
   </Router>
 );
