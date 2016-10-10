@@ -8,11 +8,8 @@ const Customer = {
     birthday: {type: Date},
     email: {type: String},
     role: {type: String},
-    scans: {
-        type: Object, defaultValue: {
-            ID: {type: Number},
-            License: {type: String}
-        }
+    images: {
+        type: Object
     },
     carRequests: {
         type: Object,
@@ -38,7 +35,9 @@ const Customer = {
     payments: {
         type: Object,
         defaultValue: []
-    }
+    },
+    fines: {type: String},
+    tolls: {type: String}
 }
 
 export default Customer
