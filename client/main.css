@@ -129,10 +129,12 @@
     margin: 0 10px;
 }
 
-.m-1 {
+.m-l-1 {
     margin: 10px;
 }
-
+.m-r-1 {
+    margin: 10px;
+}
 .m-y-1 {
     margin: 10px 0;
 }
