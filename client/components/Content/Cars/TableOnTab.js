@@ -50,18 +50,24 @@ export default class TableOnTab extends Component {
     }
 
     componentWillReceiveProps(nextProps){
-        let newSelectedItems = clone(this.state.selectedItems);
         let newAllowEdit = this.state.allowEdit;
 
         if (this.state.maintenanceList.length+1 == nextProps.maintenanceList.length) {
+            let newSelectedItems = clone(this.state.selectedItems);
             newSelectedItems.push(clone(nextProps.maintenanceList[nextProps.maintenanceList.length-1]));
             newAllowEdit = true;
+
+
+            this.setState({
+                maintenanceList: reverse(clone(nextProps.maintenanceList)),
+                selectedItems: newSelectedItems,
+                allowEdit: newAllowEdit
+            })
         }
 
 
         this.setState({
             maintenanceList: reverse(clone(nextProps.maintenanceList)),
-            selectedItems: newSelectedItems,
             allowEdit: newAllowEdit
         })
     }
@@ -89,6 +95,7 @@ export default class TableOnTab extends Component {
     }
 
     onSaveMaintenance(maintenance){
+        console.log('EDIT')
         let newSelMaintenanceList = clone(this.state.selectedItems)
 
 
@@ -100,9 +107,20 @@ export default class TableOnTab extends Component {
 
 
         const selectedItemsID = clone(this.state.selectedItemsID);
-        this.props.onSaveMaintenance(maintenance, selectedItemsID);
 
-        this.setState({selectedItems: newSelMaintenanceList});
+        const newAllowEdit = (newSelMaintenanceList.length) 
+                                ? this.state.allowEdit
+                                : false
+
+        console.log('newSelMaintenanceList', newSelMaintenanceList.length)
+        console.log('newAllowEdit', newAllowEdit)
+
+        this.setState({
+            selectedItems: newSelMaintenanceList, 
+            allowEdit: newAllowEdit
+        });
+
+        this.props.onSaveMaintenance(maintenance, selectedItemsID);
     }
 
 
