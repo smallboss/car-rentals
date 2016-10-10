@@ -75,19 +75,19 @@ class Registration extends React.Component {
                 <div className='form-group'>
                     <label htmlFor='birth_date' className='control-label col-xs-2'>Birth Date</label>
                     <div className='col-xs-10'>
-                        <input type='date' id='birth_date' className='form-control' />
+                        <input type='date' id='birth_date' className='form-control'  />
                     </div>
                 </div><br />
                 <div className='form-group'>
                     <label htmlFor='phone_number' className='control-label col-xs-2'>Phone Number</label>
                     <div className='col-xs-10'>
-                        <input type='text' id='phone_number' className='form-control' />
+                        <input type='text' id='phone_number' className='form-control'  />
                     </div>
                 </div><br />
                 <div className='form-group'>
                     <label htmlFor='address' className='control-label col-xs-2'>Address</label>
                     <div className='col-xs-10'>
-                        <input type='text' id='address' className='form-control' />
+                        <input type='text' id='address' className='form-control'  />
                     </div>
                 </div><br />
                 <div className='form-group'>
