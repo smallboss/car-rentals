@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router'
-import './styles.css'
+import Customers from './Customers';
 
-export default class Customers extends Component {
+export default class IndexFile extends Component {
     componentDidMount () {
         [...document.getElementsByClassName('make-action')].forEach((button) => {
             button.addEventListener('click', (e) => {
@@ -13,11 +12,7 @@ export default class Customers extends Component {
     }
     render() {
         return (
-            <div>
-                <h1>Customers</h1>
-                <Link to='/registration'>Registration</Link>
-                <Link to='/customers_list' className='p-x-1'>Customers List</Link>                
-            </div>
+          <Customers />
         )
     }
 }

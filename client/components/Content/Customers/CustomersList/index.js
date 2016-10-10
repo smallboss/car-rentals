@@ -122,6 +122,6 @@ class CustomersList extends React.Component {
 export default createContainer(() => {
     Meteor.subscribe('customers')
     return {
-        customers: ApiCustomers.find({role: 'customer'}).fetch()
+        customers: ApiCustomers.find({}).fetch()
     }
 }, CustomersList)

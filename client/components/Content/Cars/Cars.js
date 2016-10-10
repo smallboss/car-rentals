@@ -164,6 +164,7 @@ class Cars extends Component {
            {renderCars()}
           </tbody>
         </table>
+
       </div>
     )
   }
