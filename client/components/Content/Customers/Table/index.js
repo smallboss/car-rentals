@@ -67,7 +67,7 @@ class Table extends React.Component {
                 currentArray = this.state.arrToTable
                 _source = this._r_addNewField.children
                 _arrNew = Object.keys(_source)
-                if(this.state.addNewField && (_source[2].childNodes[0].value.length == 0 || _source[3].childNodes[0].value.length == 0 || _source[4].childNodes[0].value.length == 0)){
+                if(this.state.addNewField && (_source[1].childNodes[0].value.length == 0 || _source[1].childNodes[0].value.length == 0 || _source[3].childNodes[0].value.length == 0)){
                     alert('Fields must be contained')
                     return false
                 }
@@ -146,20 +146,18 @@ class Table extends React.Component {
                     <thead>
                         <tr>
                             <th className='col-xs-1'>#</th>
-                            <th className='col-xs-1'>Saving</th>
                             {_stateToTh.map(prop => {
                                 if(prop != '_id' && prop != '_toedit') {
                                     return (
                                         <th key={Math.random()}>{prop}</th>
                                     )   
                                 }                                
-                            }) }
+                            }) }                            
                         </tr>
                     </thead>
                     <tbody>
                     <tr key={Math.random()} className={classNameNewField} ref={ref => this._r_addNewField = ref}>
-                        <td>#</td>
-                        <td><input type='button' className='btn btn-success' name='save_notes_new' value='Save' onClick={this.handlerEditButtons} /></td>
+                        <td>#<input type='button' className='btn btn-success m-l-1' name='save_notes_new' value='Save' onClick={this.handlerEditButtons} /></td>
                         {_stateToTh.map(prop => {
                             if(prop != '_id') {
                                 return (
@@ -173,8 +171,10 @@ class Table extends React.Component {
                             if(elem[_stateToTd[1]].toString().length > 0) {
                                 return (
                                     <tr key={Math.random()}>
-                                        <td><input type='checkbox' id={elem._id._str} onChange={this.handlerChecker} /></td>
-                                        {(elem._toedit) ? <td key={Math.random()}><input type='button' className='btn btn-success' name='save_notes' value='Save' onClick={(e) => {this.handlerEditButtons(e, elem._id._str)}} /></td> : <td></td>}
+                                        <td><input type='checkbox' id={elem._id._str} onChange={this.handlerChecker} />
+                                            {(elem._toedit) ? <input key={Math.random()} type='button' className='btn btn-success m-l-1' name='save_notes' value='Save' onClick={(e) => {this.handlerEditButtons(e, elem._id._str)}} /> : ''}
+                                        </td>
+                                        
                                         {_stateToTd.map(val => {
                                             if(typeof elem[val] == 'string') {
                                                 if(elem._toedit) {
