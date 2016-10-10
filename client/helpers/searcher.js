@@ -5,7 +5,6 @@
 export function searcher (arrTarget, arrProps, searchValue) {
     let result = []
     arrProps.forEach(prop => {
-        console.log(prop)
         arrTarget.map(item => {
             for(let _prop in item) {
                 if(prop == _prop) {
