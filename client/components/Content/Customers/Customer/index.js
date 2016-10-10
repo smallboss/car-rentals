@@ -90,7 +90,7 @@ class Customer extends React.Component {
                             let customer = this.state.customer,
                                 _target = eInput.target.id,
                                 _newValue = eInput.target.value
-                            if(_newValue.length > 0) {
+                            if(typeof _newValue == 'string') {
                                 customer[_target] = _newValue
                                 this.setState({...customer})
                             }
