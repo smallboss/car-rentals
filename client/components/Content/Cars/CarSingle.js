@@ -157,8 +157,6 @@ export default class CarSingle extends Component {
 
 
     this.setState({car: newCar, dispCar: newCar, editable: false});
-	
-	console.log('this.state.isNew', this.state.isNew)
 
     // if (this.state.isNew)
     //   browserHistory.push(`/cars/${id._str}`);
