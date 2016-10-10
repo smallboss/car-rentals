@@ -54,12 +54,10 @@ export default class TableOnTab extends Component {
         let newAllowEdit = this.state.allowEdit;
 
         if (this.state.maintenanceList.length+1 == nextProps.maintenanceList.length) {
-            console.log('ADD')
             newSelectedItems.push(clone(nextProps.maintenanceList[nextProps.maintenanceList.length-1]));
             newAllowEdit = true;
         }
 
-        console.log('newSelectedItems',newSelectedItems)
 
         this.setState({
             maintenanceList: reverse(clone(nextProps.maintenanceList)),
@@ -67,13 +65,6 @@ export default class TableOnTab extends Component {
             allowEdit: newAllowEdit
         })
     }
-
-
-    componentWillUpdate(nextState){
-        console.log('nextState', nextState)
-        console.log('this.state.selectedItems', this.state.selectedItems)
-    }
-
 
 
     onEdit(){
@@ -137,10 +128,8 @@ export default class TableOnTab extends Component {
     }
 
     onRemoveMaintenance(){
-        console.log('DEL')
         const t = clone(this.state.selectedItems);
         this.props.onRemove(t);
-        console.log('DEL1')
         this.setState({selectedItems: []});
     }
 
@@ -148,7 +137,6 @@ export default class TableOnTab extends Component {
     render(){
         const { selectedItems, allowEdit } = this.state;
 
-        console.log('allowEdit', allowEdit);
 
         return (
             <div className="TableOnTab">
@@ -200,8 +188,6 @@ export default class TableOnTab extends Component {
                                 index = key;
                             }
                         })
-
-                        console.log('item', item)
 
 
                         const isEditable = (isInEditList && this.state.allowEdit) 
