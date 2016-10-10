@@ -105,13 +105,13 @@ class Registration extends React.Component {
                 <div className='form-group'>
                     <label htmlFor='img_id' className='control-label col-xs-2'>Upload ID</label>
                     <div className='col-xs-10'>
-                        <input type='file' id='img_id' className='form-control' required />
+                        <input type='file' id='img_id' className='form-control'  />
                     </div>
                 </div><br />
                 <div className='form-group'>
                     <label htmlFor='img_license' className='control-label col-xs-2'>Upload License</label>
                     <div className='col-xs-10'>
-                        <input type='file' id='img_license' className='form-control' required />
+                        <input type='file' id='img_license' className='form-control'  />
                     </div>
                 </div><br />
                 <input type='submit' className='btn btn-success' defaultValue='Add user' />
