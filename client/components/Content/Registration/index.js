@@ -7,25 +7,11 @@ import { createContainer } from 'meteor/react-meteor-data'
 import { ApiCustomers } from '../../../../imports/api/customers'
 import { imgToBase64 } from '../../../helpers/handlerImages'
 
-function toDataUrl(url, callback) {
-    console.log(url)
-    let file = url
-    let reader = new FileReader()
-    if(file) {
-        reader.readAsDataURL(file)
-    }
-    reader.onloadend = () => {
-        console.log(reader.result)
-    }
-        
-}
-
 class Registration extends React.Component {
     addUserHandler (e) {
         e.preventDefault()
         if (e.target[6].value != e.target[7].value){
             alert('Введенные пароли не совпадают');
-            e.target.reset()
             return false
         }
         let _id = new Mongo.ObjectID(),
@@ -63,35 +49,6 @@ class Registration extends React.Component {
                 _target.reset()
             })
         })
-        /*
-            reader = new FileReader()
-        reader.readAsDataURL(fileId)
-        reader.onloadend = () => {
-            imgId = reader.result
-            reader = new FileReader()
-            reader.readAsDataURL(fileLicense)
-            reader.onloadend = () => {
-                imgLicense = reader.result
-                _images = {
-                    imgId,
-                    imgLicense
-                }
-                _user = {
-                    _id,
-                    name: _target[0].value,
-                    userName: _target[1].value,
-                    email: _target[2].value,
-                    birthDate: _target[3].value,
-                    phone: _target[4].value,
-                    address: _target[5].value,
-                    password: _target[6].value,
-                    role: 'customer',
-                    _images
-                }
-                ApiCustomers.insert(_user)
-                _target.reset()
-            }
-        }*/
     }
     render () {
         return (
@@ -171,3 +128,17 @@ export default Registration
         images: Images.find({}).fetch()
     }
 }, Registration)*/
+
+/*function toDataUrl(url, callback) {
+ console.log(url)
+ let file = url
+ let reader = new FileReader()
+ if(file) {
+ reader.readAsDataURL(file)
+ }
+ reader.onloadend = () => {
+ console.log(reader.result)
+ }
+
+ }
+*/

@@ -39,15 +39,12 @@ class Table extends React.Component {
             case 'remove_notes':
                 _arrToDel = this.state.arrToDelete
                 if(_arrToDel.length > 0) {
-                    _arrToDel.forEach(item => {
-                        this.state.arrToTable.forEach(elem => {
-                            if(elem._id && elem._id._str != item) {
-                                _arrNew.push(elem)
-                            } else if (elem._id == undefined) {
-                                return {}
-                            }
-                        })
+                    this.state.arrToTable.forEach(item => {
+                        if(_arrToDel.indexOf(item._id._str) == -1) {
+                            _arrNew.push(item)
+                        }
                     })
+                    this.props.handlerChildState(this.props.currentComponent, _arrNew)
                     this.setState({arrToTable: _arrNew, arrToDelete: []})
                 }                
                 break
