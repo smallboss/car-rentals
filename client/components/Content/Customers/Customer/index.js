@@ -21,9 +21,7 @@ class Customer extends React.Component {
     }
     componentWillMount () {
         let customer = this.props.customer || {}
-        if(customer.length == 0) {
-            customer._id = new Mongo.ObjectID()
-            customer.role = 'customer'
+        if(this.props.params.id == 'new') {
             customer._new = 1
         }
         this.setState({customer: customer})
@@ -38,7 +36,6 @@ class Customer extends React.Component {
         }
     }
     componentWillReceiveProps (nextProps) {
-        console.log(nextProps)
         let customer = nextProps.customer
         this.setState({customer: customer})
     }
@@ -73,8 +70,8 @@ class Customer extends React.Component {
                                 _images = this.state.customer._images || {},
                                 _newFile,
                                 _newCustomer
-                            if(file.size > 110000) {
-                                alert('Please upload image less than 100kb')
+                            if(file.size > 1100000) {
+                                alert('Please upload image less than 1mb')
                                 eFile.preventDefault()
                                 return false
                             }
@@ -105,10 +102,12 @@ class Customer extends React.Component {
             case 'button_save':
                 $('.form-control').prop('disabled', true)
                 $('#button_save').prop('disabled', true)
-                _id = this.state.customer._id
+                _id = this.state.customer._id || undefined
                 _newState = this.state.customer;
                 if(_newState._new) {
                     delete _newState._new
+                    _newState._id = new Mongo.ObjectID()
+                    _newState.role = 'customer'
                     ApiCustomers.insert(_newState)
                     this.setState({customers: _newState})
                 } else {
@@ -125,13 +124,11 @@ class Customer extends React.Component {
             _id = this.state.customer._id
         _state[target] = data
         delete this.state.customer._id
-        console.log(_state)
         ApiCustomers.update(_id, {$set: _state})        
     }
     render () {
-        console.log(this.state.customer)
         let { _id, name, userName, address, email, birthDate, phone, role, _images} = this.state.customer || [],
-            carRequests = (this.state.customer.carRequests) ? this.state.customer.carRequests : [
+            carRequest = (this.state.customer.carRequest) ? this.state.customer.carRequest : [
                 {
                     _id: new Mongo.ObjectID(),
                     dateCreateRequest: '',
@@ -140,7 +137,7 @@ class Customer extends React.Component {
                     requestText: ''
                 }
             ],
-            rentals = (this.state.customer.rentals) ? this.state.customer.carRequests : [
+            rentals = (this.state.customer.rentals) ? this.state.customer.rentals : [
                 {
                     _id: new Mongo.ObjectID(),
                     carId: '',
@@ -164,8 +161,6 @@ class Customer extends React.Component {
             imgId = _images.imgId || ''
             imgLicense = _images.imgLicense || ''             
         }
-        console.log('down is state customer')
-        console.log(this.state.customer)
         return (
             <div className='panel panel-default'>
                 <div className='panel-heading'>
@@ -237,7 +232,7 @@ class Customer extends React.Component {
                                 </div>                          
                             </div>
                             <div id='div_car_request'  className='inner-div-users-edit'>
-                                <Table arrToTable={carRequests} currentComponent='carRequests' handlerChildState={this.handlerChildState} />
+                                <Table arrToTable={carRequest} currentComponent='carRequest' handlerChildState={this.handlerChildState} />
                             </div>
                             <div id='div_rentals' className='inner-div-users-edit'>
                                 <Table arrToTable={rentals} currentComponent='rentals' handlerChildState={this.handlerChildState} />
@@ -273,7 +268,9 @@ export default createContainer(({params}) => {
     Meteor.subscribe('customers')
     let _id = params.id
     if(_id === 'new') {
-        return {}
+        return {
+            
+        }
     } else {
         return {
             customer: ApiCustomers.findOne({_id: new Mongo.ObjectID(_id)})
