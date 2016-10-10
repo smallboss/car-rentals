@@ -164,6 +164,7 @@ class Cars extends Component {
            {renderCars()}
           </tbody>
         </table>
+
       </div>
     )
   }
@@ -172,8 +173,6 @@ class Cars extends Component {
 Cars.propTypes = {
   cars: PropTypes.array.isRequired,
 };
-
-
 
 Cars.contextTypes = {
     router: React.PropTypes.object.isRequired

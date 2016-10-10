@@ -147,19 +147,22 @@ export default class TableOnTab extends Component {
                   <button
                     onClick={this.props.onAddNew}
                     ref={(ref) => this.buttonAdd = ref}
-                    className='btn btn-primary'>
+                    style={{margin: '10px'}}
+                    className=' m-1 btn btn-primary'>
                     Add New
                   </button>
                   <button 
-                    className="btn btn-warning" 
+                    className=" m-1 btn btn-warning"
                     ref={(ref) => this.buttonEdit = ref}
+                    style={{margin: '10px'}}
                     onClick={this.onEdit}>
                     Edit
                   </button>
                   <button
                     onClick={this.onRemoveMaintenance}
                     ref={(ref) => this.buttonRemove = ref}
-                    className='btn btn-danger'>
+                    style={{margin: '10px'}}
+                    className=' m-1 btn btn-danger'>
                     Delete
                   </button>
                 </div>

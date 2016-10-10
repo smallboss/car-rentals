@@ -72,15 +72,13 @@ export default class HeadList extends Component {
             return rightArrow;
         }
 
-
-
         return (
             <div className="headList">
-                <div className="left-headList">
+                <div className="col-xs-6 left-headList">
                     <h2>{this.state.listName}</h2>
 
                     <div className="btn-box">
-                        <button onClick={this.props.onAddNew} className='btn btn-primary'>Add New</button>
+                        <button onClick={this.props.onAddNew} className='btn btn-success m-x-1'>Add New</button>
                         <button 
                             onClick={this.props.onRemoveCars} 
                             ref={(ref) => this.buttonRemove = ref}
@@ -90,11 +88,14 @@ export default class HeadList extends Component {
                     </div>
                 </div>
 
-                <div className="right-headList">
+                <div className="col-xs-6 right-headList">
                     <form>
-                        <input type="text" onChange={ (e) => this.props.onChangeSearchField(e.target.value) } />
+                        <input type="text" className='form-control' placeholder='Search' onChange={ (e) => this.props.onChangeSearchField(e.target.value) } />
                     </form>
                     
+
+                </div>
+                <div className='col-xs-12'>
                     <div className="navBox">
                         <span className="pages">
                             <span className="currentPage">{currentPage}</span>
