@@ -169,11 +169,6 @@ class Cars extends Component {
   }
 }
 
-<<<<<<< HEAD
-//Îáúÿâëÿéòå îáÿçàòåëüíî òèïû props
-=======
-//���������� ����������� ���� props
->>>>>>> origin
 Cars.propTypes = {
   cars: PropTypes.array.isRequired,
 };

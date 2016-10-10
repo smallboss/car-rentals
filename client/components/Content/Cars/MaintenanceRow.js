@@ -77,15 +77,12 @@ export default class MaintenanceRow extends Component {
         }
     }
 
-<<<<<<< HEAD
     componentDidUpdate(){
         if(this.props.focusing &&  this.inputName){
-            this.inputName.focus();
+            // this.inputName.focus();
         }
     }
 
-=======
->>>>>>> 2e39633d241368b516ff9318c938bcb613737732
     render(){
         const { onHandleSelect } = this.props;
         const { _id, jobName, description, status, date, endDate, amount } = this.state.maintenance;

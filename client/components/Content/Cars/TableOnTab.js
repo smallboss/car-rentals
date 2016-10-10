@@ -128,8 +128,10 @@ export default class TableOnTab extends Component {
     }
 
     onRemoveMaintenance(){
+        
         const t = clone(this.state.selectedItems);
         this.props.onRemove(t);
+        
         this.setState({selectedItems: []});
     }
 
@@ -137,6 +139,7 @@ export default class TableOnTab extends Component {
     render(){
         const { selectedItems, allowEdit } = this.state;
 
+        
 
         return (
             <div className="TableOnTab">
