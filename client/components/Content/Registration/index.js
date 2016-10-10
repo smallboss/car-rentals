@@ -18,12 +18,14 @@ class Registration extends React.Component {
             _target = e.target,
             _user,
             _images
-        let fileId = _target[8].files[0],
-            fileLicense = _target[9].files[0]
-        if(fileId.size > 1100000 || fileLicense.size > 1100000) {
-            alert('Please upload image less than 1mb')
-            e.preventDefault()
-            return false
+        let fileId = _target[8].files[0] || false,
+            fileLicense = _target[9].files[0] || false
+        if(fileId || fileLicense) {
+            if(fileId.size > 1100000 || fileLicense.size > 1100000) {
+                alert('Please upload image less than 1mb')
+                e.preventDefault()
+                return false
+            }    
         }
         imgToBase64(fileId, (base64Id) => {
             imgId = base64Id
