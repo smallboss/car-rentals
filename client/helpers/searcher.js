@@ -6,6 +6,11 @@ export function searcher (arrTarget, arrProps, searchValue) {
     let result = []
     arrProps.forEach(prop => {
         arrTarget.map(item => {
+            for(let i = 0; i < result.length; i++) {
+                if(result[i]._id._str == item._id._str) {
+                    return
+                }
+            }
             for(let _prop in item) {
                 if(prop == _prop) {
                     if(typeof item[_prop] == 'string') {
