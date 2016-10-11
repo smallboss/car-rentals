@@ -3,7 +3,7 @@
  */
 import { Meteor } from 'meteor/meteor'
 import { createContainer } from 'meteor/react-meteor-data'
-import { ApiCustomers } from '../../../../../imports/api/customers'
+//import { ApiCustomers } from '../../../../../imports/api/customers'
 import React from 'react'
 import { browserHistory } from 'react-router'
 import $ from 'jquery'
@@ -59,7 +59,7 @@ class CustomersList extends React.Component {
                 break
             case 'remover-users':
                 arrForRemove.map(elem => {
-                    ApiCustomers.remove({_id: new Mongo.ObjectID(elem)})
+                    Meteor.users.remove({_id: elem})                    
                 })
                 this.setState({stateForRemove: []})                
                 break
@@ -71,7 +71,7 @@ class CustomersList extends React.Component {
             stateFromValue = [],
             _props = this.props.customers
         if(searchValue.length > 0) {
-            let arrToFind = ['name', 'email']
+            let arrToFind = ['username', 'emails']
             stateFromValue = searcher(_props, arrToFind, searchValue)
         } else {
             stateFromValue = this.props.customers
@@ -93,11 +93,8 @@ class CustomersList extends React.Component {
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>User login</th>
                             <th>User name</th>
-                            <th>User email</th>
-                            <th>User BirthDate</th>
-                            <th>User role</th>
+                            <th>User email</th>                            
                         </tr>
                     </thead>
                     <tbody>
@@ -121,6 +118,6 @@ class CustomersList extends React.Component {
 export default createContainer(() => {
     Meteor.subscribe('customers')
     return {
-        customers: ApiCustomers.find({role: 'customer'}).fetch()
+        customers: Meteor.users.find().fetch()
     }
 }, CustomersList)

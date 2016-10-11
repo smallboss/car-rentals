@@ -138,9 +138,27 @@
 .m-y-1 {
     margin: 10px 0;
 }
+.m-y-2 {
+    margin: 20px 0;
+}
+.m-y-3 {
+    margin: 30px 0;
+}
+.m-t-1 {
+    margin-top: 10px;
+}
+.m-t-2 {
+    margin-top: 20px;
+}
+.m-t-3 {
+    margin-top: 30px;
+}
 .p-x-1 {
     padding: 0 10px;
 }
 .p-y-1 {
     padding: 10px 0;
+}
+.p-a-1 {
+    padding: 10px;
 }

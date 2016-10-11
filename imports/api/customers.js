@@ -1,5 +1,23 @@
-import { Mongo } from 'meteor/mongo';
-import Customer from './schemas/Customer'
+//import { Mongo } from 'meteor/mongo';
+//export const ApiUsers = Meteor.users
+
+if(Meteor.isServer) {
+  Meteor.publish('customers', function publishCustomers () {
+    //Meteor.users.remove({})
+    Meteor.users.allow({
+      update: function (userId, doc, fields, modifier) {
+        return true
+      },
+      remove: function (userId, doc) {
+        return true
+      }
+    })
+    return Meteor.users.find({"profile.userType": "customer"})
+  })
+}
+
+
+/*
 //create db table - customers
 export const ApiCustomers = new Mongo.Collection('customers');
 //ApiCustomers.schema = new SimpleSchema(Customer)
@@ -10,4 +28,4 @@ if (Meteor.isServer) {
   Meteor.publish('customers', function customersPublication() {
     return ApiCustomers.find();
   });
-}
+}*/

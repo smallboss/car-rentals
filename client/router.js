@@ -6,6 +6,7 @@ import App from './components/App.jsx';
 import Footer from './components/Footer';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar.js';
+import UserProfile from './components/Content/UserProfile'
 import Cars from './components/Content/Cars';
 import CarSingle from './components/Content/Cars/CarSingle.js';
 import Customers from './components/Content/Customers';
@@ -43,6 +44,7 @@ export const renderRoutes = () => (
     <Route path="/" component={routerComponent}>
       <IndexRoute component={App} />
       <Route path="registration" component={Registration}/>
+      <Route path="user_profile" component={UserProfile}/>
       <Route path="cars" component={Cars}/>
       <Route path="cars/:carId" component={CarSingle} />
   <Route path="customers" component={Customers} />

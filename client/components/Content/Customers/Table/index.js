@@ -7,8 +7,7 @@ import { Mongo } from 'meteor/mongo'
 class Table extends React.Component {
     constructor (props) {
         super(props)
-        let arrToTable = props.arrToTable || [] 
-        this.state = {arrToTable, editAble: 0, addNewField: 0, arrChecked: []}
+        this.state = {arrToTable: props.arrToTable || [], editAble: 0, addNewField: 0, arrChecked: []}
         this.handlerEditButtons = this.handlerEditButtons.bind(this)
         this.handlerChecker = this.handlerChecker.bind(this)
         this.handlerInputs = this.handlerInputs.bind(this)
@@ -134,7 +133,7 @@ class Table extends React.Component {
     render () {
         //console.log(this.state)
         let classNameNewField = (!this.state.addNewField) ? 'hidden' : ''
-        let _stateToTh = Object.keys(this.state.arrToTable[0] || {}, key => obj[key])
+        let _stateToTh = (this.state.arrToTable) ? Object.keys(this.state.arrToTable[0] || {}, key => obj[key]) : []
         return (
             <div>
                 <div className='row' ref={ref => {this._r_buttonArea = ref}}>
