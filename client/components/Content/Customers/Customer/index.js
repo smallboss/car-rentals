@@ -64,9 +64,6 @@ class Customer extends React.Component {
         switch (id) {
             case 'button_edit':
                 this.setState({editAble: 1});
-                /*$('#button_save').removeAttr('disabled')
-                $('.form-control').removeAttr('readOnly')
-                $('.form-control').removeAttr('disabled');*/
                 [...document.getElementsByClassName('form-control')].forEach(input => {
                     if(input.type == 'file') {
                         input.addEventListener('change', (eFile) => {
@@ -84,7 +81,7 @@ class Customer extends React.Component {
                                 eFile.preventDefault()
                                 return false
                             }
-                            if(file.type != 'image/png' || file.type != 'image/jpeg') {
+                            if(file.type != 'image/png' && file.type != 'image/jpeg') {
                                 alert('Please upload image png or jpeg')
                                 eFile.preventDefault()
                                 return false
@@ -127,8 +124,6 @@ class Customer extends React.Component {
                 document.getElementById('button_save').addEventListener('click', this.handlerEditCustomer)
                 break
             case 'button_save':
-                /*$('.form-control').prop('disabled', true)
-                $('#button_save').prop('disabled', true)*/
                 _id = this.state.customer._id || undefined
                 _newState = this.state.customer;
                 if(_newState._new) {
