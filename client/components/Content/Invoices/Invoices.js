@@ -4,7 +4,7 @@ import { browserHistory } from 'react-router'
 import { createContainer } from 'meteor/react-meteor-data';
 
 import { ApiInvoices } from '/imports/api/invoices.js';
-import { ApiUserList } from '/imports/api/userList.js'
+import { ApiCustomers } from '/imports/api/customers'
 import InvoiceRow from './InvoiceRow.js';
 import HeadList from './HeadList.js';
 
@@ -40,7 +40,7 @@ class Invoices extends Component {
       this.handleChangeSearchField(this.state.searchField, props);
     }
 
-    console.log(',props.invoices', props.invoices)
+    console.log('userList', props.userList)
   }
 
   componentWillUpdate(nextProps, nextState){
@@ -194,7 +194,7 @@ Invoices.contextTypes = {
 
 export default createContainer(() => {
   Meteor.subscribe('invoices');
-  Meteor.subscribe("userList");
+  Meteor.subscribe('customers')
 
   return {
     invoices: ApiInvoices.find().fetch(),

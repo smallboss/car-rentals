@@ -2,7 +2,7 @@ import { Meteor } from 'meteor/meteor'
 import { Mongo } from 'meteor/mongo'
 import { createContainer } from 'meteor/react-meteor-data'
 import { ApiInvoices } from '/imports/api/invoices.js'
-import { ApiUserList } from '/imports/api/userList.js'
+import { ApiCustomers } from '/imports/api/customers'
 import HeadSingle from './HeadSingle.js';
 import { browserHistory } from 'react-router';
 import React, { Component } from 'react';
@@ -27,7 +27,9 @@ export default class InvoiceSingle extends Component {
       editable: this.props.isNew
     }
 
+    this.onChangeCustomer = this.onChangeCustomer.bind(this);
     this.onChangeNotes = this.onChangeNotes.bind(this);
+    this.onChangeDate = this.onChangeDate.bind(this);
     this.onChangeDueDate = this.onChangeDueDate.bind(this);
     this.onChangeStatus = this.onChangeStatus.bind(this);
     this.handleSave = this.handleSave.bind(this);
@@ -37,9 +39,19 @@ export default class InvoiceSingle extends Component {
   }
 
 // ====================== ON CHANGE ======================
+  onChangeCustomer(value) {
+    let newInvoice = this.state.dispInvoice;
+    newInvoice.customerId = new Mongo.ObjectID(value);
+    this.setState({dispInvoice: newInvoice});
+  }
   onChangeStatus(value) {
     let newInvoice = this.state.dispInvoice;
     newInvoice.status = value;
+    this.setState({dispInvoice: newInvoice});
+  }
+  onChangeDate(value) {
+    let newInvoice = this.state.dispInvoice;
+    newInvoice.date = value;
     this.setState({dispInvoice: newInvoice});
   }
   onChangeDueDate(value) {
@@ -126,6 +138,7 @@ export default class InvoiceSingle extends Component {
     if (this.state.invoice) {
       let {
         customerId,
+        date,
         dueDate,
         status,
         notes
@@ -136,8 +149,87 @@ export default class InvoiceSingle extends Component {
         return (
           <div className="topFields">
             <div className="row">
+{ /* ============================== DROPDOWN CUSTOMERS ============================== */}
               <div className="form-group profit col-xs-6">
-                <label htmlFor="paymentStatus" className='col-xs-2'>Status</label>
+                <label htmlFor="paymentCustomerName" className='col-xs-2'>Customer Name</label>
+                {(() => {
+                  if (this.state.editable) {
+                    return (
+                      <div className='col-xs-8 form-horizontal'>
+                        <select className=' form-control' onChange={(e) => this.onChangeCustomer(e.target.value)}>
+                          {(() => {
+                            const {username, profile} = customerId ? Meteor.users.findOne(customerId)  : '';
+                            const userProfName = customerId 
+                                                    ? ((profile.name 
+                                                          ? (profile.name + ' : ') 
+                                                          : '')
+                                                     + username) 
+                                                    : '';
+                              
+                            return (    
+                              <option 
+                                className='' 
+                                value={customerId}>{userProfName}
+                              </option>
+                            )
+
+                          })()}
+                          {
+                            this.props.userList.map((el, key) => {
+                                const currentId = customerId ? customerId._str : ''
+                                if (el._id && (el._id._str != currentId)) {
+                                  return (
+                                    <option 
+                                      key={key} 
+                                      value={el._id._str}>{(el.profile.name ? (el.profile.name + " : ") : '') + el.username}</option>
+                                  )
+                                }
+                                return undefined;
+                              }
+                            )}
+                        </select>
+                      </div>
+                    )
+                  }
+
+                  return (
+                    <div className='col-xs-8'>
+                      {(() => {
+                        if (Meteor.users.findOne(customerId)) {
+                          const profile = Meteor.users.findOne(customerId).profile;
+                          return (profile.name ? (profile.name + ' : ') : '' ) + Meteor.users.findOne(customerId).username
+                        }
+                        return undefined;
+                      })()}
+                    </div>
+                  )
+                })()}
+              </div>
+{ /* END ============================= DROPDOWN CUSTOMERS ============================== */}
+              <div className="form-group name col-xs-6">
+                <label htmlFor="invoiceDate" className='col-xs-2'>Invoice date</label>
+                {(() => {
+                  if (this.state.editable) {
+                    return (
+                      <div className='col-xs-8 form-horizontal'>
+                        <input
+                          type="date"
+                          id="invoceDate"
+                          className="form-control "
+                          onChange={(e) => this.onChangeDate(e.target.value)}
+                          value={ this.state.dispInvoice.date }/>
+                      </div>
+                    )
+                  }
+
+                  return <div className='col-xs-8'>{date}</div>
+                })()}
+              </div>
+            </div>
+
+            <div className="row">
+              <div className="form-group profit col-xs-6">
+                <label htmlFor="invoiceStatus" className='col-xs-2'>Status</label>
                 {(() => {
                   if (this.state.editable) {
                     return (
@@ -164,14 +256,14 @@ export default class InvoiceSingle extends Component {
               </div>
               
               <div className="form-group name col-xs-6">
-                <label htmlFor="paymentAmount" className='col-xs-2'>Invoice Due date</label>
+                <label htmlFor="invoiceDueDate" className='col-xs-2'>Invoice Due date</label>
                 {(() => {
                   if (this.state.editable) {
                     return (
                       <div className='col-xs-8 form-horizontal'>
                         <input
                           type="date"
-                          id="invoceDueDate"
+                          id="invoiceDueDate"
                           className="form-control "
                           onChange={(e) => this.onChangeDueDate(e.target.value)}
                           value={ this.state.dispInvoice.dueDate }/>
@@ -244,6 +336,7 @@ export default class InvoiceSingle extends Component {
 
 export default createContainer(({params}) => {
   Meteor.subscribe('invoices');
+  Meteor.subscribe('customers');
 
   let isNew = false;
   let invoiceId = params.invoiceId;
@@ -265,6 +358,7 @@ export default createContainer(({params}) => {
 
   return {
     invoice: ApiInvoices.findOne(idForQuery),
+    userList: Meteor.users.find().fetch(),
     isNew: isNew
   }
 

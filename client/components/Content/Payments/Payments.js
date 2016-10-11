@@ -2,8 +2,9 @@ import React, { Component, PropTypes } from 'react';
 import { browserHistory } from 'react-router'
 
 import { createContainer } from 'meteor/react-meteor-data';
-import { ApiUserList } from '/imports/api/userList.js'
+// import { ApiUserList } from '/imports/api/userList.js'
 import { ApiPayments } from '/imports/api/payments.js';
+import { ApiCustomers } from '/imports/api/customers'
 
 import PaymentRow from './PaymentRow.js';
 import HeadList from './HeadList.js';
@@ -39,8 +40,6 @@ class Payments extends Component {
     if (this.props.payments != props.payments) {
       this.handleChangeSearchField(this.state.searchField, props);
     }
-
-    console.log('props', props.userList)
   }
 
   componentWillUpdate(nextProps, nextState){
@@ -92,17 +91,15 @@ class Payments extends Component {
     const searchQuery = queryText.toLowerCase();
 
     var displayedPayments = props.payments.filter(function(el) {
-        const paymenAmount = el.amount      ? el.amount.toLowerCase()        : '';
-        const paymenStatus = el.status      ? el.status.toLowerCase()        : '';
-        const paymenDate   = el.date        ? el.date.toLowerCase()          : '';
-        const paymenID     = el._id         ? el._id._str.toLowerCase()      : '';
-        const customerName = el.customerName ? el.customerName.toLowerCase() : '';
+        const paymenAmount = el.amount ? el.amount.toLowerCase()   : '';
+        const paymenStatus = el.status ? el.status.toLowerCase()   : '';
+        const paymenDate   = el.date   ? el.date.toLowerCase()     : '';
+        const paymenID     = el._id    ? el._id._str.toLowerCase() : '';
 
         return (paymenAmount.indexOf(searchQuery) !== -1 ||
                 paymenStatus.indexOf(searchQuery) !== -1 ||
                 paymenDate.indexOf(searchQuery)   !== -1 ||
-                paymenID.indexOf(searchQuery)     !== -1 ||
-                customerName.indexOf(searchQuery)  !== -1)
+                paymenID.indexOf(searchQuery)     !== -1)
     });
 
 
@@ -133,15 +130,16 @@ class Payments extends Component {
     const renderPayments = () => {
       return this.state.foundItems.map((itemPayment, key) => {
         if((key >= (this.state.currentPage-1) * this.state.itemsOnPage) && 
-           (key <   this.state.currentPage    * this.state.itemsOnPage))
+           (key <   this.state.currentPage    * this.state.itemsOnPage)) {
 
           return <PaymentRow 
                       key={key} 
                       item={itemPayment} 
-                      customerName={Meteor.users.findOne({_id: itemPayment.customerId})}
+                      customerName={Meteor.users.findOne(itemPayment.customerId)}
                       onClick={this.handlePaymentSingleOnClick.bind(null, itemPayment._id)}
                       selectedPaymentsId={this.state.selectedPaymentsID} 
                       onHandleSelect={this.handleSelect} />
+          }
         }
       )
     }
@@ -191,10 +189,10 @@ Payments.contextTypes = {
 
 export default createContainer(() => {
   Meteor.subscribe('payments');
-  Meteor.subscribe("userList");
+  Meteor.subscribe('customers')
 
   return {
     payments: ApiPayments.find().fetch(),
-    userList: Meteor.users.find({"profile.userType": "customer"}).fetch()
+    userList: Meteor.users.find().fetch()
   };
 }, Payments);
