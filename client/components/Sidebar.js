@@ -14,7 +14,7 @@ export default class Sidebar extends Component {
             <a type="button" data-toggle="dropdown">Invoicing
               <span className="caret"></span></a>
             <ul className="dropdown-menu">
-              <li><a href="#">Invoices</a></li>
+              <li><a href="/invoices">Invoices</a></li>
               <li><a href="/payments">Payments</a></li>
               <li><a href="#">Contracts</a></li>
             </ul>

@@ -72,12 +72,6 @@ export default class PaymentSingle extends Component {
   componentWillReceiveProps(nextProps) {
     let c = nextProps.payment;
 
-    if (this.state.payment) {
-      if (this.state.editable) {
-        c.name = clone(this.state.payment.name);
-      }
-    }
-
 
     if (this.state.editable) {
       c = clone(this.state.payment);

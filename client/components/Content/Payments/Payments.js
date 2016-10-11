@@ -90,11 +90,11 @@ class Payments extends Component {
     const searchQuery = queryText.toLowerCase();
 
     var displayedPayments = props.payments.filter(function(el) {
-        const paymenAmount = el.amount      ? el.amount.toLowerCase()      : '';
-        const paymenStatus = el.status      ? el.status.toLowerCase()      : '';
-        const paymenDate   = el.date        ? el.date.toLowerCase()        : '';
-        const paymenID     = el._id         ? el._id._str.toLowerCase()    : '';
-        const customerName  = el.customerName ? el.customerName.toLowerCase() : '';
+        const paymenAmount = el.amount      ? el.amount.toLowerCase()        : '';
+        const paymenStatus = el.status      ? el.status.toLowerCase()        : '';
+        const paymenDate   = el.date        ? el.date.toLowerCase()          : '';
+        const paymenID     = el._id         ? el._id._str.toLowerCase()      : '';
+        const customerName = el.customerName ? el.customerName.toLowerCase() : '';
 
         return (paymenAmount.indexOf(searchQuery) !== -1 ||
                 paymenStatus.indexOf(searchQuery) !== -1 ||
