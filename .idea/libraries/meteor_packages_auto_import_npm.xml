@@ -2631,6 +2631,7 @@
         <item url="file://$USER_HOME$/.meteor/packages/babel-compiler/6.9.1/npm/node_modules/core-js/modules/es6.array.filter.js" />
         <item url="file://$USER_HOME$/.meteor/packages/babel-compiler/6.9.1/npm/node_modules/core-js/modules/core.object.make.js" />
         <item url="file://$USER_HOME$/.meteor/packages/babel-compiler/6.9.1/npm/node_modules/core-js/modules/es6.regexp.match.js" />
+        <item url="file://$USER_HOME$/.meteor/packages/tmeasday_check-npm-versions/0.2.0/npm/node_modules/semver/semver.js" />
         <item url="file://$USER_HOME$/.meteor/packages/babel-compiler/6.9.1/npm/node_modules/core-js/modules/es6.object.set-prototype-of.js" />
         <item url="file://$USER_HOME$/.meteor/packages/babel-compiler/6.9.1/npm/node_modules/core-js/modules/es6.number.is-integer.js" />
         <item url="file://$USER_HOME$/.meteor/packages/babel-compiler/6.9.1/npm/node_modules/core-js/modules/_set-species.js" />
@@ -7580,6 +7581,7 @@
       <root url="file://$USER_HOME$/.meteor/packages/babel-compiler/6.9.1/npm/node_modules/core-js/modules/es6.array.filter.js" />
       <root url="file://$USER_HOME$/.meteor/packages/babel-compiler/6.9.1/npm/node_modules/core-js/modules/core.object.make.js" />
       <root url="file://$USER_HOME$/.meteor/packages/babel-compiler/6.9.1/npm/node_modules/core-js/modules/es6.regexp.match.js" />
+      <root url="file://$USER_HOME$/.meteor/packages/tmeasday_check-npm-versions/0.2.0/npm/node_modules/semver/semver.js" />
       <root url="file://$USER_HOME$/.meteor/packages/babel-compiler/6.9.1/npm/node_modules/core-js/modules/es6.object.set-prototype-of.js" />
       <root url="file://$USER_HOME$/.meteor/packages/babel-compiler/6.9.1/npm/node_modules/core-js/modules/es6.number.is-integer.js" />
       <root url="file://$USER_HOME$/.meteor/packages/babel-compiler/6.9.1/npm/node_modules/core-js/modules/_set-species.js" />

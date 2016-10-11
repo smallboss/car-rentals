@@ -4,7 +4,8 @@
 import { Meteor } from 'meteor/meteor'
 import { Mongo } from 'meteor/mongo'
 import { createContainer } from 'meteor/react-meteor-data'
-import { ApiCustomers } from '../../../../../imports/api/customers'
+//import { ApiCustomers } from '../../../../../imports/api/customers'
+import { Accounts } from 'meteor/accounts-base'
 import React from 'react'
 import $ from 'jquery'
 import { browserHistory } from 'react-router'
@@ -15,7 +16,7 @@ import './style.css'
 class Customer extends React.Component {
     constructor (props) {
         super(props)
-        this.state = {customer: this.props.customer}        
+        this.state = {customer: props.customer, editAble: 0}
         this.handlerEditCustomer = this.handlerEditCustomer.bind(this)
         this.handlerChildState = this.handlerChildState.bind(this)
     }
@@ -36,8 +37,11 @@ class Customer extends React.Component {
         }
     }
     componentWillReceiveProps (nextProps) {
+        console.log('down is next props')
+        console.log(nextProps)
         let customer = nextProps.customer
         this.setState({customer: customer})
+        this.forceUpdate()
     }
     handlerNavUserEdit (e) {
         let li_s = $('.nav-user-edit li').removeClass('active-href-nav'),
@@ -49,7 +53,7 @@ class Customer extends React.Component {
     handlerRemoveCustomer (id) {
         let _confirm = confirm('Are You sure to delete this customer?')
         if(_confirm) {
-            ApiCustomers.remove({_id: new Mongo.ObjectID(id._str)})
+            Meteor.users.remove({_id: id})
             browserHistory.push('/customers_list')   
         }        
     }
@@ -59,29 +63,35 @@ class Customer extends React.Component {
             _newState
         switch (id) {
             case 'button_edit':
-                $('#button_save').removeAttr('disabled')
+                this.setState({editAble: 1});
+                /*$('#button_save').removeAttr('disabled')
                 $('.form-control').removeAttr('readOnly')
-                $('.form-control').removeAttr('disabled');
+                $('.form-control').removeAttr('disabled');*/
                 [...document.getElementsByClassName('form-control')].forEach(input => {
                     if(input.type == 'file') {
                         input.addEventListener('change', (eFile) => {
                             let file = eFile.target.files[0],
                                 _target = eFile.target.id,
-                                _images = this.state.customer._images || {},
                                 _newFile,
-                                _newCustomer
+                                _newCustomer = this.state.customer,
+                                _images = {}
+                            if(!_newCustomer.profile._images){
+                                _newCustomer.profile = {}
+                                _newCustomer.profile._images = _images
+                            }
                             if(file.size > 1100000) {
                                 alert('Please upload image less than 1mb')
                                 eFile.preventDefault()
                                 return false
                             }
+                            if(file.type != 'image/png' || file.type != 'image/jpeg') {
+                                alert('Please upload image png or jpeg')
+                                eFile.preventDefault()
+                                return false
+                            }
                             imgToBase64(file, (result) => {
                                 _newFile = result
-                                _images[_target] = _newFile
-                                _newCustomer = {
-                                    ...this.state.customer,
-                                    _images
-                                }
+                                _newCustomer.profile._images[_target] = _newFile
                                 this.setState({customer: _newCustomer})
                             })
                         })
@@ -90,9 +100,26 @@ class Customer extends React.Component {
                             let customer = this.state.customer,
                                 _target = eInput.target.id,
                                 _newValue = eInput.target.value
-                            if(_newValue.length > 0) {
-                                customer[_target] = _newValue
-                                this.setState({...customer})
+                            if(!customer.profile) {
+                                customer.profile = {}
+                                customer.emails = [{}]
+                            }
+                            if(typeof _newValue == 'string') {
+                                if (_target == 'username') {
+                                    customer[_target] = _newValue
+                                } else {
+                                    if (_target == 'email') {
+                                        if(this.props.params.id == 'new') {
+                                            customer[_target] = _newValue
+                                            customer.emails[0].address = _newValue
+                                        } else {
+                                            customer.emails[0].address = _newValue    
+                                        }                                        
+                                    } else {
+                                        customer.profile[_target] = _newValue   
+                                    }                                  
+                                }
+                                this.setState({customer: customer})
                             }
                         })   
                     }                    
@@ -100,20 +127,31 @@ class Customer extends React.Component {
                 document.getElementById('button_save').addEventListener('click', this.handlerEditCustomer)
                 break
             case 'button_save':
-                $('.form-control').prop('disabled', true)
-                $('#button_save').prop('disabled', true)
+                /*$('.form-control').prop('disabled', true)
+                $('#button_save').prop('disabled', true)*/
                 _id = this.state.customer._id || undefined
                 _newState = this.state.customer;
                 if(_newState._new) {
                     delete _newState._new
+                    if(!_newState.profile){
+                        _newState.profile = {}
+                    }
                     _newState._id = new Mongo.ObjectID()
-                    _newState.role = 'customer'
-                    ApiCustomers.insert(_newState)
-                    this.setState({customers: _newState})
+                    _newState.password = '12345'
+                    _newState.profile.userType = 'customer'
+                    Accounts.createUser(_newState, (err) => {
+                        if(err) {
+                            console.log(err)
+                        } else {
+                            alert('You have added user')
+                        }
+                    })
+                    this.setState({customers: _newState, editAble: 0})
                 } else {
                     delete this.state.customer._id
-                    ApiCustomers.update(_id, {$set: _newState})   
-                }                
+                    Meteor.users.update(_id, {$set: _newState})
+                    this.setState({editAble: 0})
+                }               
                 break
             default:
                 break
@@ -122,13 +160,33 @@ class Customer extends React.Component {
     handlerChildState(target, data) {
         let _state = this.state.customer,
             _id = this.state.customer._id
-        _state[target] = data
+        _state.profile[target] = data
         delete this.state.customer._id
-        ApiCustomers.update(_id, {$set: _state})        
+        Meteor.users.update(_id, {$set: _state})
     }
     render () {
-        let { _id, name, userName, address, email, birthDate, phone, role, _images} = this.state.customer || [],
-            carRequest = (this.state.customer.carRequest) ? this.state.customer.carRequest : [
+        let editAble = (!this.state.editAble) ? 'disabled' : false
+        let { _id, username } = this.state.customer || [];
+        let email = (this.state.customer.emails) ? this.state.customer.emails[0].address : ''
+        let { name, birthDate, phone, address, userType } = this.state.customer.profile || '';
+        let { fines } = this.state.customer.profile || '',
+            { tolls } = this.state.customer.profile || '',
+            carRequest,
+            rentals,
+            payments
+        if(this.state.customer.profile && (typeof this.state.customer.profile._images == 'object')){
+            _images = this.state.customer.profile._images
+        } else {
+            _images = {
+                imgId: '',
+                imgLicense: ''
+            }
+        }
+        let { imgId, imgLicense } = _images
+        if(this.state.customer.profile && (typeof this.state.customer.profile.carRequest == 'object')) {
+            carRequest = this.state.customer.profile.carRequest
+        } else {
+            carRequest = [
                 {
                     _id: new Mongo.ObjectID(),
                     dateCreateRequest: '',
@@ -136,52 +194,53 @@ class Customer extends React.Component {
                     dateTo: '',
                     requestText: ''
                 }
-            ],
-            rentals = (this.state.customer.rentals) ? this.state.customer.rentals : [
+            ] 
+        }
+        if(this.state.customer.profile && (typeof this.state.customer.profile.rentals == 'object')) {
+            rentals = this.state.customer.profile.rentals
+        } else {
+            rentals = [
                 {
                     _id: new Mongo.ObjectID(),
                     carId: '',
                     dateFrom: '',
                     dateTo: ''
                 }
-            ],
-            payments = (this.state.customer.payments) ? this.state.customer.payments : [
+            ]
+        }
+        if(this.state.customer.profile && (typeof this.state.customer.profile.payments == 'object')) {
+            payments = this.state.customer.profile.payments
+        } else {
+            payments = [
                 {
                     _id: new Mongo.ObjectID(),
                     datePayment: '',
                     statePayment: '',
                     QuantityPayment: ''
                 }
-            ],
-            { fines } = this.state.customer || '',
-            { tolls } = this.state.customer || '',
-            imgId,
-            imgLicense
-        if (_images) {
-            imgId = _images.imgId || ''
-            imgLicense = _images.imgLicense || ''             
-        }
+            ]
+        }                 
         return (
             <div className='panel panel-default'>
                 <div className='panel-heading'>
-                    <h4>{name} / {userName}</h4>
+                    <h4>{username} / {name}</h4>
                     <input type='button' className='btn btn-primary p-x-1' value='Print' />
-                    <input type='button' id='button_save' className='btn btn-primary p-x-1 m-x-1' value='Save' disabled />
+                    <input type='button' id='button_save' className='btn btn-primary p-x-1 m-x-1' value='Save' disabled={editAble} />
                     <input type='button' id='button_edit' className='btn btn-primary p-x-1' value='Edit' onClick={this.handlerEditCustomer} />
                     <input type='button' className='btn btn-primary p-x-1 m-x-1' value='Delete' onClick={() => { this.handlerRemoveCustomer(_id) }} />
                 </div>
                 <div className='panel-body'>
                     <div className='row'>
                         <div className='col-xs-6'>
-                            <label htmlFor='name' className='col-xs-2'>Name</label>
+                            <label htmlFor='username' className='col-xs-2'>User Name</label>
                             <div className='col-xs-8 form-horizontal'>
-                                <input type='text' id='name' className='form-control' value={name} readOnly/>
+                                <input type='text' id='username' className='form-control' value={username} disabled={editAble} />
                             </div>
                         </div>
                         <div className='col-xs-6'>
                             <label htmlFor='address' className='col-xs-2'>Address</label>
                             <div className='col-xs-8 form-horizontal'>
-                                <input type='text' id='address' className='form-control' value={address} readOnly/>
+                                <input type='text' id='address' className='form-control' value={address} disabled={editAble} />
                             </div>
                         </div>
                     </div>
@@ -189,13 +248,13 @@ class Customer extends React.Component {
                         <div className='col-xs-6'>
                             <label htmlFor='phone' className='col-xs-2'>Phone</label>
                             <div className='col-xs-8 form-horizontal'>
-                                <input type='text' id='phone' className='form-control' value={phone} readOnly/>
+                                <input type='text' id='phone' className='form-control' value={phone} disabled={editAble} />
                             </div>
                         </div>
                         <div className='col-xs-6'>
                             <label htmlFor='email' className='col-xs-2'>Email</label>
                             <div className='col-xs-8 form-horizontal'>
-                                <input type='email' id='email' className='form-control' value={email} readOnly/>
+                                <input type='email' id='email' className='form-control' value={email} disabled={editAble} />
                             </div>
                         </div>
                     </div>
@@ -203,7 +262,7 @@ class Customer extends React.Component {
                         <div className='col-xs-6'>
                             <label htmlFor='birhdate' className='col-xs-2'>Birth Date</label>
                             <div className='col-xs-8 form-horizontal'>
-                                <input type='date' id='birthDate' className='form-control' value={birthDate} readOnly/>
+                                <input type='date' id='birthDate' className='form-control' value={birthDate} disabled={editAble}/>
                             </div>
                         </div>
                     </div>
@@ -224,11 +283,11 @@ class Customer extends React.Component {
                             <div id='div_images' className='inner-div-users-edit'>
                                 <div className='col-xs-6'>
                                     <img src={imgId} />
-                                    <input type='file' id='imgId' className='form-control' disabled/>
+                                    <input type='file' id='imgId' className='form-control' accept='image/*' disabled={editAble} />
                                 </div>
                                 <div className='col-xs-6'>
                                     <img src={imgLicense} />
-                                    <input type='file' id='imgLicense' className='form-control' disabled/>
+                                    <input type='file' id='imgLicense' className='form-control' accept='image/*' disabled={editAble} />
                                 </div>                          
                             </div>
                             <div id='div_car_request'  className='inner-div-users-edit'>
@@ -244,7 +303,7 @@ class Customer extends React.Component {
                                 <div className='form-group'>
                                     <label htmlFor='fines' className='col-xs-2'>Fines</label>
                                     <div className='col-xs-7'>
-                                        <input type='text' id='fines' className='form-control' value={fines} disabled />
+                                        <input type='text' id='fines' className='form-control' value={fines} disabled={editAble} />
                                     </div>                                    
                                 </div>                                
                             </div>
@@ -252,7 +311,7 @@ class Customer extends React.Component {
                                 <div className='form-group'>
                                     <label htmlFor='tolls' className='col-xs-2'>Tolls</label>
                                     <div className='col-xs-7'>
-                                        <input type='text' id='tolls' className='form-control' value={tolls} disabled />
+                                        <input type='text' id='tolls' className='form-control' value={tolls} disabled={editAble} />
                                     </div>                                    
                                 </div>                                
                             </div>
@@ -273,7 +332,7 @@ export default createContainer(({params}) => {
         }
     } else {
         return {
-            customer: ApiCustomers.findOne({_id: new Mongo.ObjectID(_id)})
+            customer: Meteor.users.findOne({_id: _id})
         }   
     }    
 }, Customer)
