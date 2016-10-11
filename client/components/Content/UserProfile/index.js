@@ -3,6 +3,7 @@
  */
 import React from 'react'
 import { Meteor } from 'meteor/meteor'
+import { Accounts } from 'meteor/accounts-base'
 import { Session } from 'meteor/session'
 import { createContainer } from 'meteor/react-meteor-data'
 
@@ -23,11 +24,11 @@ class UserProfile extends React.Component {
         if(typeof _newValue == 'string') {
             if (_target == 'email') {
                 _newUser.emails[0].address = _newValue
-            } else {
+            } else if(_target !== 'password' && _target !== 'repeat_password') {
                 _newUser.profile[_target] = _newValue
             }            
         }
-        this.setState({user: _newUser})        
+        this.setState({user: _newUser})
     }
     handlerButtonsEdit (e) {
         let _nameButton = e.target.name,
@@ -42,7 +43,19 @@ class UserProfile extends React.Component {
                 this.refButtonSave.addEventListener('click', this.handlerButtonsEdit)
                 break
             case 'saveButton':
-                delete this.state.user._id
+                if(this.refFormEdit['password'].value !== this.refFormEdit['repeat_password'].value) {
+                    alert('Input right repeat password please')
+                    return false
+                } else if (this.refFormEdit['password'].value.length > 0) {
+                    Meteor.call('setPassword', _id, this.refFormEdit['password'].value, function (err, result) {
+                        if(!err) {
+                            alert('Your password has been change. Sign in again please')
+                        } else {
+                            console.log(err.reason)
+                        }
+                    })
+                }
+                delete _сurrentState._id
                 Meteor.users.update(_id, {$set: _сurrentState})
                 this.setState({editAble: 0})
                 break
@@ -95,7 +108,19 @@ class UserProfile extends React.Component {
                                 <div className='col-xs-10'>
                                     <input type='text' id='address' className='form-control' value={address} disabled={editAble} />
                                 </div>
-                            </div><br />                                                   
+                            </div><br />
+                            <div className='form-group'>
+                                <label htmlFor='password' className='control-label col-xs-2'>Password</label>
+                                <div className='col-xs-10'>
+                                    <input type='password' id='password' className='form-control' disabled={editAble}  />
+                                </div>
+                            </div><br />
+                            <div className='form-group'>
+                                <label htmlFor='repeat_password' className='control-label col-xs-2'>Repeat password</label>
+                                <div className='col-xs-10'>
+                                    <input type='password' id='repeat_password' className='form-control' disabled={editAble}  />
+                                </div>
+                            </div><br />                            
                         </form>
                     </div>
                 </div>
