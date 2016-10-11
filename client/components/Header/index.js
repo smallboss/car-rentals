@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-
 import { Link } from 'react-router';
+import Login from '../Content/Login'
 
 export default class Header extends Component {
   render() {
@@ -14,6 +14,9 @@ export default class Header extends Component {
             <span className="icon-bar"></span>
           </button>
           <Link className="navbar-brand" to="/">Cars Rentals</Link>
+        </div>
+        <div className='pull-right'>
+          <Login />
         </div>
       </nav>
     )
