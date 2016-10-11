@@ -28,44 +28,54 @@ export default class PaymentSingle extends Component {
     }
 
 
+    this.onChangeCustomer = this.onChangeCustomer.bind(this);
     this.onChangeAmount = this.onChangeAmount.bind(this);
     this.onChangeNotes = this.onChangeNotes.bind(this);
     this.onChangeStatus = this.onChangeStatus.bind(this);
+    this.onChangeRef = this.onChangeRef.bind(this);
     this.handleSave = this.handleSave.bind(this);
     this.handleEdit = this.handleEdit.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
     this.handleSendByEmail = this.handleSendByEmail.bind(this);
   }
 
+// ====================== ON CHANGE ======================
   onChangeCustomer(value) {
     let newPayment = this.state.dispPayment;
     newPayment.customerId = new Mongo.ObjectID(value);
     this.setState({dispPayment: newPayment});
   }
-
   onChangeAmount(value) {
     let newPayment = this.state.dispPayment;
     newPayment.amount = value;
     this.setState({dispPayment: newPayment});
   }
-
   onChangeStatus(value) {
     let newPayment = this.state.dispPayment;
     newPayment.status = value;
     this.setState({dispPayment: newPayment});
   }
-
+  onChangeStatus(value) {
+    let newPayment = this.state.dispPayment;
+    newPayment.ref = value;
+    this.setState({dispPayment: newPayment});
+  }
   onChangeDate(value) {
     let newPayment = this.state.dispPayment;
     newPayment.date = value;
     this.setState({dispPayment: newPayment});
   }
-
+  onChangeRef(value) {
+    let newPayment = this.state.dispPayment;
+    newPayment.ref = value;
+    this.setState({dispPayment: newPayment});
+  }
   onChangeNotes(value) {
     let newPayment = this.state.dispPayment;
     newPayment.notes = value;
     this.setState({dispPayment: newPayment});
   }
+// END ================== ON CHANGE ======================
 
 
 
@@ -82,6 +92,9 @@ export default class PaymentSingle extends Component {
     if (!dataDispPayment) {
       dataDispPayment = clone(nextProps.payment)
     }
+
+
+    console.log(nextProps.userList)
 
     this.setState({
       payment: clone(c),
@@ -147,6 +160,7 @@ export default class PaymentSingle extends Component {
         amount,
         status,
         date,
+        ref,
         notes
       } = this.state.payment;
 
@@ -156,7 +170,7 @@ export default class PaymentSingle extends Component {
           <div className="topFields">
             <div className="row">
               <div className="form-group profit col-xs-6">
-                <label htmlFor="paymentStatus" className='col-xs-2'>Customer Name</label>
+                <label htmlFor="paymentCustomerName" className='col-xs-2'>Customer Name</label>
                 {(() => {
                   if (this.state.editable) {
                     return (
@@ -191,14 +205,14 @@ export default class PaymentSingle extends Component {
               </div>
 
               <div className="form-group profit col-xs-6">
-                <label htmlFor="paymentStatus" className='col-xs-2'>Date</label>
+                <label htmlFor="paymentDate" className='col-xs-2'>Date</label>
                 {(() => {
                   if (this.state.editable) {
                     return (
                       <div className='col-xs-8 form-horizontal'>
                         <input
                           type="date"
-                          id="paymentAmount"
+                          id="paymentDate"
                           className="form-control "
                           onChange={(e) => this.onChangeDate(e.target.value)}
                           value={ this.state.dispPayment.date }/>
@@ -256,6 +270,27 @@ export default class PaymentSingle extends Component {
                   }
 
                   return <div className='col-xs-8'>{amount}</div>
+                })()}
+              </div>
+            </div>
+            <div className="row">
+              <div className="form-group profit col-xs-6">
+                <label htmlFor="paymentRef" className='col-xs-2'>Ref.</label>
+                {(() => {
+                  if (this.state.editable) {
+                    return (
+                      <div className='col-xs-8 form-horizontal'>
+                        <input
+                          type="text"
+                          id="paymentRef"
+                          className="form-control "
+                          onChange={(e) => this.onChangeRef(e.target.value)}
+                          value={ this.state.dispPayment.ref }/>
+                      </div>
+                    )
+                  }
+
+                  return <div className='col-xs-8'>{ref}</div>
                 })()}
               </div>
             </div>
@@ -337,7 +372,7 @@ export default createContainer(({params}) => {
 
   return {
     payment: ApiPayments.findOne(idForQuery),
-    userList: Meteor.users.find().fetch(),
+    userList: Meteor.users.find({"profile.userType": "customer"}).fetch(),
     isNew: isNew
   }
 

@@ -39,6 +39,8 @@ class Payments extends Component {
     if (this.props.payments != props.payments) {
       this.handleChangeSearchField(this.state.searchField, props);
     }
+
+    console.log('props', props.userList)
   }
 
   componentWillUpdate(nextProps, nextState){
@@ -193,6 +195,6 @@ export default createContainer(() => {
 
   return {
     payments: ApiPayments.find().fetch(),
-    userList: Meteor.users.find().fetch()
+    userList: Meteor.users.find({"profile.userType": "customer"}).fetch()
   };
 }, Payments);
