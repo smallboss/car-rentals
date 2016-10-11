@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Link } from 'react-router';
 import { map } from 'lodash';
 
 export default class PaymentRow extends Component {
@@ -32,7 +33,7 @@ export default class PaymentRow extends Component {
                         onChange={(e) => onHandleSelect(e, item)} />
                 </th>
                 <td>
-                    <a href={`/customers/${item.customerId}`}>{ customerName.username }</a>
+                    <Link to={`/customers/${item.customerId}`}>{ customerName.username }</Link>
                 </td>
                 <td onClick={onClick} >{ item.date }</td>
                 <td onClick={onClick} >{ item._id._str }</td>

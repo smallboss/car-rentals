@@ -122,6 +122,7 @@ class Invoices extends Component {
 
 
   handleInvoiceSingleOnClick(invoiceId) {
+    console.log('invoiceId', invoiceId)
     browserHistory.push(`/invoices/${invoiceId}`);
     // this.context.router.push(`/payments/${paymentId}`)
   }
@@ -140,7 +141,7 @@ class Invoices extends Component {
                       key={key} 
                       item={itemInvoice} 
                       customerName={Meteor.users.findOne(itemInvoice.customerId)}
-                      onClick={this.handleInvoiceSingleOnClick.bind(null, itemInvoice)}
+                      onClick={this.handleInvoiceSingleOnClick.bind(null, itemInvoice._id)}
                       selectedInvoicesId={this.state.selectedInvoicesID} 
                       onHandleSelect={this.handleSelect} />
         }
