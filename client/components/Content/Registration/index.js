@@ -78,6 +78,18 @@ class Registration extends React.Component {
                 e.preventDefault()
                 return false
             }
+            if(typeof fileId == 'object' && (fileId.type != 'image/png' && fileId.type != 'image/jpeg')) {
+                alert('Please upload Id image png or jpeg')
+                _target[8].innerHTML = ''
+                e.preventDefault()
+                return false
+            }
+            if(typeof fileLicense == 'object' && (fileLicense.type != 'image/png' && fileLicense.type != 'image/jpeg')) {
+                alert('Please upload License image png or jpeg')
+                _target[9].innerHTML = ''
+                e.preventDefault()
+                return false
+            }
             if (typeof fileId != 'string') {
                 imgToBase64(fileId, (base64Id) => {
                     _user.profile._images.imgId = base64Id
@@ -86,7 +98,7 @@ class Registration extends React.Component {
                             _user.profile._images.imgLicense = base64License
                             Accounts.createUser(_user, (err) => {
                                 if(err) {
-                                    console.log(err)
+                                    alert(err.reason)
                                 } else {
                                     alert('You have register. You can enter with your login and password')
                                 }
@@ -96,7 +108,7 @@ class Registration extends React.Component {
                     } else {
                         Accounts.createUser(_user, (err) => {
                             if(err) {
-                                console.log(err)
+                                alert(err.reason)
                             } else {
                                 alert('You have register. You can enter with your login and password')
                             }
@@ -109,7 +121,7 @@ class Registration extends React.Component {
                     _user.profile._images.imgLicense = base64License
                     Accounts.createUser(_user, (err) => {
                         if(err) {
-                            console.log(err)
+                            alert(err.reason)
                         } else {
                             alert('You have register. You can enter with your login and password')
                         }
@@ -120,7 +132,7 @@ class Registration extends React.Component {
         } /*handle with images if they are end*/ else {
             Accounts.createUser(_user, (err) => {
                 if(err) {
-                    console.log(err)
+                    alert(err.reason)
                 } else {
                     alert('You have register. You can enter with your login and password')
                 }
@@ -242,15 +254,15 @@ class Registration extends React.Component {
                     </div>
                 </div><br />
                 <div className='form-group'>
-                    <label htmlFor='img_id' className='control-label col-xs-2'>Upload ID</label>
+                    <label htmlFor='imgId' className='control-label col-xs-2'>Upload ID</label>
                     <div className='col-xs-10'>
-                        <input type='file' id='img_id' className='form-control'  />
+                        <input type='file' id='imgId' className='form-control' />
                     </div>
                 </div><br />
                 <div className='form-group'>
-                    <label htmlFor='img_license' className='control-label col-xs-2'>Upload License</label>
+                    <label htmlFor='imgLicense' className='control-label col-xs-2'>Upload License</label>
                     <div className='col-xs-10'>
-                        <input type='file' id='img_license' className='form-control'  />
+                        <input type='file' id='imgLicense' className='form-control' />
                     </div>
                 </div><br />
                 <input type='submit' className='btn btn-success' value='Register' />

@@ -84,6 +84,11 @@ class Customer extends React.Component {
                                 eFile.preventDefault()
                                 return false
                             }
+                            if(file.type != 'image/png' || file.type != 'image/jpeg') {
+                                alert('Please upload image png or jpeg')
+                                eFile.preventDefault()
+                                return false
+                            }
                             imgToBase64(file, (result) => {
                                 _newFile = result
                                 _newCustomer.profile._images[_target] = _newFile
@@ -278,11 +283,11 @@ class Customer extends React.Component {
                             <div id='div_images' className='inner-div-users-edit'>
                                 <div className='col-xs-6'>
                                     <img src={imgId} />
-                                    <input type='file' id='imgId' className='form-control' disabled={editAble} />
+                                    <input type='file' id='imgId' className='form-control' accept='image/*' disabled={editAble} />
                                 </div>
                                 <div className='col-xs-6'>
                                     <img src={imgLicense} />
-                                    <input type='file' id='imgLicense' className='form-control' disabled={editAble} />
+                                    <input type='file' id='imgLicense' className='form-control' accept='image/*' disabled={editAble} />
                                 </div>                          
                             </div>
                             <div id='div_car_request'  className='inner-div-users-edit'>
