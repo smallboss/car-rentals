@@ -1,0 +1,6 @@
+.modal-sm {
+    width: 450px;
+}
+.modal-sm .form-group label {
+    margin-top: 15px;
+}

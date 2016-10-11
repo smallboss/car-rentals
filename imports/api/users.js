@@ -12,6 +12,6 @@ if(Meteor.isServer) {
                 return true
             }
         })
-        return Meteor.users.find()
+        return Meteor.users.find({}, {fields: {'password': 0}})
     })
 }

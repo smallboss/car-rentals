@@ -12,7 +12,7 @@ if(Meteor.isServer) {
         return true
       }
     })
-    return Meteor.users.find({"profile.userType": "customer"})
+    return Meteor.users.find({"profile.userType": "customer"}, {fields: {'password': 0}})
   })
 }
 
