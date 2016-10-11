@@ -157,9 +157,6 @@ export default class CarSingle extends Component {
 
 
     this.setState({car: newCar, dispCar: newCar, editable: false});
-
-    // if (this.state.isNew)
-    //   browserHistory.push(`/cars/${id._str}`);
   }
 
   handleEdit() {
@@ -420,7 +417,14 @@ export default class CarSingle extends Component {
                     )
                   }
 
-                  return <textarea className="form-control" rows="3" disabled>{description}</textarea>
+                  return (
+                    <textarea 
+                      className="form-control" 
+                      rows="3"
+                      value={description}
+                      disabled>
+                    </textarea>
+                  )
                 })()}
               </div>
               <div role="tabpanel" className="tab-pane" id="maintenance">
@@ -475,7 +479,15 @@ export default class CarSingle extends Component {
                     )
                   }
 
-                  return <div>{notes}</div>
+                  return (
+                      <textarea
+                        className='form-control'
+                        ref={ (ref) => this.inputNotes = ref }
+                        onChange={(e) => this.onChangeNotes(e.target.value)}
+                        value={notes}
+                        disabled>
+                      </textarea>
+                    )
                 })()}
               </div>
               <div role="tabpanel" className="tab-pane" id="totalExpense">
@@ -541,7 +553,7 @@ export default createContainer(({params}) => {
     isNew = true;
     carId = params.carId.substring(3);
     window.history.pushState('object or string', 'Title', `/cars/${carId}`);
-    window.history.back();
+    // window.history.back();
   }
 
 
