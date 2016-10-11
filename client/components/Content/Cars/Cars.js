@@ -94,7 +94,9 @@ class Cars extends Component {
         const carPlateNumber = el.plateNumber ? el.plateNumber.toLowerCase() : '';
         const carStatus      = el.status ? el.status.toLowerCase() : '';
 
-        return (carName.indexOf(searchQuery) !== -1 || carPlateNumber.indexOf(searchQuery) !== -1 || carStatus.indexOf(searchQuery) !== -1)
+        return (carName.indexOf(searchQuery) !== -1 || 
+                carPlateNumber.indexOf(searchQuery) !== -1 || 
+                carStatus.indexOf(searchQuery) !== -1)
     });
 
 
@@ -123,15 +125,16 @@ class Cars extends Component {
   render() {
 
     const renderCars = () => {
-        return this.state.foundItems.map((itemCar, key) => {
-          if(   (key >= (this.state.currentPage-1) * this.state.itemsOnPage) 
-             && (key <   this.state.currentPage    * this.state.itemsOnPage))
-            return <CarRow 
-                      key={key} 
-                      car={itemCar} 
-                      onClick={this.handleCarSingleOnClick.bind(null, itemCar._id)}
-                      selectedCarsId={this.state.selectedCarsID} 
-                      onHandleSelect={this.handleSelect} />
+      return this.state.foundItems.map((itemCar, key) => {
+        if(   (key >= (this.state.currentPage-1) * this.state.itemsOnPage) 
+           && (key <   this.state.currentPage    * this.state.itemsOnPage))
+
+          return <CarRow 
+                    key={key} 
+                    car={itemCar} 
+                    onClick={this.handleCarSingleOnClick.bind(null, itemCar._id)}
+                    selectedCarsId={this.state.selectedCarsID} 
+                    onHandleSelect={this.handleSelect} />
         }
       )
     }
@@ -147,8 +150,7 @@ class Cars extends Component {
           pageDown={this.pageDown}
           onChangeSearchField={this.handleChangeSearchField}
           onAddNew={this.addCar} 
-          onRemoveCars={this.removeCars}
-          isSelected={this.state.selectedCarsID.length} />
+          onRemoveCars={this.removeCars} />
 
         <table className="table table-bordered table-hover">
           <thead>
@@ -164,7 +166,6 @@ class Cars extends Component {
            {renderCars()}
           </tbody>
         </table>
-
       </div>
     )
   }
