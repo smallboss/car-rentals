@@ -3,8 +3,7 @@
  */
 import React from 'react'
 import { Meteor } from 'meteor/meteor'
-import { Accounts } from 'meteor/accounts-base'
-import { Session } from 'meteor/session'
+import { browserHistory } from 'react-router'
 import { createContainer } from 'meteor/react-meteor-data'
 
 class UserProfile extends React.Component {
@@ -50,6 +49,7 @@ class UserProfile extends React.Component {
                     Meteor.call('setPassword', _id, this.refFormEdit['password'].value, function (err, result) {
                         if(!err) {
                             alert('Your password has been change. Sign in again please')
+                            browserHistory.push('/')
                         } else {
                             console.log(err.reason)
                         }
@@ -136,7 +136,7 @@ UserProfile.propTypes = {
 
 export default createContainer(() => {
     Meteor.subscribe('users')
-    let _id = Session.get('user')
+    let _id = Meteor.userId()
     if(_id) {
         return {
             user: Meteor.users.findOne({_id: _id})

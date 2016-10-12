@@ -158,10 +158,11 @@ class Table extends React.Component {
                     <tr key={Math.random()} className={classNameNewField} ref={ref => this._r_addNewField = ref}>
                         <td>#<input type='button' className='btn btn-success m-l-1' name='save_notes_new' value='Save' onClick={this.handlerEditButtons} /></td>
                         {_stateToTh.map(prop => {
-                            let _typeInput = (prop.indexOf('date') != -1) ? 'date' : 'text'
+                            let _typeInput = (prop.indexOf('date') != -1) ? 'date' : 'text',
+                                _defaultValue = (prop.indexOf('date') != -1) ? new Date().toLocaleDateString() : ''
                             if(prop != '_id') {
                                 return (
-                                    <td key={Math.random()}><input type={_typeInput} id={prop} className='form-control' placeholder='Input new value' /></td>
+                                    <td key={Math.random()}><input type={_typeInput} id={prop} className='form-control' defaultValue={_defaultValue}/></td>
                                 )
                             }
                         }) }
