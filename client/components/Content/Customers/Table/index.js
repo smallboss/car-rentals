@@ -131,9 +131,9 @@ class Table extends React.Component {
         this.setState({arrToTable: _curArr})
     }
     render () {
-        //console.log(this.state)
         let classNameNewField = (!this.state.addNewField) ? 'hidden' : ''
-        let _stateToTh = (this.state.arrToTable) ? Object.keys(this.state.arrToTable[0] || {}, key => obj[key]) : []
+        let _stateToTh = (this.state.arrToTable) ? Object.keys(this.state.arrToTable[0] || {}, key => obj[key]) : [];
+        console.log(this.state.arrToTable);
         return (
             <div>
                 <div className='row' ref={ref => {this._r_buttonArea = ref}}>
@@ -158,9 +158,11 @@ class Table extends React.Component {
                     <tr key={Math.random()} className={classNameNewField} ref={ref => this._r_addNewField = ref}>
                         <td>#<input type='button' className='btn btn-success m-l-1' name='save_notes_new' value='Save' onClick={this.handlerEditButtons} /></td>
                         {_stateToTh.map(prop => {
+                            let _typeInput = (prop.indexOf('date') != -1) ? 'date' : 'text',
+                                _defaultValue = (prop.indexOf('date') != -1) ? new Date().toLocaleDateString() : ''
                             if(prop != '_id') {
                                 return (
-                                    <td key={Math.random()}><input type='text' id={prop} className='form-control' placeholder='Input new value' /></td>
+                                    <td key={Math.random()}><input type={_typeInput} id={prop} className='form-control' defaultValue={_defaultValue}/></td>
                                 )
                             }
                         }) }
@@ -176,10 +178,11 @@ class Table extends React.Component {
                                         
                                         {_stateToTd.map(val => {
                                             if(typeof elem[val] == 'string') {
+                                                let _typeInput = (val.indexOf('date') != -1) ? 'date' : 'text'
                                                 if(elem._toedit) {
                                                     return (
                                                         <td key={Math.random()}>
-                                                            <input type='text' className='form-control' name={val} defaultValue={elem[val]} onChange={(e) => {this.handlerInputs(elem._id._str, e)}} />
+                                                            <input type={_typeInput} className='form-control' name={val} defaultValue={elem[val]} onChange={(e) => {this.handlerInputs(elem._id._str, e)}} />
                                                         </td>
                                                     )   
                                                 } else {

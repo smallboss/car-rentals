@@ -2,7 +2,6 @@
  * Created by watcher on 10/10/16.
  */
 import React from 'react'
-import { Session } from 'meteor/session'
 import { createContainer } from 'meteor/react-meteor-data'
 import { Link } from 'react-router'
 import { browserHistory } from 'react-router'
@@ -36,7 +35,7 @@ class Login extends React.Component {
                 <ul className='dropdown-menu pull-right'>
                     <Link className='p-a-1' to='/user_profile'>My profile</Link>
                     <li role='separator' className='divider'></li>
-                    <li className='p-a-1'><input type='button' className='btn btn-primary' value='Logout' onClick={() => {Session.set('user'); browserHistory.push('/')}}/></li>                    
+                    <li className='p-a-1'><input type='button' className='btn btn-primary' value='Logout' onClick={() => {Meteor.logout(); browserHistory.push('/')}}/></li>                   
                 </ul>
             </div>
         )
@@ -44,7 +43,7 @@ class Login extends React.Component {
 }
 
 export default createContainer(() => {
-    let _id = Session.get('user')
+    let _id = Meteor.userId()
     if(_id) {
         return {
             loginedUser: Meteor.users.findOne({_id: _id})
