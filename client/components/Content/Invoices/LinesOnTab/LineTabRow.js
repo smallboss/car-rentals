@@ -1,65 +1,51 @@
 import React, { Component, PropTypes } from 'react';
 import { map, find } from 'lodash';
 
-import { paymentStateTypes } from '/imports/startup/typesList.js';
-
 export default class LineTabRow extends Component {
     constructor(props) {
         super(props); 
 
         this.state = {
-            dispPayment: this.props.payment,
+            dispLine: this.props.line,
             isEdit: this.props.isEdit
         }
 
-        this.onChangeDate = this.onChangeDate.bind(this);
         this.onChangeAmount = this.onChangeAmount.bind(this);
-        this.onChangeStatus = this.onChangeStatus.bind(this);
     } 
 
 
     componentWillReceiveProps(nextProps){
-        let dispPayment = (!this.state.dispPayment)
-                                    ? nextProps.payment 
-                                    : this.state.dispPayment
+        let dispLine = (!this.state.dispLine)
+                                    ? nextProps.line 
+                                    : this.state.dispLine
 
-        const nextPayment = nextProps.payment ? nextProps.payment._id._str : '';
-        const isSelected = find(nextProps.selectedListId, {_str: nextPayment});
+        const nextLine = nextProps.line ? nextProps.line._id._str : '';
+        const isSelected = find(nextProps.selectedListId, {_str: nextLine});
         this.checkbox.checked = isSelected;
 
         const isEdit = (isSelected && nextProps.isEdit) ? true : false;
 
-        this.setState({dispPayment, isEdit});
+        this.setState({dispLine, isEdit});
     }
 
 // ==================== CHANGERS FIELDS =============================
-    onChangeDate(value){
-        let newPayment = this.state.dispPayment;
-        newPayment.date = value;
-        this.setState({dispPayment: newPayment});
-    }
     onChangeAmount(value){
-        let newPayment = this.state.dispPayment;
-        newPayment.amount = value;
-        this.setState({dispPayment: newPayment});
-    }
-    onChangeStatus(value){
-        let newPayment = this.state.dispPayment;
-        newPayment.status = value;
-        this.setState({dispPayment: newPayment});
+        let newLine = this.state.dispLine;
+        newLine.amount = value;
+        this.setState({dispLine: newLine});
     }
 // END ================ CHANGERS FIELDS =============================
 
 
     render(){
-        const payment = this.props.payment;
-        let dispPayment = this.state.dispPayment;
+        const line = this.props.line;
+        let dispLine = this.state.dispLine;
 
         const buttonSave = () => {
             if (this.state.isEdit) {
                 return (
                     <button
-                        onClick={() => this.props.onSave(this.state.dispPayment)}
+                        onClick={() => this.props.onSave(this.state.dispLine)}
                         className='btn btn-danger'>
                         Save
                     </button>
@@ -81,16 +67,36 @@ export default class LineTabRow extends Component {
             return <span>{payment ? payment.date : ''}</span>
         }
 
+        const showDateFrom = () => {
+            if (this.state.isEdit){
+                return(
+                    <input  type="date"
+                            value={dispLine.dateTo} />
+                )
+            }
+
+            return <span>{line ? line.dateFrom : ''}</span>
+        }
+        const showDateTo = () => {
+            if (this.state.isEdit){
+                return(
+                    <input  type="date"
+                            value={dispLine.dateTo} />
+                )
+            }
+
+            return <span>{line ? line.dateTo : ''}</span>
+        }
         const showAmount = () => {
             if (this.state.isEdit){
                 return(
                     <input  type="text"
-                            value={dispPayment.amount}
+                            value={dispLine.amount}
                             onChange={(e) => this.onChangeAmount(e.target.value)} />
                 )
             }
 
-            return <span>{payment ? payment.amount : ''}</span>
+            return <span>{line ? line.amount : ''}</span>
         }
 
         const showStatus = () => {
@@ -118,19 +124,19 @@ export default class LineTabRow extends Component {
         }
 
         return(
-            <tr className="PaymentTabRow">
+            <tr className="LineTabRow">
                 <th>
                     <input  type="checkbox" 
-                            onChange={() => this.props.onSelect(payment._id)}
+                            onChange={() => this.props.onSelect(line._id)}
                             ref={(ref) => this.checkbox = ref}/>
                 </th>
                 <td>
                     { buttonSave() }
-                    { payment ? payment._id._str : '' }
+                    { line ? line._id._str : '' }
                 </td>
-                <td>{ showDate() }</td>
+                <td>{ showDateFrom() }</td>
+                <td>{ showDateTo() }</td>
                 <td>{ showAmount() }</td>
-                <td>{ showStatus() }</td>
             </tr>
         )
     }
