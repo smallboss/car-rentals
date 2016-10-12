@@ -96,47 +96,59 @@ class Registration extends React.Component {
                     if(typeof fileLicense != 'string') {
                         imgToBase64(fileLicense, (base64License) => {
                             _user.profile._images.imgLicense = base64License
-                            Accounts.createUser(_user, (err) => {
+                            Meteor.call('createNewUser', _user, () => {
+                                alert('You have register. You can enter with your login and password')                                
+                            })
+                            /*Accounts.createUser(_user, (err) => {
                                 if(err) {
                                     alert(err.reason)
                                 } else {
                                     alert('You have register. You can enter with your login and password')
                                 }
-                            })
+                            })*/
                             _target.reset()
                         })
                     } else {
-                        Accounts.createUser(_user, (err) => {
-                            if(err) {
-                                alert(err.reason)
-                            } else {
-                                alert('You have register. You can enter with your login and password')
-                            }
+                        Meteor.call('createNewUser', _user, () => {
+                            alert('You have register. You can enter with your login and password')
                         })
+                        /*Accounts.createUser(_user, (err) => {
+                         if(err) {
+                         alert(err.reason)
+                         } else {
+                         alert('You have register. You can enter with your login and password')
+                         }
+                         })*/
                         _target.reset()
                     }
                 })
             } else if (typeof fileId == 'string' && typeof fileLicense != 'string') {
                 imgToBase64(fileLicense, (base64License) => {
                     _user.profile._images.imgLicense = base64License
-                    Accounts.createUser(_user, (err) => {
-                        if(err) {
-                            alert(err.reason)
-                        } else {
-                            alert('You have register. You can enter with your login and password')
-                        }
+                    Meteor.call('createNewUser', _user, () => {
+                        alert('You have register. You can enter with your login and password')
                     })
-                    _target.reset()
+                    /*Accounts.createUser(_user, (err) => {
+                     if(err) {
+                     alert(err.reason)
+                     } else {
+                     alert('You have register. You can enter with your login and password')
+                     }
+                     })*/
+                    _target.reset()                    
                 })                
             } 
         } /*handle with images if they are end*/ else {
-            Accounts.createUser(_user, (err) => {
-                if(err) {
-                    alert(err.reason)
-                } else {
-                    alert('You have register. You can enter with your login and password')
-                }
+            Meteor.call('createNewUser', _user, () => {
+                alert('You have register. You can enter with your login and password')
             })
+            /*Accounts.createUser(_user, (err) => {
+             if(err) {
+             alert(err.reason)
+             } else {
+             alert('You have register. You can enter with your login and password')
+             }
+             })*/
             _target.reset()
         }
         

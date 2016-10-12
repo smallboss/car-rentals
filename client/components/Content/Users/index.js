@@ -1,37 +1,36 @@
 /**
- * Created by watcher on 10/5/16.
+ * Created by watcher on 10/12/16.
  */
-import { Meteor } from 'meteor/meteor'
-import { createContainer } from 'meteor/react-meteor-data'
 import React from 'react'
 import { browserHistory } from 'react-router'
-//import $ from 'jquery'
-import { searcher } from '../../../../helpers/searcher'
-import CustomerForTable from '../CustomerForTable'
-import Pagination from '../Pagination'
+import { Meteor } from 'meteor/meteor'
+import { createContainer } from 'meteor/react-meteor-data'
+import UserForTable from './UserForTable'
+import Pagination from '../Customers/Pagination'
+import { searcher } from '../../../helpers/searcher'
 
-class CustomersList extends React.Component {
+class Users extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
-            customers: this.props.customers,
+            users: this.props.users,
             currentPage: 1,
             elemsOnPage: 3,
             maxPage: 0,
-            stateForRemove: []            
+            stateForRemove: []
         }
         this.handlerPagination = this.handlerPagination.bind(this)
-        this.handlerDeleteCustomer = this.handlerDeleteCustomer.bind(this)
-        this.handlerSearchCustomer = this.handlerSearchCustomer.bind(this)
+        this.handlerDeleteUser = this.handlerDeleteUser.bind(this)
+        this.handlerSearchUser = this.handlerSearchUser.bind(this)
     }
     componentWillMount () {
-        let maxPage = Math.ceil(this.props.customers.length / this.state.elemsOnPage)
-        this.setState({customers: this.props.customers, maxPage})
+        let maxPage = Math.ceil(this.props.users.length / this.state.elemsOnPage)
+        this.setState({users: this.props.users, maxPage})
     }
     componentWillReceiveProps(nextProps) {
-        let _customers = nextProps.customers
-        let maxPage = Math.ceil(_customers.length / this.state.elemsOnPage)
-        this.setState({customers: _customers, maxPage})
+        let _users = nextProps.users
+        let maxPage = Math.ceil(_users.length / this.state.elemsOnPage)
+        this.setState({users: _users, maxPage})
     }
     shouldComponentUpdate (nextProps, nextState) {
         let _check = (nextState.stateForRemove.length > 0 ) ? 0 : 1
@@ -40,7 +39,7 @@ class CustomersList extends React.Component {
     handlerPagination (num) {
         this.setState({currentPage: num})
     }
-    handlerDeleteCustomer (e) {
+    handlerDeleteUser (e) {
         let arrForRemove = this.state.stateForRemove,
             { id, name } = e.target
         switch (name) {
@@ -58,66 +57,67 @@ class CustomersList extends React.Component {
                 break
             case 'remover-users':
                 arrForRemove.map(elem => {
-                    Meteor.users.remove({_id: elem})                    
+                    Meteor.users.remove({_id: elem})
                 })
-                this.setState({stateForRemove: []})                
+                this.setState({stateForRemove: []})
                 break
             default: break
         }
     }
-    handlerSearchCustomer (e) {
+    handlerSearchUser (e) {
         let searchValue = e.target.value.toLowerCase(),
             stateFromValue = [],
-            _props = this.props.customers
+            _props = this.props.users
         if(searchValue.length > 0) {
             let arrToFind = ['username', 'emails', 'profile']
             stateFromValue = searcher(_props, arrToFind, searchValue)
         } else {
-            stateFromValue = this.props.customers
+            stateFromValue = this.props.users
         }
         let maxPage = Math.ceil(stateFromValue.length / this.state.elemsOnPage)
-        this.setState({customers: stateFromValue, maxPage})
+        this.setState({users: stateFromValue, maxPage})
     }
-    render () {        
+    render () {
         let currentNums = this.state.currentPage * this.state.elemsOnPage
-        let _customers = this.state.customers.slice(currentNums - this.state.elemsOnPage, currentNums)
+        let _users = this.state.users.slice(currentNums - this.state.elemsOnPage, currentNums)
         return (
             <div>
-                <h3>Customer`s list</h3>
+                <h3>User`s list</h3>
                 <div className='col-xs-9'></div>
                 <div className='col-xs-3'>
-                    <input type='search' className='form-control' placeholder='Search' onChange={this.handlerSearchCustomer} />
-                </div>                
+                    <input type='search' className='form-control' placeholder='Search' onChange={this.handlerSearchUser} />
+                </div>
                 <table className='table table-hover'>
                     <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>User name</th>
-                            <th>Name</th>
-                            <th>User email</th>                            
-                        </tr>
+                    <tr>
+                        <th>#</th>
+                        <th>User name</th>
+                        <th>Name</th>
+                        <th>User email</th>
+                        <th>Role</th>
+                    </tr>
                     </thead>
                     <tbody>
-                        {_customers.map(customer => {
-                            return (
-                                <CustomerForTable customer_data={customer} handlerDeleteCustomer={this.handlerDeleteCustomer} key={Math.random()} />
-                            )
-                        })}
+                    {_users.map(user => {
+                        return (
+                            <UserForTable user_data={user} handlerDeleteUser={this.handlerDeleteUser} key={Math.random()} />
+                        )
+                    })}
                     </tbody>
                 </table>
-                <input type='button' className='btn btn-danger' name='remover-users' value='Delete users' onClick={this.handlerDeleteCustomer} />
+                <input type='button' className='btn btn-danger' name='remover-users' value='Delete users' onClick={this.handlerDeleteUser} />
                 <input type='button' className='btn btn-success m-x-1' name='add-user' value='Add user' onClick={() => {let _new = 'new'; browserHistory.push(`/customer/${_new}`)}} />
                 {(this.state.maxPage > 1) ? <div className='text-center'>
                     <Pagination num={this.state.maxPage} handlerPagination={this.handlerPagination} key={Math.random()} />
-                </div> : ''}                
+                </div> : ''}
             </div>
         )
     }
 }
 
-export default createContainer(() => {
+export default createContainer (() => {
     Meteor.subscribe('users')
     return {
-        customers: Meteor.users.find({"profile.userType": "customer"}).fetch()
+        users: Meteor.users.find({}).fetch()
     }
-}, CustomersList)
+}, Users)
