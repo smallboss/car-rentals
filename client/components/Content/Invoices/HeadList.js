@@ -89,9 +89,7 @@ export default class HeadList extends Component {
                 </div>
 
                 <div className="col-xs-6 right-headList">
-                    <form>
-                        <input type="text" className='form-control' placeholder='Search' onChange={ (e) => this.props.onChangeSearchField(e.target.value) } />
-                    </form>
+                    <input type="text" className='form-control' placeholder='Search' onChange={ (e) => this.props.onChangeSearchField(e.target.value) } />
                     
 
                 </div>

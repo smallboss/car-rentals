@@ -2,7 +2,7 @@ import { Meteor } from 'meteor/meteor'
 import { Mongo } from 'meteor/mongo'
 import { createContainer } from 'meteor/react-meteor-data'
 import { ApiPayments } from '/imports/api/payments.js'
-import { ApiUserList } from '/imports/api/userList.js'
+import { ApiCustomers } from '/imports/api/customers'
 import HeadSingle from './HeadSingle.js';
 import { browserHistory } from 'react-router';
 import React, { Component } from 'react';
@@ -55,7 +55,7 @@ export default class PaymentSingle extends Component {
     newPayment.status = value;
     this.setState({dispPayment: newPayment});
   }
-  onChangeStatus(value) {
+  onChangeRef(value) {
     let newPayment = this.state.dispPayment;
     newPayment.ref = value;
     this.setState({dispPayment: newPayment});
@@ -93,8 +93,6 @@ export default class PaymentSingle extends Component {
       dataDispPayment = clone(nextProps.payment)
     }
 
-
-    console.log(nextProps.userList)
 
     this.setState({
       payment: clone(c),
@@ -141,9 +139,6 @@ export default class PaymentSingle extends Component {
 
   render() {
 
-    console.log('this.props.userList', this.props.userList)
-    console.log('>', this.state.dispPayment)
-
     const renderHeadSingle = () => {
       return (
         <HeadSingle onSave={this.handleSave}
@@ -169,6 +164,7 @@ export default class PaymentSingle extends Component {
         return (
           <div className="topFields">
             <div className="row">
+{ /* ============================== DROPDOWN CUSTOMERS ============================== */}
               <div className="form-group profit col-xs-6">
                 <label htmlFor="paymentCustomerName" className='col-xs-2'>Customer Name</label>
                 {(() => {
@@ -177,19 +173,30 @@ export default class PaymentSingle extends Component {
                       <div className='col-xs-8 form-horizontal'>
                         <select className=' form-control' onChange={(e) => this.onChangeCustomer(e.target.value)}>
                           {(() => {
-                            if (customerId) 
-                              console.log('customerId',customerId._id)
-                              return (
-                                      undefined
-                                // <option className='' value={customerId}>{Meteor.users.findOne(customerId).username}</option>
-                              )
-                            return undefined;
+                            const {username, profile} = customerId ? Meteor.users.findOne(customerId)  : '';
+                            const userProfName = customerId 
+                                                    ? ((profile.name 
+                                                          ? (profile.name + ' : ') 
+                                                          : '')
+                                                     + username) 
+                                                    : '';
+                              
+                            return (    
+                              <option 
+                                className='' 
+                                value={customerId}>{userProfName}
+                              </option>
+                            )
+
                           })()}
                           {
                             this.props.userList.map((el, key) => {
-                                if (el._id != customerId) {
+                                const currentId = customerId ? customerId._str : ''
+                                if (el._id && (el._id._str != currentId)) {
                                   return (
-                                    <option key={key} value={el._id._str}>{el.username}</option>
+                                    <option 
+                                      key={key} 
+                                      value={el._id._str}>{(el.profile.name ? (el.profile.name + " : ") : '') + el.username}</option>
                                   )
                                 }
                                 return undefined;
@@ -200,9 +207,20 @@ export default class PaymentSingle extends Component {
                     )
                   }
 
-                  return <div className='col-xs-8'>{Meteor.users.findOne(customerId).username}</div>
+                  return (
+                    <div className='col-xs-8'>
+                      {(() => {
+                        if (Meteor.users.findOne(customerId)) {
+                          const profile = Meteor.users.findOne(customerId).profile;
+                          return (profile.name ? (profile.name + ' : ') : '' ) + Meteor.users.findOne(customerId).username
+                        }
+                        return undefined;
+                      })()}
+                    </div>
+                  )
                 })()}
               </div>
+{ /* END ============================= DROPDOWN CUSTOMERS ============================== */}
 
               <div className="form-group profit col-xs-6">
                 <label htmlFor="paymentDate" className='col-xs-2'>Date</label>
@@ -351,7 +369,7 @@ export default class PaymentSingle extends Component {
 
 export default createContainer(({params}) => {
   Meteor.subscribe('payments');
-  Meteor.subscribe("userList");
+  Meteor.subscribe('customers');
 
   let isNew = false;
   let paymentId = params.paymentId;
@@ -372,7 +390,7 @@ export default createContainer(({params}) => {
 
   return {
     payment: ApiPayments.findOne(idForQuery),
-    userList: Meteor.users.find({"profile.userType": "customer"}).fetch(),
+    userList: Meteor.users.find().fetch(),
     isNew: isNew
   }
 

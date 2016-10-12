@@ -4,7 +4,7 @@ import { browserHistory } from 'react-router'
 import { createContainer } from 'meteor/react-meteor-data';
 
 import { ApiInvoices } from '/imports/api/invoices.js';
-import { ApiUserList } from '/imports/api/userList.js'
+import { ApiCustomers } from '/imports/api/customers'
 import InvoiceRow from './InvoiceRow.js';
 import HeadList from './HeadList.js';
 
@@ -39,8 +39,6 @@ class Invoices extends Component {
     if (this.props.invoices != props.invoices) {
       this.handleChangeSearchField(this.state.searchField, props);
     }
-
-    console.log(',props.invoices', props.invoices)
   }
 
   componentWillUpdate(nextProps, nextState){
@@ -64,7 +62,6 @@ class Invoices extends Component {
 
 
   removeInvoices() {
-    console.log('DEL')
     this.state.selectedInvoicesID.map((invoiceID) => {
       ApiInvoices.remove(new Mongo.ObjectID(invoiceID));
     })
@@ -122,7 +119,6 @@ class Invoices extends Component {
 
 
   handleInvoiceSingleOnClick(invoiceId) {
-    console.log('invoiceId', invoiceId)
     browserHistory.push(`/invoices/${invoiceId}`);
     // this.context.router.push(`/payments/${paymentId}`)
   }
@@ -133,9 +129,7 @@ class Invoices extends Component {
     const renderInvoices = () => {
       return this.state.foundItems.map((itemInvoice, key) => {
         if((key >= (this.state.currentPage-1) * this.state.itemsOnPage) && 
-           (key <   this.state.currentPage    * this.state.itemsOnPage))
-
-          console.log('itemInvoice', itemInvoice)
+           (key <   this.state.currentPage    * this.state.itemsOnPage)){
 
           return <InvoiceRow 
                       key={key} 
@@ -145,7 +139,7 @@ class Invoices extends Component {
                       selectedInvoicesId={this.state.selectedInvoicesID} 
                       onHandleSelect={this.handleSelect} />
         }
-      )
+      })
     }
 
     return (
@@ -194,7 +188,7 @@ Invoices.contextTypes = {
 
 export default createContainer(() => {
   Meteor.subscribe('invoices');
-  Meteor.subscribe("userList");
+  Meteor.subscribe('customers')
 
   return {
     invoices: ApiInvoices.find().fetch(),
