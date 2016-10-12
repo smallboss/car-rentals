@@ -2,7 +2,6 @@
  * Created by watcher on 10/11/16.
  */
 import React from 'react'
-import { Session } from 'meteor/session'
 import { browserHistory } from 'react-router'
 import { Link } from 'react-router'
 import './style.css'
@@ -21,8 +20,7 @@ class LoginButtons extends React.Component {
             if(error) {
                 this.setState({error: error.reason})
             } else {
-                let _id = Meteor.userId()
-                Session.set('user', _id)
+                Meteor.loggingIn()
                 browserHistory.push('/user_profile')
                 this.setState({error: '', showModal: 0})
             }

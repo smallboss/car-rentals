@@ -3,8 +3,7 @@
  */
 import React from 'react'
 import { Meteor } from 'meteor/meteor'
-import { Accounts } from 'meteor/accounts-base'
-import { Session } from 'meteor/session'
+import { browserHistory } from 'react-router'
 import { createContainer } from 'meteor/react-meteor-data'
 
 class UserProfile extends React.Component {
@@ -33,7 +32,8 @@ class UserProfile extends React.Component {
     handlerButtonsEdit (e) {
         let _nameButton = e.target.name,
             _сurrentState = this.state.user,
-            _id = this.state.user._id
+            _id = this.state.user._id,
+            _newValue        
         switch (_nameButton) {
             case 'editButton':
                 this.setState({editAble: 1});
@@ -47,11 +47,13 @@ class UserProfile extends React.Component {
                     alert('Input right repeat password please')
                     return false
                 } else if (this.refFormEdit['password'].value.length > 0) {
-                    Meteor.call('setPassword', _id, this.refFormEdit['password'].value, function (err, result) {
+                    _newValue = this.refFormEdit['password'].value
+                    Meteor.call('setPassword', _id, _newValue, function (err, result) {
                         if(!err) {
                             alert('Your password has been change. Sign in again please')
+                            //browserHistory.push('/')
                         } else {
-                            console.log(err.reason)
+                            console.log(err)
                         }
                     })
                 }
@@ -130,13 +132,13 @@ class UserProfile extends React.Component {
 }
 
 UserProfile.propTypes = {
-    user: React.PropTypes.object.isRequired
+    user: React.PropTypes.object
 }
 
 
 export default createContainer(() => {
     Meteor.subscribe('users')
-    let _id = Session.get('user')
+    let _id = Meteor.userId()
     if(_id) {
         return {
             user: Meteor.users.findOne({_id: _id})

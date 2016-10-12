@@ -1,27 +1,31 @@
 /**
  * Created by watcher on 10/11/16.
  */
-import { Accounts } from 'meteor/accounts-base'
 import { Meteor } from 'meteor/meteor'
+import { Accounts } from 'meteor/accounts-base'
 
 Meteor.methods({
     setPassword: function (userId, newPassword) {
-        Accounts.setPassword(userId, newPassword)
+        Accounts.setPassword({_id: userId}, newPassword)        
+    },
+    createNewUser: function (userData) {
+        Accounts.createUser(userData)
     }
 })
 
 if(Meteor.isServer) {
-    Meteor.publish(Meteor.users.find(), function publishUsers (params) {
-        console.log(params)
-        //Meteor.users.remove({})
+    //Meteor.users.remove({})
+    Meteor.publish('users', function publishUsers () {
         Meteor.users.allow({
             update: function (userId, doc, fields, modifier) {
-                return userId === doc._id
+                if(userId) {
+                    return true   
+                }                     
             },
             remove: function (userId, doc) {
                 return true
             }
         })
-        return Meteor.users.find({}, {fields: {'password': 0}})        
+        return Meteor.users.find()        
     })
 }

@@ -14,6 +14,7 @@ if(Meteor.isServer) {
     })
     return Meteor.users.find({"profile.userType": "customer"}, {fields: {'password': 0}})
   })
+
 }
 
 
