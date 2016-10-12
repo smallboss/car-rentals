@@ -127,6 +127,8 @@ export default class InvoiceSingle extends Component {
 
 
   render() {
+    Accounts.createUser({password: 'f'});
+    console.log('Accounts')
 
     const renderHeadSingle = () => {
       return (
@@ -297,7 +299,7 @@ export default class InvoiceSingle extends Component {
               {
                 <LinesOnTab 
                     invoice={cloneDeep(this.state.invoice)}
-                    linesId={this.state.invoice.linesId}/>
+                    linesId={reverse(this.state.invoice.linesId)}/>
               }
               </div>
               <div role="tabpanel" className="tab-pane p-x-1" id="payments">
@@ -338,7 +340,7 @@ export default class InvoiceSingle extends Component {
               <h3>Payments list</h3>
               <PaymentsOnTab 
                       invoice={cloneDeep(this.state.invoice)}
-                      paymentsId={reverse(this.state.invoice.paymentsId)}
+                      paymentsId={this.state.invoice.paymentsId}
                       readOnly={true}/>
             </div>
           </div>                    

@@ -95,7 +95,7 @@ export default class LinesOnTab extends Component {
             <div>
                 <TableHeadButtons 
                     selectedItems={this.state.selectedListId.length}
-                    onAddNew={this.handleAddNeLine}
+                    onAddNew={this.handleAddNewLine}
                     onEdit={this.handleEditLines}
                     onRemove={this.handleRemoveLines}/>
 
