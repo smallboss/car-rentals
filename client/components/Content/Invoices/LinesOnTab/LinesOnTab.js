@@ -2,12 +2,13 @@ import React, { Component, PropTypes } from 'react';
 import { clone, map, reverse, cloneDeep, find } from 'lodash';
 import { createContainer } from 'meteor/react-meteor-data'
 
-import { ApiPayments } from '/imports/api/payments.js';
+import { ApiCars } from '/imports/api/cars.js';
+import { ApiLines } from '/imports/api/lines.js';
 import { ApiInvoices } from '/imports/api/invoices.js';
 import TableHeadButtons from './TableHeadButtons.js';
-import PaymentTabRow from './PaymentTabRow.js';
+import LineTabRow from './LineTabRow.js';
 
-export default class PaymentsOnTab extends Component {
+export default class LinesOnTab extends Component {
     constructor(props) {
         super(props); 
 
@@ -17,10 +18,10 @@ export default class PaymentsOnTab extends Component {
         }
 
         this.changeSelectedItem = this.changeSelectedItem.bind(this);
-        this.handleAddNewPayment = this.handleAddNewPayment.bind(this);
-        this.handleEditPayments = this.handleEditPayments.bind(this);
-        this.handleRemovePayments = this.handleRemovePayments.bind(this);
-        this.handleSavePayment = this.handleSavePayment.bind(this);
+        this.handleAddNewLine = this.handleAddNewLine.bind(this);
+        this.handleEditLines = this.handleEditLines.bind(this);
+        this.handleRemoveLines = this.handleRemoveLines.bind(this);
+        this.handleSaveLine = this.handleSaveLine.bind(this);
     }   
 
 
@@ -35,8 +36,8 @@ export default class PaymentsOnTab extends Component {
         })
 
 
-        if (index === -1) selectedListId.push(itemId) 
-        else selectedListId.splice(index, 1);
+        if (index === -1) { selectedListId.push(itemId) }
+        else { selectedListId.splice(index, 1); }
 
         let isEdit = this.state.isEdit;
         isEdit = !selectedListId.length ? false : isEdit;
@@ -45,38 +46,38 @@ export default class PaymentsOnTab extends Component {
     }
 
 // ====================== ADD = EDIT = REMOVE = SAVE ======================
-    handleAddNewPayment(){
-        const paymentId = new Mongo.ObjectID();
-        ApiPayments.insert({_id: paymentId, customerId: this.props.invoice.customerId});
-        ApiInvoices.update(this.props.invoice._id, {$push: { paymentsId: paymentId }});
+    handleAddNewLine(){
+        const lineId = new Mongo.ObjectID();
+        ApiLines.insert({_id: lineId, customerId: this.props.invoice.customerId});
+        ApiInvoices.update(this.props.invoice._id, {$push: { linesId: lineId }});
 
         let selectedListId = this.state.selectedListId;
-        selectedListId.push(paymentId)
+        selectedListId.push(lineId)
 
         this.setState({ selectedListId, isEdit: true });
     }
 
-    handleEditPayments(){
+    handleEditLines(){
         this.setState({isEdit: !this.state.isEdit})
     }
 
-    handleRemovePayments(){
+    handleRemoveLines(){
         const invoice = this.props.invoice;
         
         map(this.state.selectedListId, (itemId, index) => {
-            invoice.paymentsId.splice(invoice.paymentsId.indexOf(itemId), 1);
-            ApiInvoices.update({_id: invoice._id}, {$pull: {paymentsId: itemId}})
-            ApiPayments.remove(itemId);
+            invoice.linesId.splice(invoice.linesId.indexOf(itemId), 1);
+            ApiInvoices.update({_id: invoice._id}, {$pull: {linesId: itemId}})
+            ApiLines.remove(itemId);
         })
 
         this.setState({selectedListId: []});
     }
 
-    handleSavePayment(payment){
-        const _id = clone(payment._id);
-        delete payment._id;
+    handleSaveLine(line){
+        const _id = clone(line._id);
+        delete line._id;
 
-        ApiPayments.update(_id, {$set: payment });
+        ApiLines.update(_id, {$set: line });
 
         let selectedListId = this.state.selectedListId;
         selectedListId.splice(selectedListId.indexOf(_id), 1);
@@ -86,52 +87,42 @@ export default class PaymentsOnTab extends Component {
 // END =================== ADD = EDIT = REMOVE = SAVE ======================
 
     render(){
-        // let paymentListId = this.props.invoice.paymentsId;
-        let paymentListId = reverse(this.props.paymentsId);
+        let lineListId = reverse(this.props.linesId);
 
-        const RenderTableHeadButtons = () => {
-            if (!this.props.readOnly) {
-                return (
-                    <TableHeadButtons 
-                        selectedItems={this.state.selectedListId.length}
-                        onAddNew={this.handleAddNewPayment}
-                        onEdit={this.handleEditPayments}
-                        onRemove={this.handleRemovePayments}/>
-                )
-            }
-
-            return null;
-        }
-
+        console.log('-', lineListId)
 
         return(
             <div>
-                { RenderTableHeadButtons() }
+                <TableHeadButtons 
+                    selectedItems={this.state.selectedListId.length}
+                    onAddNew={this.handleAddNeLine}
+                    onEdit={this.handleEditLines}
+                    onRemove={this.handleRemoveLines}/>
 
                 <table className="table table-bordered table-hover">
                     <thead>
                         <tr>
-                            { !this.props.readOnly ? (<th><input type="checkbox" disabled/></th>) : null }
-                            <th>Payment ID</th>
-                            <th>Date</th>
+                            <th><input type="checkbox" disabled/></th>
+                            <th>Description</th>
+                            <th>From</th>
+                            <th>To</th>
                             <th>Amount</th>
-                            <th>Status</th>
                         </tr>
                     </thead>
 
                     <tbody>
                         {(() => {
-                            if (paymentListId) {
+                            if (lineListId) {
                                 return (
-                                    reverse(paymentListId).map((item, key) => {
+                                    reverse(lineListId).map((item, key) => {
                                         return (
-                                            <PaymentTabRow key={`payment-${key}`}
+                                            <LineTabRow key={`line-${key}`}
                                                 onSelect={this.changeSelectedItem.bind(null,item)}
-                                                payment={clone(ApiPayments.findOne({_id: item}))}
+                                                line={clone(ApiLines.findOne({_id: item}))}
                                                 onSave={this.handleSavePayment}
                                                 selectedListId={this.state.selectedListId}
                                                 isEdit={this.state.isEdit}
-                                                readOnly={this.props.readOnly}/>
+                                                cars={this.props.cars}/>
                                         )
                                 }))
                             }
@@ -144,19 +135,21 @@ export default class PaymentsOnTab extends Component {
     }
 }
 
-PaymentsOnTab.propTypes = {
-  payments: PropTypes.array.isRequired,
+LinesOnTab.propTypes = {
+  lines: PropTypes.array.isRequired,
 };
 
-PaymentsOnTab.contextTypes = {
+LinesOnTab.contextTypes = {
   router: React.PropTypes.object.isRequired
 }
 
 
 export default createContainer(() => {
-  Meteor.subscribe('payments');
+  Meteor.subscribe('lines');
+  Meteor.subscribe('cars');
 
   return {
-    payments: ApiPayments.find().fetch()
+    lines: ApiLines.find().fetch(),
+    cars: ApiCars.find().fetch()
   };
-}, PaymentsOnTab);
+}, LinesOnTab);

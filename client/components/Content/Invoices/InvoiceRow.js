@@ -17,11 +17,6 @@ export default class InvoiceRow extends Component {
     }
 
 
-    componentDidMount(){
-        console.log('this.props', this.props)
-    }
-
-
     render(){
         const { item, onHandleSelect, onClick, customerName } = this.props;
 
