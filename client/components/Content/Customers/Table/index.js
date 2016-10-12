@@ -131,9 +131,9 @@ class Table extends React.Component {
         this.setState({arrToTable: _curArr})
     }
     render () {
-        //console.log(this.state)
         let classNameNewField = (!this.state.addNewField) ? 'hidden' : ''
-        let _stateToTh = (this.state.arrToTable) ? Object.keys(this.state.arrToTable[0] || {}, key => obj[key]) : []
+        let _stateToTh = (this.state.arrToTable) ? Object.keys(this.state.arrToTable[0] || {}, key => obj[key]) : [];
+        console.log(this.state.arrToTable);
         return (
             <div>
                 <div className='row' ref={ref => {this._r_buttonArea = ref}}>

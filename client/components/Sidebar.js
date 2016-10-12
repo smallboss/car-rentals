@@ -34,8 +34,8 @@ export default class Sidebar extends Component {
               <li><a href="#">Tolls</a></li>
             </ul>
           </li>
-          <li><Link to="/cars">All Users</Link></li>
-          <li><Link to="/cars">Profile</Link></li>
+          <li><Link to="/users_list">All Users</Link></li>
+          <li><Link to='/user_single'>Profile</Link></li>
         </ul>
       </div>
     )

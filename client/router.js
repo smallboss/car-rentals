@@ -11,6 +11,8 @@ import Cars from './components/Content/Cars';
 import CarSingle from './components/Content/Cars/CarSingle.js';
 import Customers from './components/Content/Customers';
 import Customer from './components/Content/Customers/Customer'
+import Users from './components/Content/Users'
+import UserSingle from './components/Content/Users/UserSingle'
 import Registration from './components/Content/Registration'
 import CustomersList from './components/Content/Customers/CustomersList'
 
@@ -50,6 +52,8 @@ export const renderRoutes = () => (
   <Route path="customers" component={Customers} />
   <Route path="customers_list" component={CustomersList} />
   <Route path='customer/:id' component={Customer} />
+  <Route path='users_list' component={Users} />
+  <Route path='user_single/:id' component={UserSingle} />
   <Route path="*" component={NotFoundPage}/>
     </Route>
   </Router>

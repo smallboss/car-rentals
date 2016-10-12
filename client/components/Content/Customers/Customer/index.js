@@ -54,13 +54,14 @@ class Customer extends React.Component {
         let _confirm = confirm('Are You sure to delete this customer?')
         if(_confirm) {
             Meteor.users.remove({_id: id})
-            browserHistory.push('/customers_list')   
-        }        
+            browserHistory.push('/customers_list')
+        }
     }
     handlerEditCustomer (e) {
         let id = e.target.id,
             _id,
-            _newState
+            _newState,
+            _href
         switch (id) {
             case 'button_edit':
                 this.setState({editAble: 1});
@@ -110,16 +111,16 @@ class Customer extends React.Component {
                                             customer[_target] = _newValue
                                             customer.emails[0].address = _newValue
                                         } else {
-                                            customer.emails[0].address = _newValue    
-                                        }                                        
+                                            customer.emails[0].address = _newValue
+                                        }
                                     } else {
-                                        customer.profile[_target] = _newValue   
-                                    }                                  
+                                        customer.profile[_target] = _newValue
+                                    }
                                 }
                                 this.setState({customer: customer})
                             }
-                        })   
-                    }                    
+                        })
+                    }
                 })
                 document.getElementById('button_save').addEventListener('click', this.handlerEditCustomer)
                 break
@@ -134,19 +135,17 @@ class Customer extends React.Component {
                     _newState._id = new Mongo.ObjectID()
                     _newState.password = '12345'
                     _newState.profile.userType = 'customer'
-                    Accounts.createUser(_newState, (err) => {
-                        if(err) {
-                            console.log(err)
-                        } else {
-                            alert('You have added user')
-                        }
+                    Meteor.call('createNewUser', _newState, () => {
+                        alert('Default user`s password is 12345')
+                        _href = '/customer/' + _newState._id
+                        browserHistory.push(_href)
                     })
                     this.setState({customers: _newState, editAble: 0})
                 } else {
                     delete this.state.customer._id
                     Meteor.users.update(_id, {$set: _newState})
                     this.setState({editAble: 0})
-                }               
+                }
                 break
             default:
                 break
@@ -189,7 +188,7 @@ class Customer extends React.Component {
                     dateTo: '',
                     requestText: ''
                 }
-            ] 
+            ]
         }
         if(this.state.customer.profile && (typeof this.state.customer.profile.rentals == 'object')) {
             rentals = this.state.customer.profile.rentals
@@ -214,7 +213,7 @@ class Customer extends React.Component {
                     QuantityPayment: ''
                 }
             ]
-        }                 
+        }
         return (
             <div className='panel panel-default'>
                 <div className='panel-heading'>
@@ -283,7 +282,7 @@ class Customer extends React.Component {
                                 <div className='col-xs-6'>
                                     <img src={imgLicense} />
                                     <input type='file' id='imgLicense' className='form-control' accept='image/*' disabled={editAble} />
-                                </div>                          
+                                </div>
                             </div>
                             <div id='div_car_request'  className='inner-div-users-edit'>
                                 <Table arrToTable={carRequest} currentComponent='carRequest' handlerChildState={this.handlerChildState} />
@@ -299,16 +298,16 @@ class Customer extends React.Component {
                                     <label htmlFor='fines' className='col-xs-2'>Fines</label>
                                     <div className='col-xs-7'>
                                         <input type='text' id='fines' className='form-control' value={fines} disabled={editAble} />
-                                    </div>                                    
-                                </div>                                
+                                    </div>
+                                </div>
                             </div>
                             <div id='div_tolls' className='inner-div-users-edit'>
                                 <div className='form-group'>
                                     <label htmlFor='tolls' className='col-xs-2'>Tolls</label>
                                     <div className='col-xs-7'>
                                         <input type='text' id='tolls' className='form-control' value={tolls} disabled={editAble} />
-                                    </div>                                    
-                                </div>                                
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -319,15 +318,15 @@ class Customer extends React.Component {
 }
 
 export default createContainer(({params}) => {
-    Meteor.subscribe('customers')
+    Meteor.subscribe('users')
     let _id = params.id
     if(_id === 'new') {
         return {
-            
+
         }
     } else {
         return {
             customer: Meteor.users.findOne({_id: _id})
-        }   
-    }    
+        }
+    }
 }, Customer)
