@@ -9,6 +9,7 @@ import React, { Component } from 'react';
 import { clone, cloneDeep, reverse } from 'lodash';
 
 import PaymentsOnTab from './PaymentsOnTab/PaymentsOnTab.js'
+import LinesOnTab from './LinesOnTab/LinesOnTab.js'
 
 import { invoiceStateTypes } from '/imports/startup/typesList.js';
 
@@ -285,19 +286,26 @@ export default class InvoiceSingle extends Component {
         return (
           <div className="row">
             <ul className="nav nav-tabs" role="tablist">
-              <li>
+              <li className="active">
                 <a href="#lines" aria-controls="home" role="tab" data-toggle="tab">Lines</a>
               </li>
               <li><a href="#payments" aria-controls="messages" role="tab" data-toggle="tab">Payments</a></li>
-              <li className="active"><a href="#notes" aria-controls="messages" role="tab" data-toggle="tab">Notes</a></li>
+              <li><a href="#notes" aria-controls="messages" role="tab" data-toggle="tab">Notes</a></li>
             </ul>
             <div className="tab-content">
-              <div role="tabpanel" className="tab-pane p-x-1" id="lines">
+              <div role="tabpanel" className="tab-pane p-x-1 active" id="lines">
+              {
+                <LinesOnTab 
+                    invoice={cloneDeep(this.state.invoice)}
+                    linesId={this.state.invoice.linesId}/>
+              }
               </div>
               <div role="tabpanel" className="tab-pane p-x-1" id="payments">
-                <PaymentsOnTab />
+                <PaymentsOnTab 
+                    invoice={cloneDeep(this.state.invoice)}
+                    paymentsId={reverse(this.state.invoice.paymentsId)}/>
               </div>
-              <div role="tabpanel" className="tab-pane p-x-1 active" id="notes">
+              <div role="tabpanel" className="tab-pane p-x-1" id="notes">
                 {(() => {
                   if (this.state.editable) {
                     return (
@@ -319,18 +327,25 @@ export default class InvoiceSingle extends Component {
 
       return (
         <div className="InvoiceSingle panel panel-default">
-
           { renderHeadSingle() }
           <div className='panel-body'>
             { renderTopFields() }
 
             { renderTabs() }
           </div>
-
+          <div className="PaymentsOnTab row">
+            <div className="col-xs-12">
+              <h3>Payments list</h3>
+              <PaymentsOnTab 
+                      invoice={cloneDeep(this.state.invoice)}
+                      paymentsId={reverse(this.state.invoice.paymentsId)}
+                      readOnly={true}/>
+            </div>
+          </div>                    
         </div>
       )
     } else {
-      return (<div className="InvoiceSingle">InvoiceSingle</div>)
+      return (<div className="InvoiceSingle"></div>)
     }
   }
 }

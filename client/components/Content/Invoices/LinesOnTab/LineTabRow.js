@@ -3,7 +3,7 @@ import { map, find } from 'lodash';
 
 import { paymentStateTypes } from '/imports/startup/typesList.js';
 
-export default class PaymentTabRow extends Component {
+export default class LineTabRow extends Component {
     constructor(props) {
         super(props); 
 
@@ -25,9 +25,7 @@ export default class PaymentTabRow extends Component {
 
         const nextPayment = nextProps.payment ? nextProps.payment._id._str : '';
         const isSelected = find(nextProps.selectedListId, {_str: nextPayment});
-        
-        if (!this.props.readOnly) 
-            this.checkbox.checked = isSelected;
+        this.checkbox.checked = isSelected;
 
         const isEdit = (isSelected && nextProps.isEdit) ? true : false;
 
@@ -121,19 +119,11 @@ export default class PaymentTabRow extends Component {
 
         return(
             <tr className="PaymentTabRow">
-                {(() => {
-                    if (!this.props.readOnly) {
-                        return (
-                            <th>
-                                <input  type="checkbox" 
-                                        onChange={() => this.props.onSelect(payment._id)}
-                                        ref={(ref) => this.checkbox = ref}/>
-                            </th>
-                        )
-                    }
-
-                    return null;
-                })()}
+                <th>
+                    <input  type="checkbox" 
+                            onChange={() => this.props.onSelect(payment._id)}
+                            ref={(ref) => this.checkbox = ref}/>
+                </th>
                 <td>
                     { buttonSave() }
                     { payment ? payment._id._str : '' }
