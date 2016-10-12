@@ -55,7 +55,7 @@ export default class PaymentSingle extends Component {
     newPayment.status = value;
     this.setState({dispPayment: newPayment});
   }
-  onChangeStatus(value) {
+  onChangeRef(value) {
     let newPayment = this.state.dispPayment;
     newPayment.ref = value;
     this.setState({dispPayment: newPayment});

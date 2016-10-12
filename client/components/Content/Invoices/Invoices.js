@@ -39,8 +39,6 @@ class Invoices extends Component {
     if (this.props.invoices != props.invoices) {
       this.handleChangeSearchField(this.state.searchField, props);
     }
-
-    console.log('userList', props.userList)
   }
 
   componentWillUpdate(nextProps, nextState){
@@ -64,7 +62,6 @@ class Invoices extends Component {
 
 
   removeInvoices() {
-    console.log('DEL')
     this.state.selectedInvoicesID.map((invoiceID) => {
       ApiInvoices.remove(new Mongo.ObjectID(invoiceID));
     })
@@ -122,7 +119,6 @@ class Invoices extends Component {
 
 
   handleInvoiceSingleOnClick(invoiceId) {
-    console.log('invoiceId', invoiceId)
     browserHistory.push(`/invoices/${invoiceId}`);
     // this.context.router.push(`/payments/${paymentId}`)
   }
@@ -133,9 +129,7 @@ class Invoices extends Component {
     const renderInvoices = () => {
       return this.state.foundItems.map((itemInvoice, key) => {
         if((key >= (this.state.currentPage-1) * this.state.itemsOnPage) && 
-           (key <   this.state.currentPage    * this.state.itemsOnPage))
-
-          console.log('itemInvoice', itemInvoice)
+           (key <   this.state.currentPage    * this.state.itemsOnPage)){
 
           return <InvoiceRow 
                       key={key} 
@@ -145,7 +139,7 @@ class Invoices extends Component {
                       selectedInvoicesId={this.state.selectedInvoicesID} 
                       onHandleSelect={this.handleSelect} />
         }
-      )
+      })
     }
 
     return (

@@ -8,8 +8,9 @@ import { browserHistory } from 'react-router';
 import React, { Component } from 'react';
 import { clone, cloneDeep, reverse } from 'lodash';
 
-import { invoiceStateTypes } from '/imports/startup/typesList.js';
+import PaymentsOnTab from './PaymentsOnTab/PaymentsOnTab.js'
 
+import { invoiceStateTypes } from '/imports/startup/typesList.js';
 
 import './invoiceStyle.css'
 
@@ -149,7 +150,7 @@ export default class InvoiceSingle extends Component {
         return (
           <div className="topFields">
             <div className="row">
-{ /* ============================== DROPDOWN CUSTOMERS ============================== */}
+            { /* ============================== DROPDOWN CUSTOMERS ============================== */}
               <div className="form-group profit col-xs-6">
                 <label htmlFor="paymentCustomerName" className='col-xs-2'>Customer Name</label>
                 {(() => {
@@ -205,7 +206,7 @@ export default class InvoiceSingle extends Component {
                   )
                 })()}
               </div>
-{ /* END ============================= DROPDOWN CUSTOMERS ============================== */}
+              { /* END ============================= DROPDOWN CUSTOMERS ============================== */}
               <div className="form-group name col-xs-6">
                 <label htmlFor="invoiceDate" className='col-xs-2'>Invoice date</label>
                 {(() => {
@@ -294,6 +295,7 @@ export default class InvoiceSingle extends Component {
               <div role="tabpanel" className="tab-pane p-x-1" id="lines">
               </div>
               <div role="tabpanel" className="tab-pane p-x-1" id="payments">
+                <PaymentsOnTab />
               </div>
               <div role="tabpanel" className="tab-pane p-x-1 active" id="notes">
                 {(() => {
