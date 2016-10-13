@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
 import { map, clone } from 'lodash';
 
 import { maintenanceStateTypes } from '/imports/startup/typesList.js';
@@ -70,15 +71,17 @@ export default class MaintenanceRow extends Component {
         this.setState({maintenance: newMaintenance});
     }
 // END ============== CHANGERS FIELDS ============================
-
-
-componentDidUpdate(){
-    if (this.state.editable) {
-        // console.log('DIDUP')
-        const maintenance = clone(this.state.maintenance);
-        // this.props.onEditingField(maintenance);
+    componentDidMount(){
+        if(this.props.focusing &&  this.inputName){
+            this.inputName.focus();
+        }
     }
-}
+
+    componentDidUpdate(){
+        if(this.props.focusing &&  this.inputName){
+            // this.inputName.focus();
+        }
+    }
 
     render(){
         const { onHandleSelect } = this.props;
@@ -117,7 +120,8 @@ componentDidUpdate(){
                                     type="text"
                                     onChange={(e) => this.onChangeJobName(e.target.value)}
                                     ref={(ref) => this.inputName = ref}
-                                    value={jobName} />
+                                    value={jobName} 
+                                    autoFocus/>
                             )
                         } 
 
@@ -132,7 +136,6 @@ componentDidUpdate(){
                                 <input 
                                     type="text"
                                     onChange={(e) => this.onChangeDescription(e.target.value)}
-                                    ref={(ref) => this.inputDescription = ref}
                                     value={description} />
                             )
                         } 
@@ -148,7 +151,6 @@ componentDidUpdate(){
                                  <input 
                                     type="date"
                                     onChange={(e) => this.onChangeDate(e.target.value)}
-                                    ref={(ref) => this.inputDate = ref}
                                     value={date} />
                             )
                         } 
@@ -161,8 +163,7 @@ componentDidUpdate(){
                     {(() => {
                         if(this.state.editable){
                             return(
-                                <select ref={(ref) => this.inputStatus = ref}
-                                        onChange={(e) => this.onChangeStatus(e.target.value)}>
+                                <select onChange={(e) => this.onChangeStatus(e.target.value)}>
                                     <option value={status}>{status}</option>
                                     {
                                         maintenanceStateTypes.map((el, key) => {
@@ -189,7 +190,6 @@ componentDidUpdate(){
                                 <input 
                                     type="text"
                                     onChange={(e) => this.onChangeAmount(e.target.value)}
-                                    ref={(ref) => this.inputAmount = ref}
                                     value={amount} />
                             )
                         } 
@@ -206,7 +206,6 @@ componentDidUpdate(){
                                 <input 
                                     type="date"
                                     onChange={(e) => this.onChangeEndDate(e.target.value)}
-                                    ref={(ref) => this.inputEndDate = ref}
                                     value={endDate} />
                             )
                         } 

@@ -5,7 +5,7 @@ export default class HeadList extends Component {
         super(props);
 
         this.state = {
-            listName: "Cars",
+            listName: "Invoices",
             searchField: "",
             disableRemove: true
         }
@@ -80,7 +80,7 @@ export default class HeadList extends Component {
                     <div className="btn-box">
                         <button onClick={this.props.onAddNew} className='btn btn-success m-x-1'>Add New</button>
                         <button 
-                            onClick={this.props.onRemoveCars} 
+                            onClick={this.props.onRemoveItems} 
                             ref={(ref) => this.buttonRemove = ref}
                             className='btn btn-danger' >
                             Delete
@@ -90,8 +90,9 @@ export default class HeadList extends Component {
 
                 <div className="col-xs-6 right-headList">
                     <input type="text" className='form-control' placeholder='Search' onChange={ (e) => this.props.onChangeSearchField(e.target.value) } />
+                    
+
                 </div>
-                
                 <div className='col-xs-12'>
                     <div className="navBox">
                         <span className="pages">

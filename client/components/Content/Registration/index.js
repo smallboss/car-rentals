@@ -22,6 +22,7 @@ class Registration extends React.Component {
             alert('Введенные пароли не совпадают');
             return false
         }
+
         /*Check passwords end*/
         /*Create must have variable start*/
         let _target = e.target,

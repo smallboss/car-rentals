@@ -5,7 +5,7 @@ import { ApiCars } from '/imports/api/cars.js'
 import HeadSingle from './HeadSingle.js';
 import { browserHistory } from 'react-router';
 import React, { Component } from 'react';
-import { clone } from 'lodash';
+import { clone, cloneDeep, reverse } from 'lodash';
 
 import { carStateTypes } from '/imports/startup/typesList.js';
 import TableOnTab from './TableOnTab.js';
@@ -110,10 +110,8 @@ export default class CarSingle extends Component {
 
 
   componentWillReceiveProps(nextProps) {
-    console.log('nextProps', nextProps)
-    console.log('this.state.car', this.state.car)
-    console.log('this.state.dispcar', this.state.dispCar)
     let c = nextProps.car;
+
     if (this.state.car) {
       if (this.state.editable) {
         c.name = clone(this.state.car.name);
@@ -159,11 +157,6 @@ export default class CarSingle extends Component {
 
 
     this.setState({car: newCar, dispCar: newCar, editable: false});
-
-    console.log('this.state.isNew', this.state.isNew)
-
-    // if (this.state.isNew)
-    //   browserHistory.push(`/cars/${id._str}`);
   }
 
   handleEdit() {
@@ -424,7 +417,14 @@ export default class CarSingle extends Component {
                     )
                   }
 
-                  return <textarea className="form-control" rows="3" disabled>{description}</textarea>
+                  return (
+                    <textarea 
+                      className="form-control" 
+                      rows="3"
+                      value={description}
+                      disabled>
+                    </textarea>
+                  )
                 })()}
               </div>
               <div role="tabpanel" className="tab-pane" id="maintenance">
@@ -479,7 +479,15 @@ export default class CarSingle extends Component {
                     )
                   }
 
-                  return <div>{notes}</div>
+                  return (
+                      <textarea
+                        className='form-control'
+                        ref={ (ref) => this.inputNotes = ref }
+                        onChange={(e) => this.onChangeNotes(e.target.value)}
+                        value={notes}
+                        disabled>
+                      </textarea>
+                    )
                 })()}
               </div>
               <div role="tabpanel" className="tab-pane" id="totalExpense">
@@ -544,12 +552,19 @@ export default createContainer(({params}) => {
   if (params.carId.indexOf('new') === 0) {
     isNew = true;
     carId = params.carId.substring(3);
+    window.history.pushState('object or string', 'Title', `/cars/${carId}`);
+    // window.history.back();
   }
 
-  let loadCar = ApiCars.findOne(new Mongo.ObjectID(carId));
+
+  const idForQuery = new Mongo.ObjectID(carId);
+
+  if (!idForQuery) {
+    browserHistory.push('/cars');
+  }
 
   return {
-    car: loadCar,
+    car: ApiCars.findOne(idForQuery),
     isNew: isNew
   }
 

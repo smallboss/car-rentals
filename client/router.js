@@ -6,9 +6,13 @@ import App from './components/App.jsx';
 import Footer from './components/Footer';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar.js';
+import Payments from './components/Content/Payments';
+import PaymentSingle from './components/Content/Payments/PaymentSingle.js';
 import UserProfile from './components/Content/UserProfile'
 import Cars from './components/Content/Cars';
 import CarSingle from './components/Content/Cars/CarSingle.js';
+import Invoices from './components/Content/Invoices';
+import InvoiceSingle from './components/Content/Invoices/InvoiceSingle.js';
 import Customers from './components/Content/Customers';
 import Customer from './components/Content/Customers/Customer'
 import Users from './components/Content/Users'
@@ -48,7 +52,11 @@ export const renderRoutes = () => (
       <Route path="registration" component={Registration}/>
       <Route path="user_profile" component={UserProfile}/>
       <Route path="cars" component={Cars}/>
-      <Route path="cars/:carId" component={CarSingle} />
+        <Route path="cars/:carId" component={CarSingle} />
+      <Route path="payments" component={Payments}/>
+        <Route path="payments/:paymentId" component={PaymentSingle} />
+      <Route path="invoices" component={Invoices}/>
+        <Route path="invoices/:invoiceId" component={InvoiceSingle} />
   <Route path="customers" component={Customers} />
   <Route path="customers_list" component={CustomersList} />
   <Route path='customer/:id' component={Customer} />
