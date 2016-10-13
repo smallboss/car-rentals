@@ -44,29 +44,35 @@ class UserProfile extends React.Component {
                 this.refButtonSave.addEventListener('click', this.handlerButtonsEdit)
                 break
             case 'saveButton':
-                if(this.refFormEdit['password'].value !== this.refFormEdit['repeat_password'].value) {
-                    alert('Input right repeat password please')
-                    return false
-                } else if (this.refFormEdit['password'].value.length > 0) {
-                    _newValue = this.refFormEdit['password'].value
-                    if(_newValue.length < 6) {
-                        alert('Password must be large then 6 symbols')
-                        return false
-                    }
-                    _objToSend = { targetId: _id, newPassword: _newValue }
-                    console.log(_objToSend)
-                    Meteor.call('setNewPassword', _objToSend, function (err, result) {
-                        if(!err) {
-                            alert('Your password has been change. Sign in again please')
-                            //browserHistory.push('/')
-                        } else {
-                            console.log(err)
-                        }
-                    })
-                }
                 delete _сurrentState._id
-                Meteor.users.update(_id, {$set: _сurrentState})
-                this.setState({editAble: 0})
+                Meteor.users.update(_id, {$set: _сurrentState}, false, (err, result) => {
+                    if(err) {
+                        console.log(err)
+                    } else {
+                        if(this.refFormEdit['password'].value !== this.refFormEdit['repeat_password'].value) {
+                            alert('Input right repeat password please')
+                            return false
+                        } else if (this.refFormEdit['password'].value.length > 0) {
+                            _newValue = this.refFormEdit['password'].value
+                            if(_newValue.length < 6) {
+                                alert('Password must be large then 6 symbols')
+                                return false
+                            }
+                            _objToSend = { targetId: _id, newPassword: _newValue }
+                            console.log(_objToSend)
+                            Meteor.call('setNewPassword', _objToSend, (err, result) => {
+                                if(!err) {
+                                    alert('Your password has been change. Sign in again please')
+
+                                } else {
+                                    console.log(err)
+                                }
+                            })
+                        }
+                        this.setState({editAble: 0})
+                        browserHistory.push('/')
+                    }
+                })                
                 break
             default:
                 break

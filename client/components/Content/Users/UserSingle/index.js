@@ -71,28 +71,32 @@ class UserSingle extends React.Component {
                 document.getElementById('button_save').addEventListener('click', this.handlerEditUser)
                 break
             case 'button_save':
-                if(this.refPassword.value !== this.refRepeatPassword.value) {
-                    alert('Input right repeat password please')
-                    return false
-                } else if (this.refPassword.value.length > 0) {
-                    _newValue = this.refPassword.value
-                    if(_newValue.length < 6) {
-                        alert('Password must be large then 6 symbols')
-                        return false
-                    }
-                    _objToSend = { targetId: _id, newPassword: _newValue }     
-                    console.log(_objToSend)
-                    Meteor.call('setNewPassword', _objToSend, function (err, result) {
-                        if(!err) {
-                            alert('Password has been change')                            
-                        } else {
-                            console.log(err)
-                        }
-                    })
-                }
                 delete _newState._id
-                Meteor.users.update(_id, {$set: _newState})
-                this.setState({editAble: 0})
+                Meteor.users.update(_id, {$set: _newState}, false, (err, result) => {
+                    this.setState({editAble: 0})
+                    if(err) {
+                        console.log(err)
+                    } else {
+                        if(this.refPassword.value !== this.refRepeatPassword.value) {
+                            alert('Input right repeat password please')
+                            return false
+                        } else if (this.refPassword.value.length > 0) {
+                            _newValue = this.refPassword.value
+                            if(_newValue.length < 6) {
+                                alert('Password must be large then 6 symbols')
+                                return false
+                            }
+                            _objToSend = { targetId: _id, newPassword: _newValue }
+                            Meteor.call('setNewPassword', _objToSend, function (err, result) {
+                                if(!err) {
+                                    alert('Password has been change')
+                                } else {
+                                    console.log(err)
+                                }
+                            })
+                        }
+                    }
+                })
                 break
             default:
                 break

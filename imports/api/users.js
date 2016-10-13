@@ -6,30 +6,23 @@ import { Accounts } from 'meteor/accounts-base'
 
 if(Meteor.isServer) {
     Meteor.methods({
-        setNewPassword: function () {
-            let { targetId, newPassword } = arguments[0] // or function ({targetId, newPassword}) {...
-            console.log(targetId)    //string !may be sometimes undefined?
-            console.log(newPassword) //string
-            //Accounts.setPassword(targetId, newPassword) //sometimes work
-            Accounts.setPassword('ofy3ShAuk4dpRQhjS', newPassword)  //working if set targetId manually && targetId = undefined
+        setNewPassword: function (data) {
+            Accounts.setPassword(data.targetId, data.newPassword)             
         },
         createNewUser: function (userData) {
             Accounts.createUser(userData)
         }
     })
-
+    Meteor.users.allow({
+        update: function (userId, doc, fields, modifier) {
+            return true
+        },
+        remove: function (userId, doc) {
+            return true
+        }
+    })
     //Meteor.users.remove({})
-    console.log(Meteor.users.find().fetch())
-    console.log('')
-    Meteor.publish('users', function publishUsers () {
-        Meteor.users.allow({
-            update: function (userId, doc, fields, modifier) {
-                return true
-            },
-            remove: function (userId, doc) {
-                return true
-            }
-        })
+    Meteor.publish('users', function publishUsers () {        
         return Meteor.users.find()        
     })
 }
