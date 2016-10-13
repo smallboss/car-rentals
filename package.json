@@ -5,6 +5,7 @@
     "start": "meteor run"
   },
   "dependencies": {
+    "bcryptjs": "^2.3.0",
     "bootstrap": "^4.0.0-alpha.4",
     "lodash": "^4.16.4",
     "meteor-node-stubs": "~0.2.0",
