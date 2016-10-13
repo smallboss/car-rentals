@@ -42,7 +42,7 @@ export default class PaymentSingle extends Component {
 // ====================== ON CHANGE ======================
   onChangeCustomer(value) {
     let newPayment = this.state.dispPayment;
-    newPayment.customerId = new Mongo.ObjectID(value);
+    newPayment.customerId = value;
     this.setState({dispPayment: newPayment});
   }
   onChangeAmount(value) {
@@ -109,6 +109,10 @@ export default class PaymentSingle extends Component {
 
 
     ApiPayments.update(id, {$set: newPayment});
+    const payment = {
+      _id : id
+    };
+    // console.log(ApiCustomers.update({_id: newPayment.customerId}, {$set: { "qqqqq" : 'qqqqq'}}));
 
     newPayment_id = id;
 
@@ -174,29 +178,24 @@ export default class PaymentSingle extends Component {
                         <select className=' form-control' onChange={(e) => this.onChangeCustomer(e.target.value)}>
                           {(() => {
                             const {username, profile} = customerId ? Meteor.users.findOne(customerId)  : '';
-                            const userProfName = customerId 
-                                                    ? ((profile.name 
-                                                          ? (profile.name + ' : ') 
-                                                          : '')
-                                                     + username) 
-                                                    : '';
+                            const userProfileName = customerId ? (profile.name + ' : ' + username) : '';
                               
                             return (    
                               <option 
                                 className='' 
-                                value={customerId}>{userProfName}
+                                value={customerId}>{ userProfileName }
                               </option>
                             )
 
                           })()}
                           {
                             this.props.userList.map((el, key) => {
-                                const currentId = customerId ? customerId._str : ''
-                                if (el._id && (el._id._str != currentId)) {
+                                const currentId = customerId ? customerId : '';
+                                if (el._id != currentId) {
                                   return (
                                     <option 
                                       key={key} 
-                                      value={el._id._str}>{(el.profile.name ? (el.profile.name + " : ") : '') + el.username}</option>
+                                      value={el._id}>{(el.profile.name ? (el.profile.name + " : ") : '') + el.username}</option>
                                   )
                                 }
                                 return undefined;
@@ -254,7 +253,7 @@ export default class PaymentSingle extends Component {
                           <option className='' value={this.state.dispPayment.status}>{this.state.dispPayment.status}</option>
                           {
                             paymentStateTypes.map((el, key) => {
-                              if (el !== status) {
+                              if (el != this.state.dispPayment.status) {
                                   return (
                                     <option key={key} value={el}>{el}</option>
                                   )

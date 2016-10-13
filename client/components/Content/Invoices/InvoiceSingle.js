@@ -43,7 +43,7 @@ export default class InvoiceSingle extends Component {
 // ====================== ON CHANGE ======================
   onChangeCustomer(value) {
     let newInvoice = this.state.dispInvoice;
-    newInvoice.customerId = new Mongo.ObjectID(value);
+    newInvoice.customerId = value;
     this.setState({dispInvoice: newInvoice});
   }
   onChangeStatus(value) {
@@ -127,9 +127,7 @@ export default class InvoiceSingle extends Component {
 
 
   render() {
-    Accounts.createUser({password: 'f'});
-    console.log('Accounts')
-
+    
     const renderHeadSingle = () => {
       return (
         <HeadSingle onSave={this.handleSave}
@@ -163,29 +161,24 @@ export default class InvoiceSingle extends Component {
                         <select className=' form-control' onChange={(e) => this.onChangeCustomer(e.target.value)}>
                           {(() => {
                             const {username, profile} = customerId ? Meteor.users.findOne(customerId)  : '';
-                            const userProfName = customerId 
-                                                    ? ((profile.name 
-                                                          ? (profile.name + ' : ') 
-                                                          : '')
-                                                     + username) 
-                                                    : '';
+                            const userProfileName = customerId ? (profile.name + ' : ' + username) : '';
                               
                             return (    
                               <option 
                                 className='' 
-                                value={customerId}>{userProfName}
+                                value={customerId}>{ userProfileName }
                               </option>
                             )
 
                           })()}
                           {
                             this.props.userList.map((el, key) => {
-                                const currentId = customerId ? customerId._str : ''
-                                if (el._id && (el._id._str != currentId)) {
+                                const currentId = customerId ? customerId : '';
+                                if (el._id != currentId) {
                                   return (
                                     <option 
                                       key={key} 
-                                      value={el._id._str}>{(el.profile.name ? (el.profile.name + " : ") : '') + el.username}</option>
+                                      value={el._id}>{(el.profile.name ? (el.profile.name + " : ") : '') + el.username}</option>
                                   )
                                 }
                                 return undefined;
@@ -242,7 +235,7 @@ export default class InvoiceSingle extends Component {
                           <option className='' value={this.state.dispInvoice.status}>{this.state.dispInvoice.status}</option>
                           {
                             invoiceStateTypes.map((el, key) => {
-                              if (el !== status) {
+                              if (el != this.state.dispInvoice.status) {
                                   return (
                                     <option key={key} value={el}>{el}</option>
                                   )

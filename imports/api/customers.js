@@ -1,5 +1,6 @@
-//import { Mongo } from 'meteor/mongo';
-//export const ApiUsers = Meteor.users
+import { Mongo } from 'meteor/mongo';
+
+export const ApiCustomers = new Mongo.Collection('customers');
 
 if(Meteor.isServer) {
   Meteor.publish('customers', function publishCustomers () {

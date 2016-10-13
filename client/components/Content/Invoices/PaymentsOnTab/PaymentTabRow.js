@@ -103,7 +103,7 @@ export default class PaymentTabRow extends Component {
                       <option className='' value={this.state.dispPayment.status}>{this.state.dispPayment.status}</option>
                       {
                         paymentStateTypes.map((el, key) => {
-                          if (el !== status) {
+                          if (el !== this.state.dispPayment.status) {
                               return (
                                 <option key={key} value={el}>{el}</option>
                               )

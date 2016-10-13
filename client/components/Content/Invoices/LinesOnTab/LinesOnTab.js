@@ -77,6 +77,8 @@ export default class LinesOnTab extends Component {
         const _id = clone(line._id);
         delete line._id;
 
+        console.log('line', line)
+
         ApiLines.update(_id, {$set: line });
 
         let selectedListId = this.state.selectedListId;
@@ -88,8 +90,6 @@ export default class LinesOnTab extends Component {
 
     render(){
         let lineListId = reverse(this.props.linesId);
-
-        console.log('-', lineListId)
 
         return(
             <div>
@@ -103,9 +103,12 @@ export default class LinesOnTab extends Component {
                     <thead>
                         <tr>
                             <th><input type="checkbox" disabled/></th>
+                            <th>Item</th>
                             <th>Description</th>
+                            <th>Car plate#</th>
                             <th>From</th>
                             <th>To</th>
+                            <th>Period</th>
                             <th>Amount</th>
                         </tr>
                     </thead>
@@ -119,7 +122,7 @@ export default class LinesOnTab extends Component {
                                             <LineTabRow key={`line-${key}`}
                                                 onSelect={this.changeSelectedItem.bind(null,item)}
                                                 line={clone(ApiLines.findOne({_id: item}))}
-                                                onSave={this.handleSavePayment}
+                                                onSave={this.handleSaveLine}
                                                 selectedListId={this.state.selectedListId}
                                                 isEdit={this.state.isEdit}
                                                 cars={this.props.cars}/>

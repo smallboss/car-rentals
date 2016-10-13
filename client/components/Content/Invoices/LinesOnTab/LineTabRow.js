@@ -1,4 +1,5 @@
 import React, { Component, PropTypes } from 'react';
+import { Link } from 'react-router';
 import { map, find } from 'lodash';
 
 export default class LineTabRow extends Component {
@@ -10,7 +11,10 @@ export default class LineTabRow extends Component {
             isEdit: this.props.isEdit
         }
 
+
+        this.onChangeCarName= this.onChangeCarName.bind(this);
         this.onChangeAmount = this.onChangeAmount.bind(this);
+
     } 
 
 
@@ -21,7 +25,8 @@ export default class LineTabRow extends Component {
 
         const nextLine = nextProps.line ? nextProps.line._id._str : '';
         const isSelected = find(nextProps.selectedListId, {_str: nextLine});
-        this.checkbox.checked = isSelected;
+        if (this.checkbox)
+            this.checkbox.checked = isSelected;
 
         const isEdit = (isSelected && nextProps.isEdit) ? true : false;
 
@@ -29,6 +34,26 @@ export default class LineTabRow extends Component {
     }
 
 // ==================== CHANGERS FIELDS =============================
+    onChangeCarName(value){
+        let newLine = this.state.dispLine;
+        newLine.car = new Mongo.ObjectID(value);
+        this.setState({dispLine: newLine});
+    }
+    onChangeDescription(value){
+        let newLine = this.state.dispLine;
+        newLine.description = value;
+        this.setState({dispLine: newLine});
+    }
+    onChangeDateFrom(value){
+        let newLine = this.state.dispLine;
+        newLine.dateFrom = value;
+        this.setState({dispLine: newLine});
+    }
+    onChangeDateTo(value){
+        let newLine = this.state.dispLine;
+        newLine.dateTo = value;
+        this.setState({dispLine: newLine});
+    }
     onChangeAmount(value){
         let newLine = this.state.dispLine;
         newLine.amount = value;
@@ -38,8 +63,10 @@ export default class LineTabRow extends Component {
 
 
     render(){
-        const line = this.props.line;
+        let line = this.props.line ? this.props.line : {};
         let dispLine = this.state.dispLine;
+        const cars = this.props.cars ? this.props.cars : [];
+        const car = find(cars, {_id: line.car});
 
         const buttonSave = () => {
             if (this.state.isEdit) {
@@ -55,23 +82,80 @@ export default class LineTabRow extends Component {
             return undefined;
         }
 
+        const showItem = () => {
+            if (this.state.isEdit){
+                return(
+                    <select className=' form-control' onChange={(e) => this.onChangeCarName(e.target.value)}>
+                          {(() => {
+                            if (car) {
+                              
+                            return (    
+                              <option 
+                                className='' 
+                                value={car._id}>{ car.name }
+                              </option>
+                            )}
+
+                          })()}
+                          {
+                            cars.map((el, key) => {
+                                const carHelp = car ? car : {}
+                                if (el._id != carHelp._id) {
+                                  return (
+                                    <option 
+                                      key={`car-${key}`} 
+                                      value={el._id._str}>{el.name}</option>
+                                  )
+                                }
+                                return undefined;
+                              }
+                            )}
+                        </select>
+                )
+            }
+
+            return <span>{car ? car.name : ''}</span>
+        }
+
+        const showDescription = () => {
+            if (this.state.isEdit) {
+                return (
+                    <input type="text"
+                           className="form-control "
+                           onChange={(e) => this.onChangeDescription(e.target.value)}
+                           value={ dispLine.description } />
+                )
+            }
+
+            return <span>{line ? line.description : ''}</span>
+        }
+
         const showDate = () => {
             if (this.state.isEdit){
                 return(
                     <input  type="date"
-                            value={dispPayment.date}
+                            value={dispLine.date}
                             onChange={(e) => this.onChangeDate(e.target.value)} />
                 )
             }
 
-            return <span>{payment ? payment.date : ''}</span>
+            return <span>{line ? line.date : ''}</span>
         }
+        const showCarPlate = () => {
+            let carIdStr = line.car ? line.car._str : '';
 
+            return (
+                <Link to={`/cars/${carIdStr}`}>
+                    <span>{(line && car) ? car.plateNumber : ''}</span>
+                </Link>
+            )
+        }
         const showDateFrom = () => {
             if (this.state.isEdit){
                 return(
                     <input  type="date"
-                            value={dispLine.dateTo} />
+                            value={dispLine.dateFrom}
+                            onChange={(e) => this.onChangeDateFrom(e.target.value)} />
                 )
             }
 
@@ -81,11 +165,28 @@ export default class LineTabRow extends Component {
             if (this.state.isEdit){
                 return(
                     <input  type="date"
-                            value={dispLine.dateTo} />
+                            value={dispLine.dateTo}
+                            onChange={(e) => this.onChangeDateTo(e.target.value)} />
                 )
             }
 
             return <span>{line ? line.dateTo : ''}</span>
+        }
+        const showPeriod = () => {
+            let period;
+            let Date1, Date2;
+
+            if (this.state.isEdit){
+                Date1 = new Date (dispLine.dateFrom);
+                Date2 = new Date (dispLine.dateTo);
+            } else {
+                Date1 = new Date (line.dateFrom);
+                Date2 = new Date (line.dateTo);
+            }
+
+            period = Math.floor((Date2.getTime() - Date1.getTime())/(1000*60*60*24));
+
+            return <span>{(line && period) ? period : ''}</span>
         }
         const showAmount = () => {
             if (this.state.isEdit){
@@ -99,29 +200,6 @@ export default class LineTabRow extends Component {
             return <span>{line ? line.amount : ''}</span>
         }
 
-        const showStatus = () => {
-            if (this.state.isEdit) {
-                return (
-                  <div className='col-xs-8 form-horizontal'>
-                    <select className=' form-control' onChange={(e) => this.onChangeStatus(e.target.value)}>
-                      <option className='' value={this.state.dispPayment.status}>{this.state.dispPayment.status}</option>
-                      {
-                        paymentStateTypes.map((el, key) => {
-                          if (el !== status) {
-                              return (
-                                <option key={key} value={el}>{el}</option>
-                              )
-                            }
-                            return undefined;
-                          }
-                        )}
-                    </select>
-                  </div>
-                )
-            }
-
-            return <span>{payment ? payment.status : ''}</span>
-        }
 
         return(
             <tr className="LineTabRow">
@@ -132,10 +210,13 @@ export default class LineTabRow extends Component {
                 </th>
                 <td>
                     { buttonSave() }
-                    { line ? line._id._str : '' }
+                    { showItem() }
                 </td>
+                <td>{ showDescription() }</td>
+                <td>{ showCarPlate() }</td>
                 <td>{ showDateFrom() }</td>
                 <td>{ showDateTo() }</td>
+                <td>{ showPeriod() }</td>
                 <td>{ showAmount() }</td>
             </tr>
         )

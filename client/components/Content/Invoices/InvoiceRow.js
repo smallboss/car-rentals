@@ -28,7 +28,7 @@ export default class InvoiceRow extends Component {
                         onChange={(e) => onHandleSelect(e, item)} />
                 </th>
                 <td>
-                    <Link to={`/customers/${item.customerId}`}>{ customerName.username }</Link>
+                    <Link to={`/customers/${item.customerId}`}>{ customerName ? customerName.username : '' }</Link>
                 </td>
                 <td onClick={onClick} >{ item.date }</td>
                 <td onClick={onClick} >{ item._id._str }</td>

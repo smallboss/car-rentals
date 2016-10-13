@@ -18,6 +18,7 @@ class Registration extends React.Component {
             alert('Введенные пароли не совпадают');
             return false
         }
+
         /*Check passwords end*/
         /*Create must have variable start*/
         let _id = new Mongo.ObjectID(),
