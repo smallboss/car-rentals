@@ -19,7 +19,7 @@ class UserProfile extends React.Component {
     handlerInputs (e) {
         let _newUser = this.state.user,
             _target = e.target.id,
-            _newValue = e.target.value
+            _newValue = e.target.value            
         if(typeof _newValue == 'string') {
             if (_target == 'email') {
                 _newUser.emails[0].address = _newValue
@@ -32,8 +32,9 @@ class UserProfile extends React.Component {
     handlerButtonsEdit (e) {
         let _nameButton = e.target.name,
             _сurrentState = this.state.user,
+            _newValue,
             _id = this.state.user._id,
-            _newValue        
+            _objToSend
         switch (_nameButton) {
             case 'editButton':
                 this.setState({editAble: 1});
@@ -48,7 +49,13 @@ class UserProfile extends React.Component {
                     return false
                 } else if (this.refFormEdit['password'].value.length > 0) {
                     _newValue = this.refFormEdit['password'].value
-                    Meteor.call('setPassword', _id, _newValue, function (err, result) {
+                    if(_newValue.length < 6) {
+                        alert('Password must be large then 6 symbols')
+                        return false
+                    }
+                    _objToSend = { targetId: _id, newPassword: _newValue }
+                    console.log(_objToSend)
+                    Meteor.call('setNewPassword', _objToSend, function (err, result) {
                         if(!err) {
                             alert('Your password has been change. Sign in again please')
                             //browserHistory.push('/')
@@ -67,6 +74,13 @@ class UserProfile extends React.Component {
         
     }
     render () {
+        if(!this.state.user) {
+            return (
+                <div>
+                    Must be logined
+                </div>
+            )
+        }
         let editAble = (!this.state.editAble) ? 'disabled' : false
         let { username, emails, profile } = this.state.user || '',
             email = (emails) ? emails[0].address : ''
