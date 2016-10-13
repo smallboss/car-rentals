@@ -9,6 +9,7 @@ Meteor.methods({
         Accounts.setPassword({_id: userId}, newPassword)        
     },
     createNewUser: function (userData) {
+        console.log(userData);
         Accounts.createUser(userData)
     }
 })
