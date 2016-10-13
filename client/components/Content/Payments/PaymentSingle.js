@@ -1,5 +1,6 @@
 import { Meteor } from 'meteor/meteor'
 import { Mongo } from 'meteor/mongo'
+import { Link } from 'react-router';
 import { createContainer } from 'meteor/react-meteor-data'
 import { ApiPayments } from '/imports/api/payments.js'
 import { ApiCustomers } from '/imports/api/customers'
@@ -104,7 +105,7 @@ export default class PaymentSingle extends Component {
     let newPayment = clone(this.state.dispPayment);
 
 
-    const id = newPayment._id;
+    let id = newPayment._id;
     delete newPayment._id;
 
 
@@ -112,9 +113,11 @@ export default class PaymentSingle extends Component {
     const payment = {
       _id : id
     };
-    // console.log(ApiCustomers.update({_id: newPayment.customerId}, {$set: { "qqqqq" : 'qqqqq'}}));
 
-    newPayment_id = id;
+    Meteor.users.update({_id: newPayment.customerId}, {$push: { "profile.payments": id}});
+    
+
+    newPayment._id = id;
 
     this.setState({payment: newPayment, dispPayment: newPayment, editable: false});
   }
@@ -126,6 +129,7 @@ export default class PaymentSingle extends Component {
   handleDelete() {
     browserHistory.push('/payments');
 
+    Meteor.users.update({_id: this.state.payment.customerId}, {$pull: { "profile.payments": this.state.payment._id}});
     ApiPayments.remove(this.state.payment._id);
   }
 
@@ -217,6 +221,12 @@ export default class PaymentSingle extends Component {
                       })()}
                     </div>
                   )
+                })()}
+                {(() => {
+                  const custId = this.state.editable ? this.state.dispPayment.customerId : customerId;
+                  const custName = Meteor.users.findOne(custId) ? Meteor.users.findOne(custId).username : '';
+
+                  return (<Link to={`/customer/${custId}`}>{`${custName} propfile`}</Link>);
                 })()}
               </div>
 { /* END ============================= DROPDOWN CUSTOMERS ============================== */}

@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { map, find } from 'lodash';
+import { Link } from 'react-router';
 
 import { paymentStateTypes } from '/imports/startup/typesList.js';
 
@@ -71,6 +72,12 @@ export default class PaymentTabRow extends Component {
             return undefined;
         }
 
+        const showPaymentId = () => {
+            const paymentIdStr = payment ? payment._id._str : '';
+            return (<Link to={`/payments/${paymentIdStr}`}>{paymentIdStr}</Link>)
+        }
+
+
         const showDate = () => {
             if (this.state.isEdit){
                 return(
@@ -136,7 +143,7 @@ export default class PaymentTabRow extends Component {
                 })()}
                 <td>
                     { buttonSave() }
-                    { payment ? payment._id._str : '' }
+                    { showPaymentId() }
                 </td>
                 <td>{ showDate() }</td>
                 <td>{ showAmount() }</td>
