@@ -112,6 +112,7 @@ export default class PaymentSingle extends Component {
     const payment = {
       _id : id
     };
+    Meteor.users.update(newPayment.customerId, {$push: {'profile.payments': id}})
     // console.log(ApiCustomers.update({_id: newPayment.customerId}, {$set: { "qqqqq" : 'qqqqq'}}));
 
     newPayment_id = id;
@@ -368,7 +369,7 @@ export default class PaymentSingle extends Component {
 
 export default createContainer(({params}) => {
   Meteor.subscribe('payments');
-  Meteor.subscribe('customers');
+  Meteor.subscribe('users');
 
   let isNew = false;
   let paymentId = params.paymentId;
