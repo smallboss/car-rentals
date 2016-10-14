@@ -58,7 +58,11 @@ class CustomersList extends React.Component {
                 break
             case 'remover-users':
                 arrForRemove.map(elem => {
-                    Meteor.users.remove({_id: elem})                    
+                    Meteor.call('removeAllUserData', elem, (err) => {
+                        if(err) {
+                            console.log(err)
+                        }
+                    })                    
                 })
                 if(arrForRemove.length >= this.state.maxPage) {
                     this.setState({stateForRemove: [], currentPage: this.state.currentPage - 1})   

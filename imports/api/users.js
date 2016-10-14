@@ -3,6 +3,10 @@
  */
 import { Meteor } from 'meteor/meteor'
 import { Accounts } from 'meteor/accounts-base'
+import { ApiPayments } from '/imports/api/payments'
+import { ApiLines } from '/imports/api/lines'
+import { ApiInvoices } from '/imports/api/invoices'
+import { ApiContracts } from '/imports/api/contracts'
 
 if(Meteor.isServer) {
     Meteor.methods({
@@ -11,6 +15,32 @@ if(Meteor.isServer) {
         },
         createNewUser: function (userData) {
             return Accounts.createUser(userData)
+        },
+        removeAllUserData: function (id) {
+            let lines = ApiLines.find({customerId: id}, {multi: true}).fetch()
+            let invoices = ApiInvoices.find({customerId: id}, {multi: true}).fetch()
+            let contracts = ApiContracts.find({customerId: id}, {multi: true}).fetch()
+            let payments = ApiPayments.find({customerId: id}, {multi: true}).fetch()
+            for (let i = 0; i < lines.length; i++) {
+                if(payments[i]._id) {
+                    ApiLines.remove({_id: new Mongo.ObjectID(lines[i]._id._str)})
+                }
+            }for (let i = 0; i < invoices.length; i++) {
+                if(payments[i]._id) {
+                    ApiInvoices.remove({_id: new Mongo.ObjectID(invoices[i]._id._str)})
+                }
+            }
+            for (let i = 0; i < contracts.length; i++) {
+                if(payments[i]._id) {
+                    ApiContracts.remove({_id: new Mongo.ObjectID(contracts[i]._id._str)})
+                }                
+            }
+            for (let i = 0; i < payments.length; i++) {
+                if(payments[i]._id) {
+                    ApiPayments.remove({_id: new Mongo.ObjectID(payments[i]._id._str)})
+                }                
+            }            
+            Meteor.users.remove({_id: id})
         }
     })
     Meteor.users.allow({

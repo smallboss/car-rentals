@@ -5,7 +5,6 @@ import { Meteor } from 'meteor/meteor'
 import { Mongo } from 'meteor/mongo'
 import { createContainer } from 'meteor/react-meteor-data'
 import { ApiPayments } from '/imports/api/payments'
-//import { Accounts } from 'meteor/accounts-base'
 import React from 'react'
 import $ from 'jquery'
 import { browserHistory } from 'react-router'
@@ -51,8 +50,9 @@ class Customer extends React.Component {
     handlerRemoveCustomer (id) {
         let _confirm = confirm('Are You sure to delete this customer?')
         if(_confirm) {
-            Meteor.users.remove({_id: id})
-            browserHistory.push('/customers_list')
+            Meteor.call('removeAllUserData', id, (err) => {
+                browserHistory.push('/customers_list')
+            })                        
         }
     }
     handlerEditCustomer (e) {
