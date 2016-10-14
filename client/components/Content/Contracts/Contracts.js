@@ -9,7 +9,7 @@ import { ApiUsers } from '/imports/api/customers';
 import ContractRow from './ContractRow.js';
 import HeadList from './HeadList.js';
 
-import { map, debounce } from 'lodash';
+import { map, debounce, find } from 'lodash';
 
 
 class Contracts extends Component {
@@ -92,10 +92,28 @@ class Contracts extends Component {
 
     var displayedContracts = props.contracts.filter(function(el) {
         const contractStatus = el.status ? el.status.toLowerCase()   : '';
+        const contractTitle     = el.title    ? el.title.toLowerCase() : '';
         const contractID     = el._id    ? el._id._str.toLowerCase() : '';
+        const contractStartDate     = el.startDate    ? el.startDate.toLowerCase() : '';
+        const contractEndDate     = el.endDate    ? el.endDate.toLowerCase() : '';
 
-        return (contractStatus.indexOf(searchQuery) !== -1 ||
-                contractID.indexOf(searchQuery)     !== -1)
+
+        let contractCustomerName = find(props.userList , {_id: el.customerId});
+        contractCustomerName = contractCustomerName ? contractCustomerName.profile.name.toLowerCase() : '';
+
+        let contractManagerName = find(props.userList , {_id: el.managerId});
+        contractManagerName = contractManagerName ? contractManagerName.profile.name.toLowerCase() : '';
+
+
+        console.log(el.customerId, contractCustomerName);
+
+        return (contractStatus.indexOf(searchQuery)       !== -1 ||
+                contractID.indexOf(searchQuery)           !== -1 ||
+                contractTitle.indexOf(searchQuery)        !== -1 ||
+                contractStartDate.indexOf(searchQuery)    !== -1 ||
+                contractEndDate.indexOf(searchQuery)      !== -1 ||
+                contractCustomerName.indexOf(searchQuery) !== -1 ||
+                contractManagerName.indexOf(searchQuery)  !== -1)
     });
 
 

@@ -9,7 +9,7 @@ import { ApiCustomers } from '/imports/api/customers';
 import PaymentRow from './PaymentRow.js';
 import HeadList from './HeadList.js';
 
-import { map, debounce } from 'lodash';
+import { map, debounce, find } from 'lodash';
 
 
 class Payments extends Component {
@@ -91,15 +91,18 @@ class Payments extends Component {
     const searchQuery = queryText.toLowerCase();
 
     var displayedPayments = props.payments.filter(function(el) {
-        const paymenAmount = el.amount ? el.amount.toLowerCase()   : '';
-        const paymenStatus = el.status ? el.status.toLowerCase()   : '';
-        const paymenDate   = el.date   ? el.date.toLowerCase()     : '';
-        const paymenID     = el._id    ? el._id._str.toLowerCase() : '';
+        const paymentAmount = el.amount ? el.amount.toLowerCase()   : '';
+        const paymentStatus = el.status ? el.status.toLowerCase()   : '';
+        const paymentDate   = el.date   ? el.date.toLowerCase()     : '';
+        const paymentID     = el._id    ? el._id._str.toLowerCase() : '';
+        let paymentCustomerName = find(props.userList , {_id: el.customerId});
+        paymentCustomerName = paymentCustomerName ? paymentCustomerName.profile.name : '';
 
-        return (paymenAmount.indexOf(searchQuery) !== -1 ||
-                paymenStatus.indexOf(searchQuery) !== -1 ||
-                paymenDate.indexOf(searchQuery)   !== -1 ||
-                paymenID.indexOf(searchQuery)     !== -1)
+        return (paymentAmount.indexOf(searchQuery) !== -1 ||
+                paymentStatus.indexOf(searchQuery) !== -1 ||
+                paymentDate.indexOf(searchQuery)   !== -1 ||
+                paymentID.indexOf(searchQuery)     !== -1 ||
+                paymentCustomerName.indexOf(searchQuery) !== -1)
     });
 
 

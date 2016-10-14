@@ -25,6 +25,7 @@ export default class ContractSingle extends Component {
       contract: clone(this.props.contract),
       dispContract: clone(this.props.contract),
       isNew: this.props.isNew,
+      allowSave: false,
       customerList: this.props.customerList,
       managerList: this.props.managerList,
 
@@ -55,12 +56,18 @@ export default class ContractSingle extends Component {
   onChangeCustomer(value) {
     let newContract = this.state.dispContract;
     newContract.customerId = value;
-    this.setState({dispContract: newContract});
+    this.setState({
+        dispContract: newContract, 
+        allowSave: (newContract.customerId && newContract.managerId)
+    });
   }
   onChangeManager(value) {
     let newContract = this.state.dispContract;
     newContract.managerId = value;
-    this.setState({dispContract: newContract});
+    this.setState({
+        dispContract: newContract, 
+        allowSave: (newContract.customerId && newContract.managerId)
+    });
   }
   onChangeStartDate(value) {
     let newContract = this.state.dispContract;
@@ -105,9 +112,14 @@ export default class ContractSingle extends Component {
       dataDispContract = clone(nextProps.contract)
     }
 
+    const allowSave = this.state.editable 
+                            ? this.state.allowSave 
+                            : (c.customerId && c.managerId);
+
     this.setState({
       contract: clone(c),
-      dispContract: dataDispContract
+      dispContract: dataDispContract,
+      allowSave
     });
   }
 
@@ -131,7 +143,15 @@ export default class ContractSingle extends Component {
   }
 
   handleEdit() {
-    this.setState({editable: !this.state.editable, dispContract: clone(this.state.contract)});
+    const allowSave = (this.state.editable && this.state.contract.customerId && this.state.contract.managerId) 
+                        ? this.state.allowSave
+                        : false;
+
+    this.setState({
+        editable: !this.state.editable,
+        dispContract: clone(this.state.contract),
+        allowSave
+    });
   }
 
   handleDelete() {
@@ -150,6 +170,12 @@ export default class ContractSingle extends Component {
     if (this.buttonEdit) {
       this.buttonEdit.disabled = false;
     }
+
+    const allowSave = (this.props.contract) 
+                            ? (this.props.contract.customerId && this.props.contract.managerId)
+                            : undefined;
+
+    this.setState({allowSave});
   }
 
 
@@ -160,7 +186,8 @@ export default class ContractSingle extends Component {
         <HeadSingle onSave={this.handleSave}
                     onEdit={this.handleEdit}
                     onDelete={this.handleDelete}
-                    onSendByEmail={this.handleSendByEmail} />
+                    onSendByEmail={this.handleSendByEmail}
+                    allowSave={this.state.allowSave} />
       )
     }
 
@@ -183,7 +210,7 @@ export default class ContractSingle extends Component {
       const renderTitle = () => {
         if (this.state.editable) {
           return (
-            <div className='col-xs-12 form-horizontal'>
+            <div className='col-xs-10 form-horizontal'>
               <input
                 type="text"
                 id="contractTitle"
@@ -194,7 +221,7 @@ export default class ContractSingle extends Component {
           )
         }
 
-        return <div className='col-xs-12'>{title}</div>
+        return <div className='col-xs-10'>{title}</div>
       }
 
       const renderStartDate = () => {
@@ -371,6 +398,7 @@ export default class ContractSingle extends Component {
           <div className="topFields">
             <div className="row">
               <div className="form-group profit col-xs-12">
+                <label htmlFor="contractTitle" className='col-xs-2'><h4>Contract Title:</h4></label>
                 { renderTitle() }
               </div>
             </div>
