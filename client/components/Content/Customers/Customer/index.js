@@ -320,7 +320,7 @@ class Customer extends React.Component {
 }
 
 export default createContainer(({params}) => {
-    Meteor.subscribe('customers')
+    Meteor.subscribe('users')
     let _id = params.id
     if(_id === 'new') {
         return {
