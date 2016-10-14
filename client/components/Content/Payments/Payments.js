@@ -189,7 +189,7 @@ Payments.contextTypes = {
 
 export default createContainer(() => {
   Meteor.subscribe('payments');
-  Meteor.subscribe('customers')
+  Meteor.subscribe('users')
 
   return {
     payments: ApiPayments.find().fetch(),
