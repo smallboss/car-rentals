@@ -133,10 +133,14 @@ class Customer extends React.Component {
                     _newState._id = new Mongo.ObjectID()
                     _newState.password = '123456'
                     _newState.profile.userType = 'customer'
-                    Meteor.call('createNewUser', _newState, () => {
-                        alert('Default user`s password is 123456')
-                        _href = '/customer/' + _newState._id
-                        browserHistory.push(_href)
+                    Meteor.call('createNewUser', _newState, (err, result) => {
+                        if(err) {
+                            alert(err.reason)
+                        } else {
+                            alert('Default user`s password is 123456')
+                            _href = '/customer/' + result
+                            browserHistory.push(_href)   
+                        }                        
                     })
                     this.setState({customers: _newState, editAble: 0})
                 } else {
@@ -167,7 +171,7 @@ class Customer extends React.Component {
             })
             return
         }
-        _state = this.state.customer,
+        _state = this.state.customer
         _state.profile[target] = data
         delete this.state.customer._id
         Meteor.users.update(_id, {$set: _state})
