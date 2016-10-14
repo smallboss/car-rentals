@@ -94,6 +94,7 @@ class Users extends React.Component {
                         <th>User name</th>
                         <th>Name</th>
                         <th>User email</th>
+                        <th>User phone</th>
                         <th>Role</th>
                     </tr>
                     </thead>

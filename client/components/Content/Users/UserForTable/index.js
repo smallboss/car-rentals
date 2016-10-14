@@ -9,7 +9,7 @@ class UserForTable extends React.Component {
     render () {
         let { _id, username} = this.props.user_data
         let email = this.props.user_data.emails[0].address
-        let name = this.props.user_data.profile.name
+        let { name, phone } = this.props.user_data.profile
         let userType = this.props.user_data.profile.userType
         let _href = '/user_single/' + _id
         return (
@@ -18,6 +18,7 @@ class UserForTable extends React.Component {
                 <td><Link to={_href}>{username}</Link></td>
                 <td>{name}</td>                
                 <td>{email}</td>                
+                <td>{phone}</td>                
                 <td>{userType}</td>                
             </tr>
         )

@@ -25,8 +25,7 @@ export default class CarSingle extends Component {
 
       selectedMaintenanceID: [],
       editable: this.props.isNew
-    }
-
+    };
 
     this.onChangeName = this.onChangeName.bind(this);
     this.onChangePlateNumber = this.onChangePlateNumber.bind(this);
@@ -146,10 +145,8 @@ export default class CarSingle extends Component {
     newCar.maintenance = this.state.car.maintenance;
     if (!newCar.maintenance) newCar.maintenance = new Array();
 
-
     const id = newCar._id;
     delete newCar._id;
-
 
     ApiCars.update(id, {$set: newCar});
 
@@ -180,7 +177,6 @@ export default class CarSingle extends Component {
     };
 
     newCarData.maintenance.push(maintenance);
-
 
     const carId = newCarData._id;
     delete newCarData._id;
