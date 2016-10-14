@@ -24,10 +24,10 @@ class Login extends React.Component {
                 </div>
             )   
         }
-        let { username } = this.state.loginedUser
+        let { name } = this.state.loginedUser.profile
         return (
             <div className='btn-group div-welcome m-r-1'>
-                <span className='m-x-1'>Welcome, {username}</span>
+                <span className='m-x-1'>Welcome, {name}</span>
                 <button type='button' className='btn btn-success dropdown-toggle pull-right' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>
                     <span className='caret'></span>
                     <span className='sr-only'>Toggle Dropdown</span>

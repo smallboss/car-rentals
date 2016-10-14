@@ -119,7 +119,7 @@ class UserProfile extends React.Component {
             <div>
                 <div className='panel panel-default'>
                     <div className='panel-heading'>
-                        <h4>{username} / {name}</h4>
+                        <h4>Customer / {name}</h4>
                         <input type='button' name='editButton' className='btn btn-primary p-x-1' value='Edit' onClick={this.handlerButtonsEdit} />
                         <input type='button' name='saveButton' className='btn btn-primary p-x-1 m-x-1' ref={(ref) => this.refButtonSave = ref} value='Save' disabled={editAble} />
                     </div>

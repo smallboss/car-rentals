@@ -2,6 +2,7 @@
  * Created by watcher on 10/8/16.
  */
 import React from 'react'
+import { Link } from 'react-router'
 import { Meteor } from 'meteor/meteor'
 import { Mongo } from 'meteor/mongo'
 import { ApiPayments } from '/imports/api/payments'
@@ -156,11 +157,16 @@ class Table extends React.Component {
                         <tr>
                             <th className='col-xs-1'>#</th>
                             {_stateToTh.map(prop => {
-                                if(prop != '_id' && prop != '_toedit') {
+                                if(prop != '_id' && prop != '_toedit' && prop !== 'customerId') {
                                     return (
                                         <th key={Math.random()}>{prop}</th>
                                     )   
-                                }                                
+                                }
+                                if(this.props.currentComponent == 'payments' && prop == '_id') {
+                                    return (
+                                        <th key={Math.random()}>Payment ID</th>
+                                    )    
+                                }
                             }) }                            
                         </tr>
                     </thead>
@@ -169,25 +175,30 @@ class Table extends React.Component {
                         <td>#<input type='button' className='btn btn-success m-l-1' name='save_notes_new' value='Save' onClick={this.handlerEditButtons} /></td>
                         {_stateToTh.map(prop => {
                             let _typeInput = (prop.indexOf('date') != -1) ? 'date' : 'text',
-                                _defaultValue = (prop == 'dateCreateRequest') ? new Date().toISOString().slice(0, 10) : ''                            
-                            if(prop != '_id') {
+                                _defaultValue = (prop == 'dateCreateRequest') ? new Date().toISOString().slice(0, 10) : ''     
+                                _defaultValue = (prop == 'status') ? 'open' : _defaultValue
+                            if(this.props.currentComponent == 'payments' && prop == '_id') {
+                                return (
+                                    <td key={Math.random()}><input type={_typeInput} id={prop} className='form-control' value={new Mongo.ObjectID()} /></td>
+                                )
+                            }
+                            if(prop != '_id' && prop != 'customerId') {
                                 return (
                                     <td key={Math.random()}><input type={_typeInput} id={prop} className='form-control' defaultValue={_defaultValue}/></td>
                                 )
-                            }
+                            }                            
                         }) }
                     </tr>
                         {this.state.arrToTable.map((elem, i) => {
                             let _stateToTd = Object.keys(this.state.arrToTable[i], key => elem[key])
-                            if(elem[_stateToTd[1]].toString().length > 0) {
+                            if(elem[_stateToTd[1]].length > 0) {
                                 return (
                                     <tr key={Math.random()}>
                                         <td><input type='checkbox' id={elem._id._str} onChange={this.handlerChecker} />
                                             {(elem._toedit) ? <input key={Math.random()} type='button' className='btn btn-success m-l-1' name='save_notes' value='Save' onClick={(e) => {this.handlerEditButtons(e, elem._id._str)}} /> : ''}
                                         </td>
-                                        
                                         {_stateToTd.map(val => {
-                                            if(typeof elem[val] == 'string') {
+                                            if(typeof elem[val] == 'string' && val != 'customerId') {
                                                 let _typeInput = (val.indexOf('date') != -1) ? 'date' : 'text'
                                                 if(elem._toedit) {
                                                     return (
@@ -195,13 +206,20 @@ class Table extends React.Component {
                                                             <input type={_typeInput} className='form-control' name={val} defaultValue={elem[val]} onChange={(e) => {this.handlerInputs(elem._id._str, e)}} />
                                                         </td>
                                                     )   
-                                                } else {
+                                                } else {                                                    
                                                     return (
                                                         <td key={Math.random()}>
                                                             {elem[val]}
                                                         </td>
                                                     )   
                                                 }                                                   
+                                            } else if(this.props.currentComponent == 'payments' && val == '_id') {
+                                                let href = '/payments/' + elem._id._str
+                                                return (
+                                                    <td key={Math.random()}>
+                                                        <Link to={href}>{elem._id._str}</Link>
+                                                    </td>
+                                                )
                                             }                                            
                                         })}
                                     </tr>

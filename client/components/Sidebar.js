@@ -35,7 +35,7 @@ export default class Sidebar extends Component {
             </ul>
           </li>
           <li><Link to="/users_list">All Users</Link></li>
-          <li><Link to='/user_single'>Profile</Link></li>
+          <li><Link to='/user_profile'>Profile</Link></li>
         </ul>
       </div>
     )

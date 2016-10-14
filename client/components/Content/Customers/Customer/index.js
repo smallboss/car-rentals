@@ -237,7 +237,7 @@ class Customer extends React.Component {
             payments = [ {
                 _id: new Mongo.ObjectID(),
                 amount: '',
-                customerId: '',
+                customerId: _id,
                 date: '',
                 ref: '',
                 status: ''
@@ -269,15 +269,15 @@ class Customer extends React.Component {
                     </div>
                     <div className='row m-y-1'>
                         <div className='col-xs-6'>
-                            <label htmlFor='phone' className='col-xs-2'>Phone</label>
+                            <label htmlFor='name' className='col-xs-2'>Name</label>
                             <div className='col-xs-8 form-horizontal'>
-                                <input type='text' id='phone' className='form-control' value={phone} disabled={editAble} />
+                                <input type='text' id='name' className='form-control' value={name} disabled={editAble} />
                             </div>
                         </div>
                         <div className='col-xs-6'>
-                            <label htmlFor='email' className='col-xs-2'>Email</label>
+                            <label htmlFor='phone' className='col-xs-2'>Phone</label>
                             <div className='col-xs-8 form-horizontal'>
-                                <input type='email' id='email' className='form-control' value={email} disabled={editAble} />
+                                <input type='text' id='phone' className='form-control' value={phone} disabled={editAble} />
                             </div>
                         </div>
                     </div>
@@ -286,6 +286,12 @@ class Customer extends React.Component {
                             <label htmlFor='birhdate' className='col-xs-2'>Birth Date</label>
                             <div className='col-xs-8 form-horizontal'>
                                 <input type='date' id='birthDate' className='form-control' value={birthDate} disabled={editAble}/>
+                            </div>
+                        </div>
+                        <div className='col-xs-6'>
+                            <label htmlFor='email' className='col-xs-2'>Email</label>
+                            <div className='col-xs-8 form-horizontal'>
+                                <input type='email' id='email' className='form-control' value={email} disabled={editAble} />
                             </div>
                         </div>
                     </div>
