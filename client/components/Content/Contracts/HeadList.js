@@ -5,7 +5,7 @@ export default class HeadList extends Component {
         super(props);
 
         this.state = {
-            listName: "Payments",
+            listName: "Contracts",
             searchField: "",
             disableRemove: true
         }

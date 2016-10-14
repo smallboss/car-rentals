@@ -1,8 +1,8 @@
 import React, { Component, PropTypes } from 'react';
 import { browserHistory } from 'react-router'
-
+import { Email } from 'meteor/email'
 import { createContainer } from 'meteor/react-meteor-data';
-// import { ApiUserList } from '/imports/api/userList.js'
+
 import { ApiContracts } from '/imports/api/contracts.js';
 import { ApiUsers } from '/imports/api/customers';
 
@@ -32,7 +32,7 @@ class Contracts extends Component {
     this.pageDown = this.pageDown.bind(this);
     this.handleClickOnRow = this.handleClickOnRow.bind(this);
 
-    context.router
+    context.router;
   }
 
 

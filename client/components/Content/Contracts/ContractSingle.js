@@ -2,13 +2,14 @@ import { Meteor } from 'meteor/meteor'
 import { Mongo } from 'meteor/mongo'
 import { Link } from 'react-router';
 import { createContainer } from 'meteor/react-meteor-data'
-import { ApiPayments } from '/imports/api/payments.js'
+import { ApiInvoices } from '/imports/api/invoices.js'
 import { ApiUsers } from '/imports/api/users'
 import { ApiContracts } from '/imports/api/contracts'
+import LinesOnTab from './LinesOnTab/LinesOnTab.js';
 import HeadSingle from './HeadSingle.js';
 import { browserHistory } from 'react-router';
 import React, { Component } from 'react';
-import { clone, cloneDeep, reverse } from 'lodash';
+import { clone, cloneDeep, reverse, concat } from 'lodash';
 
 import { contractStateTypes } from '/imports/startup/typesList.js';
 
@@ -36,6 +37,7 @@ export default class ContractSingle extends Component {
     this.onChangeManager = this.onChangeManager.bind(this);
     this.onChangeStartDate = this.onChangeStartDate.bind(this);
     this.onChangeEndDate = this.onChangeEndDate.bind(this);
+    this.onChangeTermsAndConditions = this.onChangeTermsAndConditions.bind(this);
     this.onChangeNotes = this.onChangeNotes.bind(this);
     this.onChangeStatus = this.onChangeStatus.bind(this);
     this.handleSave = this.handleSave.bind(this);
@@ -75,6 +77,11 @@ export default class ContractSingle extends Component {
     newContract.status = value;
     this.setState({dispContract: newContract});
   }
+  onChangeTermsAndConditions(value){
+    let newContract = this.state.dispContract;
+    newContract.termsAndConditions = value;
+    this.setState({dispContract: newContract});
+  }
   onChangeNotes(value) {
     let newContract = this.state.dispContract;
     newContract.notes = value;
@@ -97,8 +104,6 @@ export default class ContractSingle extends Component {
     if (!dataDispContract) {
       dataDispContract = clone(nextProps.contract)
     }
-
-    console.log('managerList', nextProps.managerList)
 
     this.setState({
       contract: clone(c),
@@ -170,6 +175,7 @@ export default class ContractSingle extends Component {
         startDate,
         endDate,
         status,
+        termsAndConditions,
         notes
       } = this.state.contract;
 
@@ -399,6 +405,26 @@ export default class ContractSingle extends Component {
       }
 
 
+      const renderInvoiceLinesTable = () => {
+
+        let linesId = [];
+
+        if (this.props.contract.invoicesId) {
+          this.props.contract.invoicesId.map((el) => {
+            let invoice = ApiInvoices.findOne({_id: el});
+            linesId = linesId.concat(invoice ? invoice.linesId : []);
+          })
+        }
+
+        return (
+          <LinesOnTab 
+              invoice={cloneDeep(this.state.invoice)}
+              linesId={reverse(linesId)}
+              readOnly={true}/>
+        )
+      }
+
+
       const renderTabs = () => {
         return (
           <div className="row">
@@ -411,8 +437,22 @@ export default class ContractSingle extends Component {
             </ul>
             <div className="tab-content">
               <div role="tabpanel" className="tab-pane p-x-1 active" id="details">
+                <h3>Invoice lines</h3>
+                { renderInvoiceLinesTable() }
               </div>
               <div role="tabpanel" className="tab-pane p-x-1" id="terms">
+                {(() => {
+                  if (this.state.editable) {
+                    return (
+                      <textarea
+                        className='form-control'
+                        onChange={(e) => this.onChangeTermsAndConditions(e.target.value)}
+                        value={this.state.dispContract.termsAndConditions}>
+                      </textarea>
+                    )
+                  }
+                  return <textarea className="form-control" rows="3" disabled value={notes}></textarea>
+                })()}
               </div>
               <div role="tabpanel" className="tab-pane p-x-1" id="notes">
                 {(() => {
@@ -425,7 +465,6 @@ export default class ContractSingle extends Component {
                       </textarea>
                     )
                   }
-
                   return <textarea className="form-control" rows="3" disabled value={notes}></textarea>
                 })()}
               </div>
@@ -457,7 +496,7 @@ export default class ContractSingle extends Component {
 export default createContainer(({params}) => {
   Meteor.subscribe('contracts');
   Meteor.subscribe('users');
-  // Meteor.subscribe('customers');
+  Meteor.subscribe('invoices');
 
   let isNew = false;
   let contractId = params.contractId;

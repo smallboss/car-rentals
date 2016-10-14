@@ -48,7 +48,6 @@ export default class LinesOnTab extends Component {
 // ====================== ADD = EDIT = REMOVE = SAVE ======================
     handleAddNewLine(){
         const lineId = new Mongo.ObjectID();
-        // let custId = this.props.invoice.customerId ? this.props.invoice.customerId : ''
         ApiLines.insert({_id: lineId, customerId: this.props.invoice.customerId});
         ApiInvoices.update(this.props.invoice._id, {$push: { linesId: lineId }});
 
@@ -94,16 +93,16 @@ export default class LinesOnTab extends Component {
 
         return(
             <div>
-                <TableHeadButtons 
-                    selectedItems={this.state.selectedListId.length}
-                    onAddNew={this.handleAddNewLine}
-                    onEdit={this.handleEditLines}
-                    onRemove={this.handleRemoveLines}/>
-
                 <table className="table table-bordered table-hover">
                     <thead>
                         <tr>
-                            <th><input type="checkbox" disabled/></th>
+                            
+                            {(() => {
+                                if (!this.props.readOnly) {
+                                    return <th><input type="checkbox" disabled/></th>
+                                }
+                                return null;
+                            })()}
                             <th>Item</th>
                             <th>Description</th>
                             <th>Car plate#</th>
@@ -126,7 +125,8 @@ export default class LinesOnTab extends Component {
                                                 onSave={this.handleSaveLine}
                                                 selectedListId={this.state.selectedListId}
                                                 isEdit={this.state.isEdit}
-                                                cars={this.props.cars}/>
+                                                cars={this.props.cars}
+                                                readOnly={this.props.readOnly}/>
                                         )
                                 }))
                             }

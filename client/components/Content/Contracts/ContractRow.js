@@ -31,6 +31,11 @@ export default class ContractRow extends Component {
                 <td>
                     <Link to={`/customer/${item.customerId}`}>{ customerName ? customerName.username : ''}</Link>
                 </td>
+                <td onClick={onClick} >{ item._id._str }</td>
+                <td onClick={onClick} >{ 'last invoice' }</td>
+                <td onClick={onClick} >{ 'total to invoice' }</td>
+                <td onClick={onClick} >{ item.startDate }</td>
+                <td onClick={onClick} >{ item.endDate }</td>
                 <td onClick={onClick} >{ item.status }</td>
                 <td>
                     <Link to={`/customer/${item.managerId}`}>{ managerName ? managerName.username : ''}</Link>
