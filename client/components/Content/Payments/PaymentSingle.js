@@ -161,15 +161,14 @@ export default class PaymentSingle extends Component {
 
   render() {
 
-    console.log(this.props.userList);
-
     const renderHeadSingle = () => {
       return (
         <HeadSingle onSave={this.handleSave}
                     onEdit={this.handleEdit}
                     onDelete={this.handleDelete}
                     onSendByEmail={this.handleSendByEmail}
-                    allowSave={this.state.allowSave} />
+                    allowSave={this.state.allowSave}
+                    title={this.props.payment.codeName} />
       )
     }
 
@@ -389,7 +388,6 @@ export default createContainer(({params}) => {
     window.history.pushState('object or string', 'Title', `/payments/${paymentId}`);
     // window.history.back();
   }
-
 
   const idForQuery = new Mongo.ObjectID(paymentId);
 

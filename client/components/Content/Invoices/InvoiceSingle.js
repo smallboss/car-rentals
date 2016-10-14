@@ -84,7 +84,6 @@ export default class InvoiceSingle extends Component {
     if (!dataDispInvoice) {
       dataDispInvoice = clone(nextProps.invoice)
     }
-
     
     const allowSave = this.state.editable ? this.state.allowSave : c.customerId;
 
@@ -158,6 +157,8 @@ export default class InvoiceSingle extends Component {
 
 
   render() {
+
+    console.log(this.state.invoice);
     
     const renderHeadSingle = () => {
       return (
