@@ -357,7 +357,3 @@ export default createContainer(({params}) => {
         }
     }
 }, Customer)
-
-/*<div id='div_payments' className='inner-div-users-edit'>
- <Table arrToTable={payments} currentComponent='payments' handlerChildState={this.handlerChildState} />
- </div>*/
