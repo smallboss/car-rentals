@@ -14,14 +14,17 @@ class Registration extends React.Component {
     addUserHandler (e) {
         e.preventDefault()
         /*Check passwords start*/
+        if(e.target[6].value.length < 6) {
+            alert('Password must be large then 6 symbols')
+            return false
+        }
         if (e.target[6].value != e.target[7].value){
             alert('Введенные пароли не совпадают');
             return false
         }
         /*Check passwords end*/
         /*Create must have variable start*/
-        let _id = new Mongo.ObjectID(),
-            _target = e.target,
+        let _target = e.target,
             _user,
             _images = {
                 imgId: '',
@@ -30,7 +33,7 @@ class Registration extends React.Component {
         let fileId = _target[8].files[0] || '',
             fileLicense = _target[9].files[0] || ''
         _user = {
-            _id,
+            id: new Mongo.ObjectID(),
             username: _target[1].value,
             email: _target[2].value,
             password: _target[6].value,
@@ -96,9 +99,12 @@ class Registration extends React.Component {
                     if(typeof fileLicense != 'string') {
                         imgToBase64(fileLicense, (base64License) => {
                             _user.profile._images.imgLicense = base64License
-                            Meteor.call('createNewUser', _user, () => {
-                                alert('You have register. You can enter with your login and password')                                
-                            })
+                            //Meteor.call('createNewUser', _user, () => {
+                            //    alert('You have register. You can enter with your login and password')
+                            //})
+                            Accounts.createUser(_user, (err) => {
+                                console.log(err);
+                            });
                             /*Accounts.createUser(_user, (err) => {
                                 if(err) {
                                     alert(err.reason)
@@ -109,9 +115,12 @@ class Registration extends React.Component {
                             _target.reset()
                         })
                     } else {
-                        Meteor.call('createNewUser', _user, () => {
-                            alert('You have register. You can enter with your login and password')
-                        })
+                        //Meteor.call('createNewUser', _user, () => {
+                        //    alert('You have register. You can enter with your login and password')
+                        //})
+                        Accounts.createUser(_user, (err) => {
+                            console.log(err);
+                        });
                         /*Accounts.createUser(_user, (err) => {
                          if(err) {
                          alert(err.reason)
@@ -125,9 +134,12 @@ class Registration extends React.Component {
             } else if (typeof fileId == 'string' && typeof fileLicense != 'string') {
                 imgToBase64(fileLicense, (base64License) => {
                     _user.profile._images.imgLicense = base64License
-                    Meteor.call('createNewUser', _user, () => {
-                        alert('You have register. You can enter with your login and password')
-                    })
+                    //Meteor.call('createNewUser', _user, () => {
+                    //    alert('You have register. You can enter with your login and password')
+                    //})
+                    Accounts.createUser(_user, (err) => {
+                        console.log(err);
+                    });
                     /*Accounts.createUser(_user, (err) => {
                      if(err) {
                      alert(err.reason)
@@ -139,9 +151,12 @@ class Registration extends React.Component {
                 })                
             } 
         } /*handle with images if they are end*/ else {
-            Meteor.call('createNewUser', _user, () => {
-                alert('You have register. You can enter with your login and password')
-            })
+            //Meteor.call('createNewUser', _user, () => {
+            //    alert('You have register. You can enter with your login and password')
+            //})
+            Accounts.createUser(_user, (err) => {
+                console.log(err);
+            });
             /*Accounts.createUser(_user, (err) => {
              if(err) {
              alert(err.reason)

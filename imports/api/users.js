@@ -3,25 +3,38 @@
  */
 import { Meteor } from 'meteor/meteor'
 import { Accounts } from 'meteor/accounts-base'
-
-Meteor.methods({
-    setPassword: function (userId, newPassword) {
-        Accounts.setPassword({_id: userId}, newPassword)        
-    },
-    createNewUser: function (userData) {
-        console.log(userData);
-        Accounts.createUser(userData)
-    }
-})
+//
+//Meteor.methods({
+//    setPassword: function (userId, newPassword) {
+//        Accounts.setPassword({_id: userId}, newPassword)
+//    },
+//    createNewUser: function (userData) {
+//        console.log(userData);
+//        Accounts.createUser(userData)
+//    }
+//})
 
 if(Meteor.isServer) {
+    Meteor.methods({
+        setNewPassword: function () {
+            let { targetId, newPassword } = arguments[0] // or function ({targetId, newPassword}) {...
+            console.log(targetId)    //string !may be sometimes undefined?
+            console.log(newPassword) //string
+            //Accounts.setPassword(targetId, newPassword) //sometimes work
+            Accounts.setPassword('ofy3ShAuk4dpRQhjS', newPassword)  //working if set targetId manually && targetId = undefined
+        },
+        createNewUser: function (userData) {
+            Accounts.createUser(userData)
+        }
+    })
+
     //Meteor.users.remove({})
+    console.log(Meteor.users.find().fetch())
+    console.log('')
     Meteor.publish('users', function publishUsers () {
         Meteor.users.allow({
             update: function (userId, doc, fields, modifier) {
-                if(userId) {
-                    return true   
-                }                     
+                return true
             },
             remove: function (userId, doc) {
                 return true
