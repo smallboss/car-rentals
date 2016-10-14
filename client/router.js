@@ -13,6 +13,8 @@ import Cars from './components/Content/Cars';
 import CarSingle from './components/Content/Cars/CarSingle.js';
 import Invoices from './components/Content/Invoices';
 import InvoiceSingle from './components/Content/Invoices/InvoiceSingle.js';
+import Contracts from './components/Content/Contracts';
+import ContractSingle from './components/Content/Contracts/ContractSingle.js';
 import Customers from './components/Content/Customers';
 import Customer from './components/Content/Customers/Customer'
 import Users from './components/Content/Users'
@@ -55,6 +57,8 @@ export const renderRoutes = () => (
         <Route path="cars/:carId" component={CarSingle} />
       <Route path="payments" component={Payments}/>
         <Route path="payments/:paymentId" component={PaymentSingle} />
+      <Route path="contracts" component={Contracts}/>
+        <Route path="contracts/:contractId" component={ContractSingle} />
       <Route path="invoices" component={Invoices}/>
         <Route path="invoices/:invoiceId" component={InvoiceSingle} />
   <Route path="customers" component={Customers} />

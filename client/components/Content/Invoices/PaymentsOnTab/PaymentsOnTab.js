@@ -49,6 +49,7 @@ export default class PaymentsOnTab extends Component {
         const paymentId = new Mongo.ObjectID();
         ApiPayments.insert({_id: paymentId, customerId: this.props.invoice.customerId});
         ApiInvoices.update(this.props.invoice._id, {$push: { paymentsId: paymentId }});
+        Meteor.users.update({_id: this.props.invoice.customerId}, {$push: { "profile.payments": paymentId}});
 
         let selectedListId = this.state.selectedListId;
         selectedListId.push(paymentId)

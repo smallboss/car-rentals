@@ -16,7 +16,7 @@ export default class Sidebar extends Component {
             <ul className="dropdown-menu">
               <li><Link to="/invoices">Invoices</Link></li>
               <li><Link to="/payments">Payments</Link></li>
-              <li><a href="#">Contracts</a></li>
+              <li><Link to="/contracts">Contracts</Link></li>
             </ul>
           </li>
           <li className="dropdown">

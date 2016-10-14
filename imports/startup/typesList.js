@@ -2,3 +2,4 @@ export const carStateTypes = ['avaliable', 'rented', 'in maintenance'];
 export const maintenanceStateTypes = ['draft', 'pending', 'done'];
 export const paymentStateTypes = ['open', 'paid'];
 export const invoiceStateTypes = ['open', 'paid'];
+export const contractStateTypes = ['complete', 'cancelled', 'inprogress'];

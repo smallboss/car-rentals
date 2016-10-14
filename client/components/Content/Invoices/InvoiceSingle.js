@@ -1,12 +1,14 @@
 import { Meteor } from 'meteor/meteor'
 import { Mongo } from 'meteor/mongo'
+import { Link } from 'react-router';
 import { createContainer } from 'meteor/react-meteor-data'
 import { ApiInvoices } from '/imports/api/invoices.js'
+import { ApiPayments } from '/imports/api/payments.js'
 import { ApiCustomers } from '/imports/api/customers'
 import HeadSingle from './HeadSingle.js';
 import { browserHistory } from 'react-router';
 import React, { Component } from 'react';
-import { clone, cloneDeep, reverse } from 'lodash';
+import { clone, cloneDeep, reverse, map } from 'lodash';
 
 import PaymentsOnTab from './PaymentsOnTab/PaymentsOnTab.js'
 import LinesOnTab from './LinesOnTab/LinesOnTab.js'
@@ -98,6 +100,13 @@ export default class InvoiceSingle extends Component {
 
     ApiInvoices.update(id, {$set: newInvoice});
 
+    map(newInvoice.paymentsId, (el) => {
+      Meteor.users.update({_id: this.state.invoice.customerId}, {$pull: { "profile.payments": el}});
+      ApiPayments.update({_id: el}, {$set: {customerId: newInvoice.customerId}});
+      Meteor.users.update({_id: newInvoice.customerId}, {$push: { "profile.payments": el}});
+    })
+
+
     newInvoice_id = id;
 
     this.setState({invoice: newInvoice, dispInvoice: newInvoice, editable: false});
@@ -109,6 +118,11 @@ export default class InvoiceSingle extends Component {
 
   handleDelete() {
     browserHistory.push('/invoices');
+
+    map(newInvoice.paymentsId, (el) => {
+      Meteor.users.update({_id: this.state.invoice.customerId}, {$pull: { "profile.payments": el}});
+      ApiPayments.remove({_id: el});
+    })
 
     ApiInvoices.remove(this.state.invoice._id);
   }
@@ -200,6 +214,12 @@ export default class InvoiceSingle extends Component {
                       })()}
                     </div>
                   )
+                })()}
+                {(() => {
+                  const custId = this.state.editable ? this.state.dispInvoice.customerId : customerId;
+                  const custName = Meteor.users.findOne(custId) ? Meteor.users.findOne(custId).username : '';
+
+                  return (<Link to={`/customer/${custId}`}>{`${custName} propfile`}</Link>);
                 })()}
               </div>
               { /* END ============================= DROPDOWN CUSTOMERS ============================== */}
