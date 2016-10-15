@@ -166,7 +166,8 @@ export default class InvoiceSingle extends Component {
                     onEdit={this.handleEdit}
                     onDelete={this.handleDelete}
                     onSendByEmail={this.handleSendByEmail}
-                    allowSave={this.state.allowSave}/>
+                    allowSave={this.state.allowSave}
+                    title={this.props.invoice.codeName} />
       )
     }
 

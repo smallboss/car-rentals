@@ -57,6 +57,7 @@ class Payments extends Component {
 
 
   addPayment() {
+    /*
     const _id = new Mongo.ObjectID();
     ApiPayments.insert({ _id});
 
@@ -90,7 +91,7 @@ class Payments extends Component {
 
     paymentsNumb = ''+parseInt(paymentsNumb);
     ApiYearWrite.update({_id: yearWrite._id }, {$set: { paymentsNumb }});
-
+*/
     browserHistory.push(`/payments/new`);
   }
 

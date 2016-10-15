@@ -9,7 +9,7 @@ export default class HeadSingle extends Component {
         return (
             <div className="panel-heading HeadSingle">
                 <div className="buttonBox">
-                    <h3 className="text-primary">{ this.props.title}</h3>
+                    <h3 className="text-primary">{ this.props.title }</h3>
                    {(() => {
                         let buttonSave = <button type="button" className="btn btn-primary p-x-1 m-x-1" onClick={this.props.onSave} disabled>Save</button>;
                         if (this.props.allowSave) {
