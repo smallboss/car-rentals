@@ -22,6 +22,7 @@ export default class PaymentSingle extends Component {
     this.state = {
       payment: clone(this.props.payment),
       dispPayment: clone(this.props.payment),
+      allowSave: false,
       isNew: this.props.isNew,
       customerList: this.props.userList,
 
@@ -44,7 +45,7 @@ export default class PaymentSingle extends Component {
   onChangeCustomer(value) {
     let newPayment = this.state.dispPayment;
     newPayment.customerId = value;
-    this.setState({dispPayment: newPayment});
+    this.setState({dispPayment: newPayment, allowSave: true});
   }
   onChangeAmount(value) {
     let newPayment = this.state.dispPayment;
@@ -94,10 +95,12 @@ export default class PaymentSingle extends Component {
       dataDispPayment = clone(nextProps.payment)
     }
 
+    const allowSave = this.state.editable ? this.state.allowSave : c.customerId;
 
     this.setState({
       payment: clone(c),
-      dispPayment: dataDispPayment
+      dispPayment: dataDispPayment,
+      allowSave
     });
   }
 
@@ -114,7 +117,7 @@ export default class PaymentSingle extends Component {
       _id : id
     };
 
-    Meteor.users.update({_id: newPayment.customerId}, {$push: { "profile.payments": id}});
+    Meteor.users.update({_id: newPayment.customerId}, {$addToSet: { "profile.payments": id}});
     
 
     newPayment._id = id;
@@ -123,7 +126,15 @@ export default class PaymentSingle extends Component {
   }
 
   handleEdit() {
-    this.setState({editable: !this.state.editable, dispPayment: clone(this.state.payment)});
+    const allowSave = (this.state.editable && !this.state.invoice.customerId) 
+                        ? this.state.allowSave
+                        : false;
+
+    this.setState({
+        editable: !this.state.editable,
+        dispPayment: clone(this.state.payment),
+        allowSave
+    });
   }
 
   handleDelete() {
@@ -142,6 +153,9 @@ export default class PaymentSingle extends Component {
     if (this.buttonEdit) {
       this.buttonEdit.disabled = false;
     }
+
+    const allowSave = this.props.payment ? this.props.payment.customerId : undefined;
+    this.setState({allowSave});
   }
 
 
@@ -152,7 +166,9 @@ export default class PaymentSingle extends Component {
         <HeadSingle onSave={this.handleSave}
                     onEdit={this.handleEdit}
                     onDelete={this.handleDelete}
-                    onSendByEmail={this.handleSendByEmail} />
+                    onSendByEmail={this.handleSendByEmail}
+                    allowSave={this.state.allowSave}
+                    title={this.props.payment.codeName} />
       )
     }
 
@@ -163,7 +179,6 @@ export default class PaymentSingle extends Component {
         amount,
         status,
         date,
-        ref,
         notes
       } = this.state.payment;
 
@@ -221,12 +236,6 @@ export default class PaymentSingle extends Component {
                       })()}
                     </div>
                   )
-                })()}
-                {(() => {
-                  const custId = this.state.editable ? this.state.dispPayment.customerId : customerId;
-                  const custName = Meteor.users.findOne(custId) ? Meteor.users.findOne(custId).username : '';
-
-                  return (<Link to={`/customer/${custId}`}>{`${custName} propfile`}</Link>);
                 })()}
               </div>
 { /* END ============================= DROPDOWN CUSTOMERS ============================== */}
@@ -304,20 +313,10 @@ export default class PaymentSingle extends Component {
               <div className="form-group profit col-xs-6">
                 <label htmlFor="paymentRef" className='col-xs-2'>Ref.</label>
                 {(() => {
-                  if (this.state.editable) {
-                    return (
-                      <div className='col-xs-8 form-horizontal'>
-                        <input
-                          type="text"
-                          id="paymentRef"
-                          className="form-control "
-                          onChange={(e) => this.onChangeRef(e.target.value)}
-                          value={ this.state.dispPayment.ref }/>
-                      </div>
-                    )
-                  }
+                  const custId = this.state.editable ? this.state.dispPayment.customerId : customerId;
+                  const custName = Meteor.users.findOne(custId) ? (Meteor.users.findOne(custId).profile.name + " profile") : '';
 
-                  return <div className='col-xs-8'>{ref}</div>
+                  return (<Link to={`/customer/${custId}`}>{custName}</Link>);
                 })()}
               </div>
             </div>
@@ -389,7 +388,6 @@ export default createContainer(({params}) => {
     window.history.pushState('object or string', 'Title', `/payments/${paymentId}`);
     // window.history.back();
   }
-
 
   const idForQuery = new Mongo.ObjectID(paymentId);
 

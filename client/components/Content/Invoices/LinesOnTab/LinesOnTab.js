@@ -92,18 +92,29 @@ export default class LinesOnTab extends Component {
     render(){
         let lineListId = reverse(this.props.linesId);
 
+        const RenderTableHeadButtons = () => {
+            if (!this.props.readOnly) {
+                return (
+                    <TableHeadButtons 
+                        selectedItems={this.state.selectedListId.length}
+                        onAddNew={this.handleAddNewPayment}
+                        onEdit={this.handleEditPayments}
+                        onRemove={this.handleRemovePayments}/>
+                )
+            }
+
+            return null;
+        }
+
+
         return(
             <div>
-                <TableHeadButtons 
-                    selectedItems={this.state.selectedListId.length}
-                    onAddNew={this.handleAddNewLine}
-                    onEdit={this.handleEditLines}
-                    onRemove={this.handleRemoveLines}/>
+                { RenderTableHeadButtons() }
 
                 <table className="table table-bordered table-hover">
                     <thead>
                         <tr>
-                            <th><input type="checkbox" disabled/></th>
+                            { !this.props.readOnly ? (<th><input type="checkbox" disabled/></th>) : null }
                             <th>Item</th>
                             <th>Description</th>
                             <th>Car plate#</th>
@@ -126,7 +137,8 @@ export default class LinesOnTab extends Component {
                                                 onSave={this.handleSaveLine}
                                                 selectedListId={this.state.selectedListId}
                                                 isEdit={this.state.isEdit}
-                                                cars={this.props.cars}/>
+                                                cars={this.props.cars}
+                                                readOnly={this.props.readOnly}/>
                                         )
                                 }))
                             }

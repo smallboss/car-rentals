@@ -266,7 +266,8 @@ export default class CarSingle extends Component {
       return (
         <HeadSingle onSave={this.handleSave}
                     onEdit={this.handleEdit}
-                    onDelete={this.handleDelete}/>
+                    onDelete={this.handleDelete}
+                    itemName={this.state.car.name}/>
       )
     }
 

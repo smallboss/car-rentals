@@ -70,7 +70,7 @@ const wrapper = ({children}) => {
 };
 
 Router.refresh = function () {
-    Router.dispatch(location.getCurrentPath(), null)
+  Router.dispatch(location.getCurrentPath(), null)
 }
 
 export const renderRoutes = () => (
