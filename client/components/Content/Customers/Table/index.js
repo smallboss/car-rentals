@@ -182,6 +182,11 @@ class Table extends React.Component {
                                     <td key={Math.random()}><input type={_typeInput} id={prop} className='form-control' value={new Mongo.ObjectID()} /></td>
                                 )
                             }
+                            if(prop == 'status') {
+                                return (
+                                    <td key={Math.random()} width='100'><select id='status' className='form-control'><option value='open' defaultValue>open</option><option value='close'>close</option></select></td>
+                                )
+                            }
                             if(prop != '_id' && prop != 'customerId') {
                                 return (
                                     <td key={Math.random()}><input type={_typeInput} id={prop} className='form-control' defaultValue={_defaultValue}/></td>
@@ -201,6 +206,16 @@ class Table extends React.Component {
                                             if(typeof elem[val] == 'string' && val != 'customerId') {
                                                 let _typeInput = (val.indexOf('date') != -1) ? 'date' : 'text'
                                                 if(elem._toedit) {
+                                                    if(val == 'status') {
+                                                        return (
+                                                            <td key={Math.random()} width='100'>
+                                                                <select className='form-control' name='status'>
+                                                                    <option value='open' >open</option>
+                                                                    <option value='close'>close</option>
+                                                                </select>
+                                                            </td>
+                                                        )
+                                                    }
                                                     return (
                                                         <td key={Math.random()}>
                                                             <input type={_typeInput} className='form-control' name={val} defaultValue={elem[val]} onChange={(e) => {this.handlerInputs(elem._id._str, e)}} />
@@ -214,7 +229,7 @@ class Table extends React.Component {
                                                     )   
                                                 }                                                   
                                             } else if(this.props.currentComponent == 'payments' && val == '_id') {
-                                                let href = '/payments/' + elem._id._str
+                                                let href = '/managePanel/payments/' + elem._id._str
                                                 return (
                                                     <td key={Math.random()}>
                                                         <Link to={href}>{elem._id._str}</Link>

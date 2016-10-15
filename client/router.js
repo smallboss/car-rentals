@@ -24,7 +24,7 @@ import UserSingle from './components/Content/Users/UserSingle'
 import Registration from './components/Content/Registration'
 import CustomersList from './components/Content/Customers/CustomersList'
 /*import back components*/
-import BackSidebar from './components/ManagePanel/BackSidebar'
+//import BackSidebar from './components/ManagePanel/BackSidebar'
 import BackHeader from './components/ManagePanel/BackHeader'
 import BackFooter from './components/ManagePanel/BackFooter'
 
@@ -53,7 +53,7 @@ const backRouterComponent = (children) => {
     return (
         <div id='main_container'>
             <BackHeader />
-            <BackSidebar />
+            <Sidebar side='backEnd' />
             <div className='content'>
                 {children}
             </div>

@@ -166,6 +166,7 @@ class Customer extends React.Component {
                     ApiPayments.update({_id: _idPayment}, {$set: item})    
                 } else {
                     Meteor.users.update({_id: _id}, {$push: {'profile.payments': _idPayment}})
+                    item.customerId = _id
                     ApiPayments.insert(item)
                 }
             })

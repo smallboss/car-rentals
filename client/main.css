@@ -51,7 +51,7 @@
     position: absolute;
     background: #eeeeee ;
     overflow: hidden;
-    height: 20em;
+    height: 25em;
 }
 .sidebar-nav {
     position: absolute;
@@ -182,6 +182,15 @@
 }
 .m-t-3 {
     margin-top: 30px;
+}
+.p-l-1 {
+    padding-left: 10px;
+}
+.p-l-2 {
+    padding-left: 20px;
+}
+.p-l-3 {
+    padding-left: 30px;
 }
 .p-x-1 {
     padding: 0 10px;

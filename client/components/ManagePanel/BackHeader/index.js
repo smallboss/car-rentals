@@ -4,8 +4,9 @@ import Login from '../../Content/Login'
 
 export default class BackHeader extends Component {
     render() {
+        let styleHeader = {background: '#90c9c7'}
         return (
-            <nav className="header-nav navbar navbar-inverse">
+            <nav className="header-nav navbar navbar-inverse" style={styleHeader}>
                 <div className="navbar-header">
                     <button className="navbar-toggle" type="button" data-toggle="collapse" data-target=".js-navbar-collapse">
                         <span className="sr-only">Toggle navigation</span>
