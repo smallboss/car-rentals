@@ -31,7 +31,7 @@ export default class InvoiceRow extends Component {
                     <Link to={`/customer/${item.customerId}`}>{ customerName ? customerName.profile.name : '' }</Link>
                 </td>
                 <td onClick={onClick} >{ item.date }</td>
-                <td onClick={onClick} >{ item._id._str }</td>
+                <td onClick={onClick} >{ item.codeName}</td>
                 <td onClick={onClick} >{ item.dueDate }</td>
                 <td onClick={onClick} >{ item.amount }</td>
                 <td onClick={onClick} >{ item.status }</td>

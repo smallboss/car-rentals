@@ -3,7 +3,8 @@ import { Mongo } from 'meteor/mongo'
 import { Link } from 'react-router';
 import { createContainer } from 'meteor/react-meteor-data'
 import { ApiPayments } from '/imports/api/payments.js'
-import { ApiCustomers } from '/imports/api/customers'
+import { ApiUsers } from '/imports/api/users'
+import { ApiYearWrite } from '/imports/api/yearWrite'
 import HeadSingle from './HeadSingle.js';
 import { browserHistory } from 'react-router';
 import React, { Component } from 'react';
@@ -97,6 +98,8 @@ export default class PaymentSingle extends Component {
 
     const allowSave = this.state.editable ? this.state.allowSave : c.customerId;
 
+    c = nextProps.payment;
+
     this.setState({
       payment: clone(c),
       dispPayment: dataDispPayment,
@@ -106,34 +109,60 @@ export default class PaymentSingle extends Component {
 
   handleSave() {
     let newPayment = clone(this.state.dispPayment);
+    let paymentId;
 
+    if(this.state.isNew){
+      paymentId = new Mongo.ObjectID();
+      newPayment._id = paymentId;
+      ApiPayments.insert(newPayment);
 
-    let id = newPayment._id;
-    delete newPayment._id;
+      let yearWrite = ApiYearWrite.findOne({year: '2016'});
+      let paymentsNumb = '1';
 
+      if (yearWrite) {
+        if(!yearWrite.paymentsNumb) yearWrite.paymentsNumb = '0';
+        yearWrite.paymentsNumb = ''+(parseInt(yearWrite.paymentsNumb)+1);
+        paymentsNumb = parseInt(yearWrite.paymentsNumb);
+      } else {
+        yearWrite = {
+            _id: new Mongo.ObjectID(),
+            paymentsNumb: paymentsNumb
+        };
+        
+        ApiYearWrite.insert({
+            _id: yearWrite._id, 
+            year: ''+(new Date()).getFullYear()
+        });
+      }
 
-    ApiPayments.update(id, {$set: newPayment});
-    const payment = {
-      _id : id
-    };
+      if (yearWrite.paymentsNumb.length == 1)
+        paymentsNumb = '00'+paymentsNumb;
+      else if (yearWrite.paymentsNumb.length <= 2)
+          paymentsNumb = '0'+paymentsNumb;
+          else paymentsNumb = ''+paymentsNumb;
 
-    Meteor.users.update({_id: newPayment.customerId}, {$addToSet: { "profile.payments": id}});
-    
+      let codeName = `PAY/${(new Date()).getFullYear()}/${paymentsNumb}`;
 
-    newPayment._id = id;
+      ApiPayments.update(paymentId, {$set: { codeName }});
 
-    this.setState({payment: newPayment, dispPayment: newPayment, editable: false});
+      paymentsNumb = ''+parseInt(paymentsNumb);
+      ApiYearWrite.update({_id: yearWrite._id }, {$set: { paymentsNumb }});
+    } else {
+      paymentId = newPayment._id;
+      delete newPayment._id;
+      ApiPayments.update(paymentId, {$set: newPayment});
+    }
+
+    Meteor.users.update({_id: newPayment.customerId}, {$addToSet: { "profile.payments": paymentId}});
+    if (this.state.isNew) browserHistory.push(`/payments/${paymentId}`);
+    this.setState({payment: newPayment, dispPayment: newPayment, editable: false, isNew: false});
   }
 
   handleEdit() {
-    const allowSave = (this.state.editable && !this.state.invoice.customerId) 
-                        ? this.state.allowSave
-                        : false;
-
     this.setState({
         editable: !this.state.editable,
         dispPayment: clone(this.state.payment),
-        allowSave
+        allowSave: this.state.payment.customerId
     });
   }
 
@@ -377,28 +406,23 @@ export default class PaymentSingle extends Component {
 
 export default createContainer(({params}) => {
   Meteor.subscribe('payments');
-  Meteor.subscribe('customers');
+  Meteor.subscribe('users');
+  Meteor.subscribe('yearwrite');
 
   let isNew = false;
   let paymentId = params.paymentId;
+  let payment = {};
 
   if (params.paymentId.indexOf('new') === 0) {
     isNew = true;
-    paymentId = params.paymentId.substring(3);
-    window.history.pushState('object or string', 'Title', `/payments/${paymentId}`);
-    // window.history.back();
-  }
-
-  const idForQuery = new Mongo.ObjectID(paymentId);
-
-  if (!idForQuery) {
-    browserHistory.push('/payments');
+  } else {
+    payment = ApiPayments.findOne(new Mongo.ObjectID(paymentId));
   }
 
   return {
-    payment: ApiPayments.findOne(idForQuery),
-    userList: Meteor.users.find().fetch(),
-    isNew: isNew
+    payment,
+    userList: Meteor.users.find({'profile.userType': 'customer'}).fetch(),
+    isNew
   }
 
 }, PaymentSingle)

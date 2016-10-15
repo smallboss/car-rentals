@@ -56,16 +56,17 @@ class Contracts extends Component {
 
 
   addContract() {
-    const _id = new Mongo.ObjectID();
-    ApiContracts.insert({ _id});
-    browserHistory.push(`/contracts/new${_id}`);
+    browserHistory.push(`/contracts/new`);
   }
 
 
   removeContracts() {
     this.state.selectedContractsID.map((contractID) => {
+      console.log('contractID', contractID);
       ApiContracts.remove(new Mongo.ObjectID(contractID));
     })
+
+    console.log('this.state.selectedContractsID', this.state.selectedContractsID);
 
     this.setState({selectedContractsID: []});
   }
@@ -93,7 +94,7 @@ class Contracts extends Component {
     var displayedContracts = props.contracts.filter(function(el) {
         const contractStatus = el.status ? el.status.toLowerCase()   : '';
         const contractTitle     = el.title    ? el.title.toLowerCase() : '';
-        const contractID     = el._id    ? el._id._str.toLowerCase() : '';
+        const contractCodeName     = el.codeName    ? el.codeName.toLowerCase() : '';
         const contractStartDate     = el.startDate    ? el.startDate.toLowerCase() : '';
         const contractEndDate     = el.endDate    ? el.endDate.toLowerCase() : '';
 
@@ -104,11 +105,8 @@ class Contracts extends Component {
         let contractManagerName = find(props.userList , {_id: el.managerId});
         contractManagerName = contractManagerName ? contractManagerName.profile.name.toLowerCase() : '';
 
-
-        console.log(el.customerId, contractCustomerName);
-
         return (contractStatus.indexOf(searchQuery)       !== -1 ||
-                contractID.indexOf(searchQuery)           !== -1 ||
+                contractCodeName.indexOf(searchQuery)     !== -1 ||
                 contractTitle.indexOf(searchQuery)        !== -1 ||
                 contractStartDate.indexOf(searchQuery)    !== -1 ||
                 contractEndDate.indexOf(searchQuery)      !== -1 ||
@@ -208,7 +206,8 @@ Contracts.contextTypes = {
 
 export default createContainer(() => {
   Meteor.subscribe('contracts');
-  Meteor.subscribe('users')
+  Meteor.subscribe('users');
+  Meteor.subscribe('yearwrite');
 
   return {
     contracts: ApiContracts.find().fetch(),

@@ -4,8 +4,7 @@ import { browserHistory } from 'react-router'
 import { createContainer } from 'meteor/react-meteor-data';
 // import { ApiUserList } from '/imports/api/userList.js'
 import { ApiPayments } from '/imports/api/payments.js';
-import { ApiCustomers } from '/imports/api/customers';
-import { ApiYearWrite } from '/imports/api/yearWrite.js';
+import { ApiUsers } from '/imports/api/customers';
 
 import PaymentRow from './PaymentRow.js';
 import HeadList from './HeadList.js';
@@ -57,41 +56,6 @@ class Payments extends Component {
 
 
   addPayment() {
-    /*
-    const _id = new Mongo.ObjectID();
-    ApiPayments.insert({ _id});
-
-    let yearWrite = ApiYearWrite.findOne({year: '2016'});
-    let paymentsNumb = '1';
-
-    if (yearWrite) {
-      yearWrite.paymentsNumb = ''+(parseInt(yearWrite.paymentsNumb)+1);
-      paymentsNumb = parseInt(yearWrite.paymentsNumb);
-    } else {
-      yearWrite = {
-          _id: new Mongo.ObjectID(),
-          paymentsNumb: paymentsNumb
-      };
-      
-      ApiYearWrite.insert({
-          _id: yearWrite._id, 
-          year: ''+(new Date()).getFullYear()
-      });
-    }
-
-    if (yearWrite.paymentsNumb.length == 1)
-      paymentsNumb = '00'+paymentsNumb;
-    else if (yearWrite.paymentsNumb.length <= 2)
-        paymentsNumb = '0'+paymentsNumb;
-        else paymentsNumb = ''+paymentsNumb;
-
-    let codeName = `PAY/${(new Date()).getFullYear()}/${paymentsNumb}`;
-
-    ApiPayments.update(_id, {$set: { codeName }});
-
-    paymentsNumb = ''+parseInt(paymentsNumb);
-    ApiYearWrite.update({_id: yearWrite._id }, {$set: { paymentsNumb }});
-*/
     browserHistory.push(`/payments/new`);
   }
 
@@ -226,11 +190,11 @@ Payments.contextTypes = {
 
 export default createContainer(() => {
   Meteor.subscribe('payments');
-  Meteor.subscribe('customers');
+  Meteor.subscribe('users');
   Meteor.subscribe('yearwrite');
 
   return {
     payments: ApiPayments.find().fetch(),
-    userList: Meteor.users.find().fetch()
+    userList: Meteor.users.find({'profile.userType': 'customer'}).fetch()
   };
 }, Payments);

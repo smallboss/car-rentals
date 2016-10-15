@@ -80,7 +80,7 @@ export default class HeadList extends Component {
                     <div className="btn-box">
                         <button onClick={this.props.onAddNew} className='btn btn-success m-x-1'>Add New</button>
                         <button 
-                            onClick={this.props.onRemovePayments} 
+                            onClick={this.props.onRemoveContracts} 
                             ref={(ref) => this.buttonRemove = ref}
                             className='btn btn-danger' >
                             Delete

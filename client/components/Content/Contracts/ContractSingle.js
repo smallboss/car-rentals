@@ -5,6 +5,7 @@ import { createContainer } from 'meteor/react-meteor-data'
 import { ApiInvoices } from '/imports/api/invoices.js'
 import { ApiUsers } from '/imports/api/users'
 import { ApiContracts } from '/imports/api/contracts'
+import { ApiYearWrite } from '/imports/api/yearWrite.js';
 import LinesOnTab from './LinesOnTab/LinesOnTab.js';
 import HeadSingle from './HeadSingle.js';
 import { browserHistory } from 'react-router';
@@ -116,6 +117,8 @@ export default class ContractSingle extends Component {
                             ? this.state.allowSave 
                             : (c.customerId && c.managerId);
 
+    c = nextProps.contract;
+
     this.setState({
       contract: clone(c),
       dispContract: dataDispContract,
@@ -125,32 +128,62 @@ export default class ContractSingle extends Component {
 
   handleSave() {
     let newContract = clone(this.state.dispContract);
+    let contractId;
 
 
-    let id = newContract._id;
-    delete newContract._id;
+    if(this.state.isNew){
+      contractId = new Mongo.ObjectID();
+      newContract._id = contractId;
+      ApiContracts.insert(newContract);
+
+      let yearWrite = ApiYearWrite.findOne({year: '2016'});
+      let contractsNumb = '1';
+
+      if (yearWrite) {
+        if(!yearWrite.contractsNumb) yearWrite.contractsNumb = '0';
+        yearWrite.contractsNumb = ''+(parseInt(yearWrite.contractsNumb)+1);
+        contractsNumb = parseInt(yearWrite.contractsNumb);
+      } else {
+        yearWrite = {
+            _id: new Mongo.ObjectID(),
+            contractsNumb: contractsNumb
+        };
+        
+        ApiYearWrite.insert({
+            _id: yearWrite._id, 
+            year: ''+(new Date()).getFullYear()
+        });
+      }
+
+      if (yearWrite.contractsNumb.length == 1)
+        contractsNumb = '00'+contractsNumb;
+      else if (yearWrite.contractsNumb.length <= 2)
+          contractsNumb = '0'+contractsNumb;
+          else contractsNumb = ''+contractsNumb;
+
+      let codeName = `CO/${(new Date()).getFullYear()}/${contractsNumb}`;
+
+      ApiContracts.update(contractId, {$set: { codeName }});
+
+      contractsNumb = ''+parseInt(contractsNumb);
+      ApiYearWrite.update({_id: yearWrite._id }, {$set: { contractsNumb }});
+    } else {
+      contractId = newContract._id;
+      delete newContract._id;
+      ApiContracts.update(contractId, {$set: newContract});
+    }
 
 
-    ApiContracts.update(id, {$set: newContract});
-
-
-    // Meteor.users.update({_id: newPayment.customerId}, {$push: { "profile.payments": id}});
-    
-
-    newContract._id = id;
-
-    this.setState({contract: newContract, dispContract: newContract, editable: false});
+    Meteor.users.update({_id: newContract.contractId}, {$addToSet: { "profile.contracts": contractId}});
+    if (this.state.isNew) browserHistory.push(`/contracts/${contractId}`);
+    this.setState({contract: newContract, dispContract: newContract, editable: false, isNew: false});
   }
 
   handleEdit() {
-    const allowSave = (this.state.editable && this.state.contract.customerId && this.state.contract.managerId) 
-                        ? this.state.allowSave
-                        : false;
-
     this.setState({
         editable: !this.state.editable,
         dispContract: clone(this.state.contract),
-        allowSave
+        allowSave: (this.state.contract.customerId && this.state.contract.managerId)
     });
   }
 
@@ -158,7 +191,7 @@ export default class ContractSingle extends Component {
     browserHistory.push('/contracts');
 
     // Meteor.users.update({_id: this.state.payment.customerId}, {$pull: { "profile.payments": this.state.payment._id}});
-    ApiPayments.remove(this.state.contract._id);
+    ApiContracts.remove(this.state.contract._id);
   }
 
   handleSendByEmail(){
@@ -188,7 +221,7 @@ export default class ContractSingle extends Component {
                     onDelete={this.handleDelete}
                     onSendByEmail={this.handleSendByEmail}
                     allowSave={this.state.allowSave}
-                    title={this.props.contract.title} />
+                    title={this.props.contract.codeName} />
       )
     }
 
@@ -315,12 +348,6 @@ export default class ContractSingle extends Component {
                   })
                 }
               </select>
-              {(() => {
-                const custId = this.state.editable ? this.state.dispContract.customerId : customerId;
-                const custName = Meteor.users.findOne(custId) ? Meteor.users.findOne(custId).username : '';
-
-                return <Link to={`/customer/${custId}`}>{`${custName} propfile`}</Link>
-              })()}
             </div>
           )
         }
@@ -370,12 +397,6 @@ export default class ContractSingle extends Component {
                   })
                 }
               </select>
-              {(() => {
-                const mantId = this.state.editable ? this.state.dispContract.managerId : managerId;
-                const custName = Meteor.users.findOne(mantId) ? Meteor.users.findOne(mantId).username : '';
-
-                return <Link to={`/customer/${mantId}`}>{`${custName} propfile`}</Link>
-              })()}
             </div>
           )
         }
@@ -383,6 +404,7 @@ export default class ContractSingle extends Component {
         return (
           <div className='col-xs-8'>
             {(() => {
+
               if (Meteor.users.findOne(managerId)) {
                 const profile = Meteor.users.findOne(managerId).profile;
                 return (profile.name ? (profile.name + ' : ') : '' ) + Meteor.users.findOne(managerId).username
@@ -407,6 +429,13 @@ export default class ContractSingle extends Component {
               <div className="form-group profit col-xs-6">
                 <label htmlFor="contractCustomerName" className='col-xs-2'>Customer Name</label>
                 { renderCustomer() }
+
+                {(() => {
+                  const custId = this.state.editable ? this.state.dispContract.customerId : customerId;
+                  const custName = Meteor.users.findOne(custId) ? (Meteor.users.findOne(custId).profile.name + " profile") : '';
+
+                  return <Link to={`/customer/${custId}`}>{`${custName}`}</Link>
+                })()}
               </div>
               <div className="form-group profit col-xs-6">
                 <label htmlFor="contractStartDate" className='col-xs-2'>Start Date</label>
@@ -417,6 +446,13 @@ export default class ContractSingle extends Component {
               <div className="form-group profit col-xs-6">
                 <label htmlFor="contractAccountManager" className='col-xs-2'>Account manager</label>
                 { renderManager() }
+
+                {(() => {
+                  const manId = this.state.editable ? this.state.dispContract.managerId : managerId;
+                  const manName = Meteor.users.findOne(manId) ? (Meteor.users.findOne(manId).profile.name + " profile") : '';
+
+                  return <Link to={`/customer/${manId}`}>{`${manName}`}</Link>
+                })()}
               </div>
               <div className="form-group profit col-xs-6">
                 <label htmlFor="contractEndDate" className='col-xs-2'>End Date</label>
@@ -526,29 +562,23 @@ export default createContainer(({params}) => {
   Meteor.subscribe('contracts');
   Meteor.subscribe('users');
   Meteor.subscribe('invoices');
+  Meteor.subscribe('yearwrite');
 
   let isNew = false;
   let contractId = params.contractId;
+  let contract = {};
 
   if (params.contractId.indexOf('new') === 0) {
     isNew = true;
-    contractId = params.contractId.substring(3);
-    window.history.pushState('object or string', 'Title', `/contracts/${contractId}`);
-    // window.history.back();
-  }
-
-
-  const idForQuery = new Mongo.ObjectID(contractId);
-
-  if (!idForQuery) {
-    browserHistory.push('/contracts');
+  } else {
+    contract = ApiContracts.findOne(new Mongo.ObjectID(contractId));
   }
 
   return {
-    contract: ApiContracts.findOne(idForQuery),
+    contract,
     customerList: Meteor.users.find({'profile.userType': 'customer'}).fetch(),
     managerList: Meteor.users.find({'profile.userType': {$in:["admin","employee"]}}).fetch(),
-    isNew: isNew
+    isNew
   }
 
 }, ContractSingle)

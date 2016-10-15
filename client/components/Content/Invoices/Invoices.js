@@ -4,7 +4,7 @@ import { browserHistory } from 'react-router'
 import { createContainer } from 'meteor/react-meteor-data';
 
 import { ApiInvoices } from '/imports/api/invoices.js';
-import { ApiCustomers } from '/imports/api/customers'
+import { ApiUsers } from '/imports/api/customers'
 import InvoiceRow from './InvoiceRow.js';
 import HeadList from './HeadList.js';
 
@@ -55,9 +55,7 @@ class Invoices extends Component {
 
 
   addInvoice() {
-    const _id = new Mongo.ObjectID();
-    ApiInvoices.insert({ _id});
-    browserHistory.push(`/invoices/new${_id}`);
+    browserHistory.push(`/invoices/new`);
   }
 
 
@@ -93,14 +91,14 @@ class Invoices extends Component {
         const invoiceAmount = el.amount      ? el.amount.toLowerCase()      : '';
         const invoiceStatus = el.status      ? el.status.toLowerCase()      : '';
         const invoiceDate   = el.date        ? el.date.toLowerCase()        : '';
-        const invoiceID     = el._id         ? el._id._str.toLowerCase()    : '';
+        const invoiceCodeName = el.codeName    ? el.codeName.toLowerCase() : '';
         let invoiceCustomerName = find(props.userList , {_id: el.customerId});
         invoiceCustomerName = invoiceCustomerName ? invoiceCustomerName.profile.name : '';
 
         return (invoiceAmount.indexOf(searchQuery) !== -1 ||
                 invoiceStatus.indexOf(searchQuery) !== -1 ||
                 invoiceDate.indexOf(searchQuery)   !== -1 ||
-                invoiceID.indexOf(searchQuery)     !== -1 ||
+                invoiceCodeName.indexOf(searchQuery)     !== -1 ||
                 invoiceCustomerName.indexOf(searchQuery) !== -1)
     });
 
@@ -191,10 +189,11 @@ Invoices.contextTypes = {
 
 export default createContainer(() => {
   Meteor.subscribe('invoices');
-  Meteor.subscribe('customers')
+  Meteor.subscribe('users');
+  Meteor.subscribe('yearwrite');
 
   return {
     invoices: ApiInvoices.find().fetch(),
-    userList: Meteor.users.find().fetch()
+    userList: Meteor.users.find({'profile.userType': 'customer'}).fetch()
   };
 }, Invoices);
