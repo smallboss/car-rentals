@@ -8,7 +8,7 @@ import { ApiCustomers } from '/imports/api/customers'
 import InvoiceRow from './InvoiceRow.js';
 import HeadList from './HeadList.js';
 
-import { map, debounce } from 'lodash';
+import { map, debounce, find } from 'lodash';
 
 
 class Invoices extends Component {
@@ -94,11 +94,14 @@ class Invoices extends Component {
         const invoiceStatus = el.status      ? el.status.toLowerCase()      : '';
         const invoiceDate   = el.date        ? el.date.toLowerCase()        : '';
         const invoiceID     = el._id         ? el._id._str.toLowerCase()    : '';
+        let invoiceCustomerName = find(props.userList , {_id: el.customerId});
+        invoiceCustomerName = invoiceCustomerName ? invoiceCustomerName.profile.name : '';
 
         return (invoiceAmount.indexOf(searchQuery) !== -1 ||
                 invoiceStatus.indexOf(searchQuery) !== -1 ||
                 invoiceDate.indexOf(searchQuery)   !== -1 ||
-                invoiceID.indexOf(searchQuery)     !== -1)
+                invoiceID.indexOf(searchQuery)     !== -1 ||
+                invoiceCustomerName.indexOf(searchQuery) !== -1)
     });
 
 

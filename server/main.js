@@ -10,6 +10,7 @@ import '../imports/api/users.js';
 //import '../imports/api/customers.js';
 
 import '../imports/api/email.js';
+import '../imports/api/yearWrite.js';
 
 import './smtp.js';
 Meteor.startup(() => {
