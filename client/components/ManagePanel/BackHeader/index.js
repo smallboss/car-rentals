@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router';
 import Login from '../../Content/Login'
-require('../backmain.css')
 
 export default class BackHeader extends Component {
     render() {
