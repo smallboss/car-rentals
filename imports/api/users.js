@@ -20,7 +20,7 @@ if(Meteor.isServer) {
             Accounts.setPassword(data.targetId, data.newPassword)             
         },
         createNewUser: function (userData) {
-            Accounts.createUser(userData)
+            return Accounts.createUser(userData)
         }
     })
     Meteor.users.allow({

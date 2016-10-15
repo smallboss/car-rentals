@@ -2,7 +2,9 @@
  * Created by watcher on 10/8/16.
  */
 import React from 'react'
+import { Meteor } from 'meteor/meteor'
 import { Mongo } from 'meteor/mongo'
+import { ApiPayments } from '/imports/api/payments'
 
 class Table extends React.Component {
     constructor (props) {
@@ -27,6 +29,7 @@ class Table extends React.Component {
     }
     handlerEditButtons (e, targetId) {
         let _target = e.target.name,
+            idCustomer,
             currentArray = [],
             _arrToDel = [],
             _arrToEdit = [],
@@ -42,9 +45,17 @@ class Table extends React.Component {
                     this.state.arrToTable.forEach(item => {
                         if(_arrToDel.indexOf(item._id._str) == -1) {
                             _arrNew.push(item)
+                        } else {
+                            if(this.props.currentComponent == 'payments') {
+                                idCustomer = item.customerId
+                                Meteor.users.update({_id: idCustomer}, {$pull: {'profile.payments': item._id}})
+                                ApiPayments.remove({_id: item._id})
+                            }
                         }
                     })
-                    this.props.handlerChildState(this.props.currentComponent, _arrNew)
+                    if(this.props.currentComponent !== 'payments') {
+                        this.props.handlerChildState(this.props.currentComponent, _arrNew)    
+                    }
                     this.setState({arrToTable: _arrNew, arrChecked: []})
                 }                
                 break
@@ -158,7 +169,7 @@ class Table extends React.Component {
                         <td>#<input type='button' className='btn btn-success m-l-1' name='save_notes_new' value='Save' onClick={this.handlerEditButtons} /></td>
                         {_stateToTh.map(prop => {
                             let _typeInput = (prop.indexOf('date') != -1) ? 'date' : 'text',
-                                _defaultValue = (prop.indexOf('date') != -1) ? new Date().toLocaleDateString() : ''
+                                _defaultValue = (prop == 'dateCreateRequest') ? new Date().toISOString().slice(0, 10) : ''                            
                             if(prop != '_id') {
                                 return (
                                     <td key={Math.random()}><input type={_typeInput} id={prop} className='form-control' defaultValue={_defaultValue}/></td>

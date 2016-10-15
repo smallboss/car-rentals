@@ -4,8 +4,8 @@
 import { Meteor } from 'meteor/meteor'
 import { Mongo } from 'meteor/mongo'
 import { createContainer } from 'meteor/react-meteor-data'
-//import { ApiCustomers } from '../../../../../imports/api/customers'
-import { Accounts } from 'meteor/accounts-base'
+import { ApiPayments } from '/imports/api/payments'
+//import { Accounts } from 'meteor/accounts-base'
 import React from 'react'
 import $ from 'jquery'
 import { browserHistory } from 'react-router'
@@ -108,7 +108,6 @@ class Customer extends React.Component {
                                         if(this.props.params.id == 'new') {
                                             customer[_target] = _newValue
                                             customer.emails = [{address: _newValue}]
-                                            //customer.emails[0].address = _newValue
                                         } else {
                                             customer.emails[0].address = _newValue
                                         }
@@ -134,10 +133,14 @@ class Customer extends React.Component {
                     _newState._id = new Mongo.ObjectID()
                     _newState.password = '123456'
                     _newState.profile.userType = 'customer'
-                    Meteor.call('createNewUser', _newState, () => {
-                        alert('Default user`s password is 123456')
-                        _href = '/customer/' + _newState._id
-                        browserHistory.push(_href)
+                    Meteor.call('createNewUser', _newState, (err, result) => {
+                        if(err) {
+                            alert(err.reason)
+                        } else {
+                            alert('Default user`s password is 123456')
+                            _href = '/customer/' + result
+                            browserHistory.push(_href)   
+                        }                        
                     })
                     this.setState({customers: _newState, editAble: 0})
                 } else {
@@ -151,8 +154,24 @@ class Customer extends React.Component {
         }
     }
     handlerChildState(target, data) {
-        let _state = this.state.customer,
-            _id = this.state.customer._id
+        let _state,
+            _id = this.state.customer._id, 
+            _idPayment
+            //currentPayments = this.state.customer.profile.payments
+        if(target == 'payments') {
+            data.forEach(item => {
+                _idPayment = new Mongo.ObjectID(item._id._str)
+                if(ApiPayments.findOne({_id: _idPayment})) {
+                    delete item._id
+                    ApiPayments.update({_id: _idPayment}, {$set: item})    
+                } else {
+                    Meteor.users.update({_id: _id}, {$push: {'profile.payments': _idPayment}})
+                    ApiPayments.insert(item)
+                }
+            })
+            return
+        }
+        _state = this.state.customer
         _state.profile[target] = data
         delete this.state.customer._id
         Meteor.users.update(_id, {$set: _state})
@@ -169,7 +188,7 @@ class Customer extends React.Component {
             { tolls } = this.state.customer.profile || '',
             carRequest,
             rentals,
-            payments
+            payments = []
         if(this.state.customer.profile && (typeof this.state.customer.profile._images == 'object')){
             _images = this.state.customer.profile._images
         } else {
@@ -205,16 +224,24 @@ class Customer extends React.Component {
             ]
         }
         if(this.state.customer.profile && (typeof this.state.customer.profile.payments == 'object')) {
-            payments = this.state.customer.profile.payments
-        } else {
-            payments = [
-                {
-                    _id: new Mongo.ObjectID(),
-                    datePayment: '',
-                    statePayment: '',
-                    QuantityPayment: ''
+            let paymentsIds = this.state.customer.profile.payments
+            let paymentsProps = this.props.payments
+            paymentsIds.forEach(id => {
+                let finder = ApiPayments.findOne({_id: new Mongo.ObjectID(id._str)})
+                if (finder) {
+                    payments.push(finder)
                 }
-            ]
+            })
+        } 
+        if(payments.length == 0) {
+            payments = [ {
+                _id: new Mongo.ObjectID(),
+                amount: '',
+                customerId: '',
+                date: '',
+                ref: '',
+                status: ''
+            }]
         }
         return (
             <div className='panel panel-default'>
@@ -321,6 +348,7 @@ class Customer extends React.Component {
 
 export default createContainer(({params}) => {
     Meteor.subscribe('users')
+    Meteor.subscribe('payments')
     let _id = params.id
     if(_id === 'new') {
         return {
@@ -328,7 +356,8 @@ export default createContainer(({params}) => {
         }
     } else {
         return {
-            customer: Meteor.users.findOne({_id: _id})
+            customer: Meteor.users.findOne({_id: _id}),
+            payments: ApiPayments.find().fetch()
         }
     }
 }, Customer)

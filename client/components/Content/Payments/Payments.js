@@ -192,6 +192,7 @@ export default createContainer(() => {
   Meteor.subscribe('payments');
   Meteor.subscribe('users');
   Meteor.subscribe('yearwrite');
+  Meteor.subscribe('users')
 
   return {
     payments: ApiPayments.find().fetch(),
