@@ -11,7 +11,7 @@ class UserForTable extends React.Component {
         let email = this.props.user_data.emails[0].address
         let { name, phone } = this.props.user_data.profile
         let userType = this.props.user_data.profile.userType
-        let _href = '/user_single/' + _id
+        let _href = '/managePanel/user_single/' + _id
         return (
             <tr className='tr-href'>
                 <td><input type='checkbox' id={_id} name='checkbox-for-delete' onChange={this.props.handlerDeleteUser} /></td>

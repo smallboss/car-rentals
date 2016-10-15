@@ -51,7 +51,7 @@ class Customer extends React.Component {
         let _confirm = confirm('Are You sure to delete this customer?')
         if(_confirm) {
             Meteor.call('removeAllUserData', id, (err) => {
-                browserHistory.push('/customers_list')
+                browserHistory.push('/managePanel/customers_list')
             })                        
         }
     }
@@ -138,7 +138,7 @@ class Customer extends React.Component {
                             alert(err.reason)
                         } else {
                             alert('Default user`s password is 123456')
-                            _href = '/customer/' + result
+                            _href = '/managePanel/customer/' + result
                             browserHistory.push(_href)   
                         }                        
                     })

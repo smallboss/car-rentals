@@ -1,7 +1,4 @@
 /* Toggle Styles */
-#main_container {
-    position: relative;
-}
 
 #wrapper {
     padding-left: 0;
@@ -47,15 +44,9 @@
 
 /* Sidebar Styles */
 
-#sidebar-wrapper {
-    position: absolute;
-    background: white;
-    overflow: hidden;
-    height: 20em;
-}
 .sidebar-nav {
     position: absolute;
-    display: block;
+    top: 0;
     width: 250px;
     margin: 0;
     padding: 0;
@@ -75,8 +66,8 @@
 
 .sidebar-nav li a:hover {
     text-decoration: none;
-    color: #000;
-    background: rgba(155,255,255,0.2);
+    color: #fff;
+    background: rgba(255,255,255,0.2);
 }
 
 .sidebar-nav li a:active,
@@ -134,36 +125,15 @@
 .content {
     margin-left: 260px;
 }
-.m-x-0 {
-    margin-left: 0;
-    margin-right: 0;
-}
 .m-x-1 {
     margin: 0 10px;
 }
-.m-x-2 {
-    margin: 0 20px;
-}
-.m-x-3 {
-    margin: 0 30px;
-}
+
 .m-l-1 {
-    margin-left: 10px;
-}
-.m-l-2 {
-    margin-left: 20px;
-}
-.m-l-3 {
-    margin-left: 30px;
+    margin: 10px;
 }
 .m-r-1 {
-    margin-right: 10px;
-}
-.m-r-2 {
-    margin-right: 20px;
-}
-.m-r-3 {
-    margin-right: 30px;
+    margin: 10px;
 }
 .m-y-1 {
     margin: 10px 0;

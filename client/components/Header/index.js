@@ -1,24 +1,33 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router';
 import Login from '../Content/Login'
+import './style.css'
 
 export default class Header extends Component {
   render() {
     return (
-      <nav className="header-nav navbar navbar-inverse">
-        <div className="navbar-header">
-          <button className="navbar-toggle" type="button" data-toggle="collapse" data-target=".js-navbar-collapse">
-            <span className="sr-only">Toggle navigation</span>
-            <span className="icon-bar"></span>
-            <span className="icon-bar"></span>
-            <span className="icon-bar"></span>
-          </button>
-          <Link className="navbar-brand" to="/">Cars Rentals</Link>
-        </div>
-        <div className='pull-right'>
-          <Login />
-        </div>
+      <nav className='row navbar header-nav'>
+          <div className='col-xs-2'>
+              <div className='navbar-header'>
+                  <Link className='navbar-brand m-x-3' to='/'>Cars Rentals</Link>
+              </div>
+          </div>
+          <div className='col-xs-7'>
+              <ul className='m-y-1 nav nav-justified'>
+                  <li><Link to="/">Home</Link></li>
+                  <li><Link to="/users_list">Services</Link></li>
+                  <li><Link to="/users_list">Reviews</Link></li>
+                  <li><Link to="/users_list">Location</Link></li>
+                  <li><Link to="/users_list">Contact</Link></li>
+              </ul>
+          </div>
+          <div className='col-xs-3'>
+              <div className='pull-right m-y-1 m-x-3'>
+                  <Login />
+              </div>
+          </div>
       </nav>
     )
   }
 }
+
