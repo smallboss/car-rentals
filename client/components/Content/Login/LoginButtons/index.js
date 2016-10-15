@@ -20,7 +20,7 @@ class LoginButtons extends React.Component {
             if(error) {
                 this.setState({error: error.reason})
             } else {
-                Meteor.loggingIn()
+                Meteor.loggingIn();
                 browserHistory.push('/user_profile')
                 this.setState({error: '', showModal: 0})
             }

@@ -95,6 +95,7 @@ class CustomersList extends React.Component {
                             <th>User name</th>
                             <th>Name</th>
                             <th>User email</th>                            
+                            <th>User phone</th>                            
                         </tr>
                     </thead>
                     <tbody>
@@ -118,6 +119,6 @@ class CustomersList extends React.Component {
 export default createContainer(() => {
     Meteor.subscribe('users')
     return {
-        customers: Meteor.users.find({"profile.userType": "customer"}).fetch()
+        customers: Meteor.users.find({'profile.userType': 'customer'}).fetch()
     }
 }, CustomersList)

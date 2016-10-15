@@ -37,8 +37,6 @@ class Customer extends React.Component {
         }
     }
     componentWillReceiveProps (nextProps) {
-        console.log('down is next props')
-        console.log(nextProps)
         let customer = nextProps.customer
         this.setState({customer: customer})
         this.forceUpdate()
@@ -109,7 +107,8 @@ class Customer extends React.Component {
                                     if (_target == 'email') {
                                         if(this.props.params.id == 'new') {
                                             customer[_target] = _newValue
-                                            customer.emails[0].address = _newValue
+                                            customer.emails = [{address: _newValue}]
+                                            //customer.emails[0].address = _newValue
                                         } else {
                                             customer.emails[0].address = _newValue
                                         }
@@ -133,10 +132,10 @@ class Customer extends React.Component {
                         _newState.profile = {}
                     }
                     _newState._id = new Mongo.ObjectID()
-                    _newState.password = '12345'
+                    _newState.password = '123456'
                     _newState.profile.userType = 'customer'
                     Meteor.call('createNewUser', _newState, () => {
-                        alert('Default user`s password is 12345')
+                        alert('Default user`s password is 123456')
                         _href = '/customer/' + _newState._id
                         browserHistory.push(_href)
                     })
@@ -161,7 +160,10 @@ class Customer extends React.Component {
     render () {
         let editAble = (!this.state.editAble) ? 'disabled' : false
         let { _id, username } = this.state.customer || [];
-        let email = (this.state.customer.emails) ? this.state.customer.emails[0].address : ''
+        let email = ''
+        if(this.state.customer.emails) {
+            email = this.state.customer.emails[0].address   
+        }
         let { name, birthDate, phone, address, userType } = this.state.customer.profile || '';
         let { fines } = this.state.customer.profile || '',
             { tolls } = this.state.customer.profile || '',
