@@ -89,7 +89,7 @@ export default createContainer (({params}) => {
             default:
                 return {
                     arrToTable: [],
-                    tableName: 'Nothing results'
+                    tableName: 'No results'
                 }                
         }           
     }
