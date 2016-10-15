@@ -12,15 +12,53 @@ import { imgToBase64 } from '../../../../helpers/handlerImages'
 import Table from '../Table'
 import './style.css'
 
+const _user = {
+    id: new Mongo.ObjectID(),
+    username: '',
+    email: '',
+    password: '123456',
+    profile: {
+        userType: 'customer',
+        name: '',
+        birthDate: '',
+        phone: '',
+        address: '',
+        carRequest: [
+            {
+                _id: new Mongo.ObjectID(),
+                dateCreateRequest: '',
+                dateFrom: '',
+                dateTo: '',
+                requestText: ''
+            }
+        ],
+        rentals: [
+            {
+                _id: new Mongo.ObjectID(),
+                carId: '',
+                dateFrom: '',
+                dateTo: ''
+            }
+        ],
+        payments: [],
+        fines: '',
+        tolls: '',
+        _images: {
+            imgId: '',
+            imgLicense: ''
+        }
+    }
+}
+
 class Customer extends React.Component {
     constructor (props) {
         super(props)
-        this.state = {customer: props.customer, editAble: 0}
+        this.state = {customer: props.customer || _user, editAble: 0}
         this.handlerEditCustomer = this.handlerEditCustomer.bind(this)
         this.handlerChildState = this.handlerChildState.bind(this)
     }
     componentWillMount () {
-        let customer = this.props.customer || {}
+        let customer = this.props.customer || _user
         if(this.props.params.id == 'new') {
             customer._new = 1
         }
@@ -179,61 +217,25 @@ class Customer extends React.Component {
     }
     render () {
         let editAble = (!this.state.editAble) ? 'disabled' : false
-        let { _id, username } = this.state.customer || [];
-        let email = ''
-        if(this.state.customer.emails) {
-            email = this.state.customer.emails[0].address   
-        }
-        let { name, birthDate, phone, address, userType } = this.state.customer.profile || '';
-        let { fines } = this.state.customer.profile || '',
-            { tolls } = this.state.customer.profile || '',
-            carRequest,
-            rentals,
-            payments = []
-        if(this.state.customer.profile && (typeof this.state.customer.profile._images == 'object')){
-            _images = this.state.customer.profile._images
-        } else {
+        let { _id, username, profile } = this.state.customer
+        let email = (this.state.customer.emails) ? this.state.customer.emails[0].address : this.state.customer.email 
+        let { name, birthDate, phone, address, userType, fines, tolls, carRequest, rentals, _images } = profile;
+        if(!_images) {
             _images = {
                 imgId: '',
                 imgLicense: ''
             }
         }
         let { imgId, imgLicense } = _images
-        if(this.state.customer.profile && (typeof this.state.customer.profile.carRequest == 'object')) {
-            carRequest = this.state.customer.profile.carRequest
-        } else {
-            carRequest = [
-                {
-                    _id: new Mongo.ObjectID(),
-                    dateCreateRequest: '',
-                    dateFrom: '',
-                    dateTo: '',
-                    requestText: ''
-                }
-            ]
-        }
-        if(this.state.customer.profile && (typeof this.state.customer.profile.rentals == 'object')) {
-            rentals = this.state.customer.profile.rentals
-        } else {
-            rentals = [
-                {
-                    _id: new Mongo.ObjectID(),
-                    carId: '',
-                    dateFrom: '',
-                    dateTo: ''
-                }
-            ]
-        }
-        if(this.state.customer.profile && (typeof this.state.customer.profile.payments == 'object')) {
-            let paymentsIds = this.state.customer.profile.payments
-            let paymentsProps = this.props.payments
-            paymentsIds.forEach(id => {
-                let finder = ApiPayments.findOne({_id: new Mongo.ObjectID(id._str)})
-                if (finder) {
-                    payments.push(finder)
-                }
-            })
-        } 
+        let paymentsIds = profile.payments,
+            payments = []
+        let paymentsProps = this.props.payments
+        paymentsIds.forEach(id => {
+            let finder = ApiPayments.findOne({_id: new Mongo.ObjectID(id._str)})
+            if (finder) {
+                payments.push(finder)
+            }
+        }) 
         if(payments.length == 0) {
             payments = [ {
                 _id: new Mongo.ObjectID(),
