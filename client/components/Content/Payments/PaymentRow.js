@@ -28,10 +28,10 @@ export default class PaymentRow extends Component {
                         onChange={(e) => onHandleSelect(e, item)} />
                 </th>
                 <td>
-                    <Link to={`/customer/${item.customerId}`}>{ customerName ? customerName.username : ''}</Link>
+                    <Link to={`/customer/${item.customerId}`}>{ customerName ? customerName.profile.name : ''}</Link>
                 </td>
                 <td onClick={onClick} >{ item.date }</td>
-                <td onClick={onClick} >{ item._id._str }</td>
+                <td onClick={onClick} >{ item.codeName }</td>
                 <td onClick={onClick} >{ item.amount }</td>
                 <td onClick={onClick} >{ item.status }</td>
             </tr>

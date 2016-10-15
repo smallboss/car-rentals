@@ -25,6 +25,7 @@ export default class InvoiceSingle extends Component {
     this.state = {
       invoice: clone(this.props.invoice),
       dispInvoice: clone(this.props.invoice),
+      allowSave: false,
       isNew: this.props.isNew,
       customerList: this.props.userList,
 
@@ -46,7 +47,7 @@ export default class InvoiceSingle extends Component {
   onChangeCustomer(value) {
     let newInvoice = this.state.dispInvoice;
     newInvoice.customerId = value;
-    this.setState({dispInvoice: newInvoice});
+    this.setState({dispInvoice: newInvoice, allowSave: true});
   }
   onChangeStatus(value) {
     let newInvoice = this.state.dispInvoice;
@@ -83,12 +84,16 @@ export default class InvoiceSingle extends Component {
     if (!dataDispInvoice) {
       dataDispInvoice = clone(nextProps.invoice)
     }
+    
+    const allowSave = this.state.editable ? this.state.allowSave : c.customerId;
 
     this.setState({
       invoice: clone(c),
-      dispInvoice: dataDispInvoice
+      dispInvoice: dataDispInvoice,
+      allowSave
     });
   }
+
 
   handleSave() {
     let newInvoice = clone(this.state.dispInvoice);
@@ -103,7 +108,7 @@ export default class InvoiceSingle extends Component {
     map(newInvoice.paymentsId, (el) => {
       Meteor.users.update({_id: this.state.invoice.customerId}, {$pull: { "profile.payments": el}});
       ApiPayments.update({_id: el}, {$set: {customerId: newInvoice.customerId}});
-      Meteor.users.update({_id: newInvoice.customerId}, {$push: { "profile.payments": el}});
+      Meteor.users.update({_id: newInvoice.customerId}, {$addToSet: { "profile.payments": el}});
     })
 
 
@@ -113,7 +118,15 @@ export default class InvoiceSingle extends Component {
   }
 
   handleEdit() {
-    this.setState({editable: !this.state.editable, dispInvoice: clone(this.state.invoice)});
+    const allowSave = (this.state.editable && !this.state.invoice.customerId) 
+                            ? this.state.allowSave
+                            : false;
+
+    this.setState({
+        editable: !this.state.editable, 
+        dispInvoice: clone(this.state.invoice), 
+        allowSave
+    });
   }
 
   handleDelete() {
@@ -136,18 +149,25 @@ export default class InvoiceSingle extends Component {
     if (this.buttonEdit) {
       this.buttonEdit.disabled = false;
     }
+
+    const allowSave = this.props.invoice ? this.props.invoice.customerId : undefined;
+    this.setState({allowSave});
   }
 
 
 
   render() {
+
+    console.log(this.state.invoice);
     
     const renderHeadSingle = () => {
       return (
         <HeadSingle onSave={this.handleSave}
                     onEdit={this.handleEdit}
                     onDelete={this.handleDelete}
-                    onSendByEmail={this.handleSendByEmail} />
+                    onSendByEmail={this.handleSendByEmail}
+                    allowSave={this.state.allowSave}
+                    title={this.props.invoice.codeName} />
       )
     }
 
@@ -217,9 +237,9 @@ export default class InvoiceSingle extends Component {
                 })()}
                 {(() => {
                   const custId = this.state.editable ? this.state.dispInvoice.customerId : customerId;
-                  const custName = Meteor.users.findOne(custId) ? Meteor.users.findOne(custId).username : '';
+                  const custName = Meteor.users.findOne(custId) ? (Meteor.users.findOne(custId).profile.name + ' propfile') : '';
 
-                  return (<Link to={`/customer/${custId}`}>{`${custName} propfile`}</Link>);
+                  return (<Link to={`/customer/${custId}`}>{custName}</Link>);
                 })()}
               </div>
               { /* END ============================= DROPDOWN CUSTOMERS ============================== */}
@@ -312,13 +332,15 @@ export default class InvoiceSingle extends Component {
               {
                 <LinesOnTab 
                     invoice={cloneDeep(this.state.invoice)}
-                    linesId={reverse(this.state.invoice.linesId)}/>
+                    linesId={reverse(this.state.invoice.linesId)}
+                    readOnly={!this.state.invoice.customerId}/>
               }
               </div>
               <div role="tabpanel" className="tab-pane p-x-1" id="payments">
                 <PaymentsOnTab 
                     invoice={cloneDeep(this.state.invoice)}
-                    paymentsId={reverse(this.state.invoice.paymentsId)}/>
+                    paymentsId={reverse(this.state.invoice.paymentsId)}
+                    readOnly={!this.state.invoice.customerId}/>
               </div>
               <div role="tabpanel" className="tab-pane p-x-1" id="notes">
                 {(() => {
