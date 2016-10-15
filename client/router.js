@@ -24,9 +24,9 @@ import UserSingle from './components/Content/Users/UserSingle'
 import Registration from './components/Content/Registration'
 import CustomersList from './components/Content/Customers/CustomersList'
 /*import back components*/
-import BackSidebar from './components/ManagePartition/BackSidebar'
-import BackHeader from './components/ManagePartition/BackHeader'
-import BackFooter from './components/ManagePartition/BackFooter'
+import BackSidebar from './components/ManagePanel/BackSidebar'
+import BackHeader from './components/ManagePanel/BackHeader'
+import BackFooter from './components/ManagePanel/BackFooter'
 
 const NotFoundPage = () => {
   return (
@@ -36,21 +36,8 @@ const NotFoundPage = () => {
   )
 };
 
-const routerComponent = ({children}) => {
-    let path = children.props.route.path
-    if(path === 'managePanel') {
-        return (
-            <div id='main_container'>
-                <BackHeader />
-                <BackSidebar />
-                <div className='content'>
-                    {children}
-                </div>
-                <BackFooter />
-            </div>
-        )
-    } else {
-        return (
+const frontRouterComponent = (children) => {
+    return (
             <div id='main_container'>
                 <Header />
                 <Sidebar />
@@ -59,8 +46,27 @@ const routerComponent = ({children}) => {
                 </div>
                 <Footer />
             </div>
-        )   
-    }  
+    )
+};
+
+const backRouterComponent = (children) => {
+    return (
+        <div id='main_container'>
+            <BackHeader />
+            <BackSidebar />
+            <div className='content'>
+                {children}
+            </div>
+            <BackFooter />
+        </div>
+    );
+};
+
+const wrapper = ({children}) => {
+    if(location.href.indexOf('managePanel') != -1) {
+        return backRouterComponent(children);
+    }
+    return frontRouterComponent(children);
 };
 
 Router.refresh = function () {
@@ -69,28 +75,30 @@ Router.refresh = function () {
 
 export const renderRoutes = () => (
   <Router history={browserHistory}>
-    <Route path="/" component={routerComponent}>
-      <IndexRoute component={App} />
-        <IndexRedirect to='home' />
-      <Route path="home" component={Home}/>
-      <Route path="registration" component={Registration}/>
-      <Route path="user_profile" component={UserProfile}/>
-      <Route path="user_profile/:tableTarget" component={TableForUser}/>
-      <Route path="cars" component={Cars}/>
-        <Route path="cars/:carId" component={CarSingle} />
-      <Route path="managePanel/payments" component={Payments}/>
-        <Route path="managePanel/payments/:paymentId" component={PaymentSingle} />
-      <Route path="managePanel/contracts" component={Contracts}/>
-        <Route path="managePanel/contracts/:contractId" component={ContractSingle} />
-      <Route path="managePanel/invoices" component={Invoices}/>
-        <Route path="managePanel/invoices/:invoiceId" component={InvoiceSingle} />
-  <Route path="managePanel/customers" component={Customers} />
-  <Route path="managePanel/customers_list" component={CustomersList} />
-  <Route path='managePanel/customer/:id' component={Customer} />
-  <Route path='managePanel/users_list' component={Users} />
-  <Route path='managePanel/user_single/:id' component={UserSingle} />
-  <Route path='managePanel' component={UserSingle} />
-  <Route path="*" component={NotFoundPage}/>
-    </Route>
+      <Route path="/" component={wrapper}>
+        <IndexRoute component={App}/>
+        <Route path="home" component={Home}/>
+        <Route path="registration" component={Registration}/>
+        <Route path="user_profile" component={UserProfile}/>
+        <Route path="user_profile/:tableTarget" component={TableForUser}/>
+        <Route path="/managePanel">
+            <IndexRoute component={CustomersList}/>
+            <Route path="cars" component={Cars}/>
+            <Route path="cars/:carId" component={CarSingle}/>
+            <Route path="payments" component={Payments}/>
+            <Route path="payments/:paymentId" component={PaymentSingle}/>
+            <Route path="contracts" component={Contracts}/>
+            <Route path="contracts/:contractId" component={ContractSingle}/>
+            <Route path="invoices" component={Invoices}/>
+            <Route path="invoices/:invoiceId" component={InvoiceSingle}/>
+            <Route path="customers" component={Customers}/>
+            <Route path="customers_list" component={CustomersList}/>
+            <Route path='customer/:id' component={Customer}/>
+            <Route path='users_list' component={Users}/>
+            <Route path='user_single/:id' component={UserSingle}/>
+            <Route path="*" component={NotFoundPage}/>
+        </Route>
+      <Route path="*" component={NotFoundPage}/>
+  </Route>
   </Router>
 );
