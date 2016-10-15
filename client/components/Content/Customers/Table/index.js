@@ -209,10 +209,8 @@ class Table extends React.Component {
                                                     if(val == 'status') {
                                                         return (
                                                             <td key={Math.random()} width='100'>
-                                                                <select className='form-control' name='status'>
-                                                                    <option value='open' >open</option>
-                                                                    <option value='close'>close</option>
-                                                                </select>
+                                                                <datalist id='statusList'><option value='open' /><option value='close' /></datalist>
+                                                                <input list='statusList' className='form-control' name='status' defaultValue={elem[val]} onChange={(e) => {this.handlerInputs(elem._id._str, e)}} />
                                                             </td>
                                                         )
                                                     }
