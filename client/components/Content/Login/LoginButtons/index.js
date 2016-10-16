@@ -30,7 +30,7 @@ class LoginButtons extends React.Component {
         let classModal = (this.state.showModal) ? 'modal show' : 'modal fade'            
         return (
             <div>
-                <Link className='navbar-link btn btn-large btn-default m-x-1' to='/registration'>Register</Link>
+                <Link className='navbar-link btn btn-large btn-default m-x-1 btn-register' to='/registration'>Register</Link>
                 <input type='button' className='btn btn-large btn-default' role='button' onClick={() => this.setState({showModal: 1})} value='Sign In' />
                 <div id='loginModal' className={classModal}>
                     <div className='overlay'></div>

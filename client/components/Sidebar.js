@@ -55,13 +55,7 @@ class Sidebar extends Component {
           <div></div>
       )
     }
-    const adminPart = (this.state.loginAdmin) ? <li className='dropdown'>
-      <a type='button' className='p-l-3' data-toggle='dropdown'>Admin Panel
-        <span className='caret m-l-3'></span></a>
-      <ul className='dropdown-menu m-l-3' id='admin_part'>
-        <li><Link to='/managePanel/'>Manage Panel</Link></li>
-      </ul>
-    </li> : ''
+    const adminPart = (this.state.loginAdmin) ? <li><Link to='/managePanel/' className='p-l-3'>Manage Panel</Link></li> : ''
     if(this.props.side && this.props.side == 'backEnd') {
       return (
           <div id='sidebar-wrapper'>
