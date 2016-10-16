@@ -56,9 +56,9 @@ class Sidebar extends Component {
       )
     }
     const adminPart = (this.state.loginAdmin) ? <li className='dropdown'>
-      <a type='button' data-toggle='dropdown'>Admin Panel
+      <a type='button' className='p-l-3' data-toggle='dropdown'>Admin Panel
         <span className='caret m-l-3'></span></a>
-      <ul className='dropdown-menu' id='admin_part'>
+      <ul className='dropdown-menu m-l-3' id='admin_part'>
         <li><Link to='/managePanel/'>Manage Panel</Link></li>
       </ul>
     </li> : ''
@@ -71,12 +71,12 @@ class Sidebar extends Component {
     } else {
       return (
           <div id='sidebar-wrapper'>
-            <ul className='sidebar-nav p-l-3'>
-              <li><Link to='/user_profile' className='navbar-link'>Profile</Link></li>
-              <li><Link to='/user_profile/history'>Rental History</Link></li>
-              <li><Link to='/user_profile/payments'>Payments</Link></li>
-              <li><Link to='/user_profile/contracts'>Contracts</Link></li>
-              <li><Link to='/user_profile/invoices'>Invoices</Link></li>
+            <ul className='sidebar-nav'>
+              <li><Link to='/user_profile' className='p-l-3'>Profile</Link></li>
+              <li><Link to='/user_profile/history' className='p-l-3'>Rental History</Link></li>
+              <li><Link to='/user_profile/payments' className='p-l-3'>Payments</Link></li>
+              <li><Link to='/user_profile/contracts' className='p-l-3'>Contracts</Link></li>
+              <li><Link to='/user_profile/invoices' className='p-l-3'>Invoices</Link></li>
               {adminPart}
             </ul>
           </div>

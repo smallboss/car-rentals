@@ -64,6 +64,7 @@ const backRouterComponent = (children) => {
 
 const wrapper = ({children}) => {
     if(location.href.indexOf('managePanel') != -1) {
+        console.log(Meteor.user())
         return backRouterComponent(children);
     }
     return frontRouterComponent(children);
@@ -77,6 +78,7 @@ export const renderRoutes = () => (
   <Router history={browserHistory}>
       <Route path="/" component={wrapper}>
         <IndexRoute component={App}/>
+          <IndexRedirect to='home' />
         <Route path="home" component={Home}/>
         <Route path="registration" component={Registration}/>
         <Route path="user_profile" component={UserProfile}/>
