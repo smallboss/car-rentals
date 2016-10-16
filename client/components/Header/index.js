@@ -15,10 +15,10 @@ export default class Header extends Component {
           <div className='col-xs-7'>
               <ul className='m-y-1 nav nav-justified'>
                   <li><Link to="/">Home</Link></li>
-                  <li><Link to="/users_list">Services</Link></li>
-                  <li><Link to="/users_list">Reviews</Link></li>
-                  <li><Link to="/users_list">Location</Link></li>
-                  <li><Link to="/users_list">Contact</Link></li>
+                  <li><Link to="/#services">Services</Link></li>
+                  <li><Link to="/#reviews">Reviews</Link></li>
+                  <li><Link to="/#location">Location</Link></li>
+                  <li><Link to="/#contact">Contact</Link></li>
               </ul>
           </div>
           <div className='col-xs-3'>

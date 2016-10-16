@@ -158,8 +158,10 @@ class Table extends React.Component {
                             <th className='col-xs-1'>#</th>
                             {_stateToTh.map(prop => {
                                 if(prop != '_id' && prop != '_toedit' && prop !== 'customerId') {
+                                    let replaceProp = prop.replace( /([A-Z])/g, (l) => {return ' ' + l.toUpperCase()}  )
+                                    replaceProp = replaceProp.charAt(0).toUpperCase() + replaceProp.slice(1)
                                     return (
-                                        <th key={Math.random()}>{prop}</th>
+                                        <th key={Math.random()}>{replaceProp}</th>
                                     )   
                                 }
                                 if(this.props.currentComponent == 'payments' && prop == '_id') {
@@ -182,6 +184,11 @@ class Table extends React.Component {
                                     <td key={Math.random()}><input type={_typeInput} id={prop} className='form-control' value={new Mongo.ObjectID()} /></td>
                                 )
                             }
+                            if(prop == 'status') {
+                                return (
+                                    <td key={Math.random()} width='100'><select id='status' className='form-control'><option value='open' defaultValue>open</option><option value='close'>close</option></select></td>
+                                )
+                            }
                             if(prop != '_id' && prop != 'customerId') {
                                 return (
                                     <td key={Math.random()}><input type={_typeInput} id={prop} className='form-control' defaultValue={_defaultValue}/></td>
@@ -201,6 +208,18 @@ class Table extends React.Component {
                                             if(typeof elem[val] == 'string' && val != 'customerId') {
                                                 let _typeInput = (val.indexOf('date') != -1) ? 'date' : 'text'
                                                 if(elem._toedit) {
+                                                    if(val == 'status') {
+                                                        let selectOpen = (elem.status == 'open') ? true : false //not use defaultValue instead selected because defaultValue not boolean value
+                                                        let selectClose = (elem.status == 'close') ? true : false //not use defaultValue instead selected because defaultValue not boolean value
+                                                        return (
+                                                            <td key={Math.random()} width='100'>
+                                                                <select name='status' className='form-control' onChange={(e) => {this.handlerInputs(elem._id._str, e)}}>
+                                                                    <option value='open' selected={selectOpen}>Open</option>
+                                                                    <option value='close' selected={selectClose}>Close</option> 
+                                                                </select>
+                                                            </td>
+                                                        )
+                                                    }
                                                     return (
                                                         <td key={Math.random()}>
                                                             <input type={_typeInput} className='form-control' name={val} defaultValue={elem[val]} onChange={(e) => {this.handlerInputs(elem._id._str, e)}} />
@@ -214,7 +233,7 @@ class Table extends React.Component {
                                                     )   
                                                 }                                                   
                                             } else if(this.props.currentComponent == 'payments' && val == '_id') {
-                                                let href = '/payments/' + elem._id._str
+                                                let href = '/managePanel/payments/' + elem._id._str
                                                 return (
                                                     <td key={Math.random()}>
                                                         <Link to={href}>{elem._id._str}</Link>

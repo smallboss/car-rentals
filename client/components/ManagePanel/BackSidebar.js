@@ -1,9 +1,29 @@
 import React, { Component } from 'react';
-
+import { createContainer } from 'meteor/react-meteor-data'
 import { Link } from 'react-router';
 
-export default class BackSidebar extends Component {
+class BackSidebar extends Component {
+  constructor() {
+    super()
+    this.state = {loginIn: 0, loginAdmin: 0}
+  }
+  componentWillReceiveProps(nextProps) {
+    let loginIn = nextProps.loginIn
+    if(loginIn) {
+      let loginAdmin = (loginIn.profile.userType == 'admin') ? 1 : 0
+      this.setState({loginIn: 1, loginAdmin})
+    } else {
+      this.setState({loginIn: 0, loginAdmin: 0})
+    }
+  }
   render() {
+    console.log(this.props)
+    console.log(this.state)
+    if(!this.state.loginIn || !this.state.loginAdmin) {
+      return (
+          <div>Must login as admin</div>
+      )
+    }
     return (
         <div id="sidebar-wrapper">
           <ul className="sidebar-nav">
@@ -41,3 +61,10 @@ export default class BackSidebar extends Component {
     )
   }
 }
+
+export default createContainer(() => {
+  Meteor.subscribe('users')
+  return {
+    loginIn: Meteor.user()
+  }
+}, BackSidebar)
