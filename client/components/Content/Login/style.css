@@ -3,5 +3,17 @@
     overflow: hidden;
 }
 .div-welcome {
+    height: 50px;
+    display: flex;
+}
 
+.div-welcome .pull-right > div:first-child > span {
+    margin: auto 20px;
+}
+
+.div-welcome:first-child {
+    border: 1px solid #469d46 ;
+    border-radius: 4px;
+    display: flex;
+    margin: auto 5px;
 }

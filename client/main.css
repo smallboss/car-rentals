@@ -127,12 +127,9 @@
     }
 }
 
-.header-nav {
-    margin-bottom: 1px!important;
-}
-
 .content {
     margin-left: 260px;
+    min-height: 100vh;
 }
 .m-x-0 {
     margin-left: 0;
@@ -182,6 +179,18 @@
 }
 .m-t-3 {
     margin-top: 30px;
+}
+.m-a-0 {
+    margin: 0;
+}
+.m-b-1 {
+    margin-bottom: 10px;
+}
+.m-b-2 {
+    margin-bottom: 20px;
+}
+.m-b-3 {
+    margin-bottom: 30px;
 }
 .p-l-1 {
     padding-left: 10px;

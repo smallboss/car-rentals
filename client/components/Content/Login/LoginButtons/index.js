@@ -27,14 +27,14 @@ class LoginButtons extends React.Component {
         })
     }
     render () {
-        let classModal = (this.state.showModal) ? 'modal show' : 'modal fade',
-            styleModal = {width: '400px'}
+        let classModal = (this.state.showModal) ? 'modal show' : 'modal fade'            
         return (
             <div>
                 <Link className='navbar-link btn btn-large btn-default m-x-1' to='/registration'>Sign Up</Link>
                 <input type='button' className='btn btn-large btn-default' role='button' onClick={() => this.setState({showModal: 1})} value='Sign In' />
                 <div id='loginModal' className={classModal}>
-                    <div className='modal-dialog modal-sm' style={styleModal}>
+                    <div className='overlay'></div>
+                    <div className='modal-dialog modal-sm'>
                         <div className='modal-content p-a-1'>
                             <div>
                                 <span>{this.state.error}</span>
@@ -57,10 +57,10 @@ class LoginButtons extends React.Component {
                                         </div>                                        
                                     </div>
                                 </div>
-                                <input type='submit' className='btn btn-success pull-right m-y-1' value='Enter'/>
+                                <input type='submit' className='btn btn-success pull-right m-y-1' value='Sign In'/>
                             </form>
                         </div>
-                    </div>
+                    </div>                    
                 </div>
             </div>
         )

@@ -1,5 +1,13 @@
-.modal-sm {
-    width: 450px;
+.overlay {
+    position: absolute;
+    background: rgba(0,0,0,0.4);
+    height: 100vh;
+    width: 100vw;
+}
+.modal-content {
+    position: absolute;
+    top: 30vh!important;
+    width: 400px;
 }
 .modal-sm .form-group label {
     margin-top: 15px;
