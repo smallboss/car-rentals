@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router';
 import Login from '../../Content/Login'
+import '../../Header/style.css'
 
 export default class BackHeader extends Component {
     render() {
-        let styleHeader = {background: '#90c9c7'}
         return (
-            <nav className="header-nav navbar navbar-inverse" style={styleHeader}>
+            <nav className="header-nav navbar">
                 <div className="navbar-header">
                     <button className="navbar-toggle" type="button" data-toggle="collapse" data-target=".js-navbar-collapse">
                         <span className="sr-only">Toggle navigation</span>
