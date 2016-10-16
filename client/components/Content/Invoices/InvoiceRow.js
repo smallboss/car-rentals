@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router';
 import { map } from 'lodash';
+import { ApiLines } from '/imports/api/lines.js';
+
 
 export default class InvoiceRow extends Component {
     constructor(props) {
@@ -20,6 +22,21 @@ export default class InvoiceRow extends Component {
     render(){
         const { item, onHandleSelect, onClick, customerName } = this.props;
 
+        const renderAmount = () => {
+            let totalAmount = 0;
+
+            if (item.linesId) {
+                item.linesId.map((el) => {
+                    console.log('el', el);
+                    const amount = ApiLines.findOne({ _id: el }).amount;
+                    totalAmount += parseInt(amount ? amount : 0);
+                })
+            }
+
+            return totalAmount;
+        }
+
+
         return (
             <tr>
                 <th>
@@ -28,12 +45,12 @@ export default class InvoiceRow extends Component {
                         onChange={(e) => onHandleSelect(e, item)} />
                 </th>
                 <td>
-                    <Link to={`/customer/${item.customerId}`}>{ customerName ? customerName.profile.name : '' }</Link>
+                    <Link to={`/managePanel/customer/${item.customerId}`}>{ customerName ? customerName.profile.name : '' }</Link>
                 </td>
                 <td onClick={onClick} >{ item.date }</td>
-                <td onClick={onClick} >{ item._id._str }</td>
+                <td onClick={onClick} >{ item.codeName}</td>
                 <td onClick={onClick} >{ item.dueDate }</td>
-                <td onClick={onClick} >{ item.amount }</td>
+                <td onClick={onClick} >{ renderAmount() }</td>
                 <td onClick={onClick} >{ item.status }</td>
             </tr>
         )

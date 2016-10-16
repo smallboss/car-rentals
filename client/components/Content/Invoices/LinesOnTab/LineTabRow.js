@@ -61,7 +61,6 @@ export default class LineTabRow extends Component {
     }
 // END ================ CHANGERS FIELDS =============================
 
-
     render(){
         let line = this.props.line ? this.props.line : {};
         let dispLine = this.state.dispLine;

@@ -42,14 +42,17 @@ export default class LinesOnTab extends Component {
         let isEdit = this.state.isEdit;
         isEdit = !selectedListId.length ? false : isEdit;
 
+        console.log('selectedListId', selectedListId);
+
         this.setState({selectedListId, isEdit});
     }
 
 // ====================== ADD = EDIT = REMOVE = SAVE ======================
     handleAddNewLine(){
+        console.log('ffff');
         const lineId = new Mongo.ObjectID();
-        // let custId = this.props.invoice.customerId ? this.props.invoice.customerId : ''
-        ApiLines.insert({_id: lineId, customerId: this.props.invoice.customerId});
+
+        ApiLines.insert({_id: lineId, invoiceId: this.props.invoice._id});
         ApiInvoices.update(this.props.invoice._id, {$push: { linesId: lineId }});
 
         let selectedListId = this.state.selectedListId;
@@ -97,9 +100,9 @@ export default class LinesOnTab extends Component {
                 return (
                     <TableHeadButtons 
                         selectedItems={this.state.selectedListId.length}
-                        onAddNew={this.handleAddNewPayment}
-                        onEdit={this.handleEditPayments}
-                        onRemove={this.handleRemovePayments}/>
+                        onAddNew={this.handleAddNewLine}
+                        onEdit={this.handleEditLines}
+                        onRemove={this.handleRemoveLines}/>
                 )
             }
 
