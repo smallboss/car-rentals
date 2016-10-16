@@ -11,7 +11,7 @@ class CustomerForTable extends React.Component {
         let { _id, username} = this.props.customer_data
         let email = this.props.customer_data.emails[0].address
         let { name, phone } = this.props.customer_data.profile
-        let _href = '/customer/' + _id
+        let _href = '/managePanel/customer/' + _id
         return (
             <tr className='tr-href'>
                 <td><input type='checkbox' id={_id} name='checkbox-for-delete' onChange={this.props.handlerDeleteCustomer} /></td>

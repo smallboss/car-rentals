@@ -2,10 +2,10 @@
  * Created by watcher on 10/4/16.
  */
 import React from 'react'
+import { browserHistory } from 'react-router'
 import { Mongo } from 'meteor/mongo'
-import { Accounts } from 'meteor/accounts-base'
+//import { Accounts } from 'meteor/accounts-base'
 import { createContainer } from 'meteor/react-meteor-data'
-//import { ApiCustomers } from '../../../../imports/api/customers'
 import { imgToBase64 } from '../../../helpers/handlerImages'
 
 function createUser (data) {}
@@ -93,134 +93,89 @@ class Registration extends React.Component {
                     if(typeof fileLicense != 'string') {
                         imgToBase64(fileLicense, (base64License) => {
                             _user.profile._images.imgLicense = base64License
-                            //Meteor.call('createNewUser', _user, () => {
-                            //    alert('You have register. You can enter with your login and password')
-                            //})
+                            Meteor.call('createNewUser', _user, (err, result) => {
+                                if(err) {
+                                    alert(err.reason)
+                                } else {
+                                    alert('You have register. You can enter with your login and password')
+                                    browserHistory.push('/')
+                                }
+                            })
+                            /*
                             Accounts.createUser(_user, (err) => {
-                                console.log(err);
-                            });
-                            /*Accounts.createUser(_user, (err) => {
                                 if(err) {
                                     alert(err.reason)
                                 } else {
                                     alert('You have register. You can enter with your login and password')
                                 }
-                            })*/
+                            })
+                            */
                             _target.reset()
                         })
                     } else {
-                        //Meteor.call('createNewUser', _user, () => {
-                        //    alert('You have register. You can enter with your login and password')
-                        //})
+                        Meteor.call('createNewUser', _user, (err, result) => {
+                            if(err) {
+                                alert(err.reason)
+                            } else {
+                                alert('You have register. You can enter with your login and password')
+                                browserHistory.push('/')
+                            }
+                        })
+                        /*
                         Accounts.createUser(_user, (err) => {
-                            console.log(err);
-                        });
-                        /*Accounts.createUser(_user, (err) => {
                          if(err) {
                          alert(err.reason)
                          } else {
                          alert('You have register. You can enter with your login and password')
                          }
-                         })*/
+                         })
+                         */
                         _target.reset()
                     }
                 })
             } else if (typeof fileId == 'string' && typeof fileLicense != 'string') {
                 imgToBase64(fileLicense, (base64License) => {
                     _user.profile._images.imgLicense = base64License
-                    //Meteor.call('createNewUser', _user, () => {
-                    //    alert('You have register. You can enter with your login and password')
-                    //})
-                    Accounts.createUser(_user, (err) => {
-                        console.log(err);
-                    });
-                    /*Accounts.createUser(_user, (err) => {
+                    Meteor.call('createNewUser', _user, (err, result) => {
+                        if(err) {
+                            alert(err.reason)
+                        } else {
+                            alert('You have register. You can enter with your login and password')
+                            browserHistory.push('/')
+                        }
+                    })
+                    /*
+                     Accounts.createUser(_user, (err) => {
                      if(err) {
                      alert(err.reason)
                      } else {
                      alert('You have register. You can enter with your login and password')
                      }
-                     })*/
-                    _target.reset()                    
+                     })
+                     */
+                    _target.reset()
                 })                
             } 
         } /*handle with images if they are end*/ else {
-            //Meteor.call('createNewUser', _user, () => {
-            //    alert('You have register. You can enter with your login and password')
-            //})
-            Accounts.createUser(_user, (err) => {
-                console.log(err);
-            });
-            /*Accounts.createUser(_user, (err) => {
+            Meteor.call('createNewUser', _user, (err, result) => {
+                if(err) {
+                    alert(err.reason)
+                } else {
+                    alert('You have register. You can enter with your login and password')
+                    browserHistory.push('/')
+                }
+            })
+            /*
+             Accounts.createUser(_user, (err) => {
              if(err) {
              alert(err.reason)
              } else {
              alert('You have register. You can enter with your login and password')
              }
-             })*/
+             })
+             */
             _target.reset()
         }
-        
-
-
-        /*
-        let _id = new Mongo.ObjectID(),
-            _target = e.target,
-            _user,
-            _images
-        let fileId = _target[8].files[0] || false,
-            fileLicense = _target[9].files[0] || false
-        if(fileId || fileLicense) {
-            if(fileId.size > 1100000 || fileLicense.size > 1100000) {
-                alert('Please upload image less than 1mb')
-                e.preventDefault()
-                return false
-            }
-            imgToBase64(fileId, (base64Id) => {
-                imgId = base64Id
-                imgToBase64(fileLicense, (base64License) => {
-                    imgLicense = base64License
-                    _images = {
-                        imgId,
-                        imgLicense
-                    }
-                    _user = {
-                        _id,
-                        name: _target[0].value,
-                        userName: _target[1].value,
-                        email: _target[2].value,
-                        birthDate: _target[3].value,
-                        phone: _target[4].value,
-                        address: _target[5].value,
-                        password: _target[6].value,
-                        role: 'customer',
-                        _images
-                    }
-                    ApiCustomers.insert(_user)
-                    _target.reset()
-                })
-            })
-        } else {
-            _images = {
-                imgId: '',
-                imgLicense: ''
-            }
-            _user = {
-                _id,
-                name: _target[0].value,
-                userName: _target[1].value,
-                email: _target[2].value,
-                birthDate: _target[3].value,
-                phone: _target[4].value,
-                address: _target[5].value,
-                password: _target[6].value,
-                role: 'customer',
-                _images
-            }
-            ApiCustomers.insert(_user)
-            _target.reset()
-        }*/
-        
     }
     render () {
         return (
@@ -235,7 +190,9 @@ class Registration extends React.Component {
                 <div className='form-group'>
                     <label htmlFor='user_name' className='control-label col-xs-2'>User Name</label>
                     <div className='col-xs-10'>
-                        <input type='text' id='user_name' className='form-control' required />
+                        <input type='text' id='user_name' className='form-control' required onKeyDown={(e) => {if (e.keyCode == 32) {alert('Spaces are not allowed'); e.preventDefault()}}} 
+                        onChange={(e) => {if(e.target.value.indexOf(' ') !== -1) {e.target.value = e.target.value.replace(/ /g, '')}}}
+                        />
                     </div>
                 </div><br />
                 <div className='form-group'>

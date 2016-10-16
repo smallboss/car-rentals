@@ -5,6 +5,8 @@ import React from 'react'
 import { Meteor } from 'meteor/meteor'
 import { browserHistory } from 'react-router'
 import { createContainer } from 'meteor/react-meteor-data'
+import { imgToBase64 } from '../../../helpers/handlerImages'
+import './style.css'
 
 class UserProfile extends React.Component {
     constructor(props) {
@@ -19,7 +21,31 @@ class UserProfile extends React.Component {
     handlerInputs (e) {
         let _newUser = this.state.user,
             _target = e.target.id,
-            _newValue = e.target.value            
+            _newValue = e.target.value
+        if(e.target.type == 'file') {
+            /* handler image start */
+            let file = e.target.files[0],
+                _target = e.target.id,
+                _newFile,
+                _images = {}
+            if(file.size > 1100000) {
+                alert('Please upload image less than 1mb')
+                e.preventDefault()
+                return false
+            }
+            if(file.type != 'image/png' && file.type != 'image/jpeg') {
+                alert('Please upload image png or jpeg')
+                e.preventDefault()
+                return false
+            }
+            imgToBase64(file, (result) => {
+                _newFile = result
+                _newUser.profile._images[_target] = _newFile
+                this.setState({user: _newUser})
+            })
+            /* handler image end */
+            return
+        }
         if(typeof _newValue == 'string') {
             if (_target == 'email') {
                 _newUser.emails[0].address = _newValue
@@ -39,35 +65,15 @@ class UserProfile extends React.Component {
             case 'editButton':
                 this.setState({editAble: 1});
                 for(let i = 0; i < this.refFormEdit.length; i++) {
-                    this.refFormEdit[i].addEventListener('input', this.handlerInputs)
+                    if(this.refFormEdit[i].type != 'file') {
+                        this.refFormEdit[i].addEventListener('input', this.handlerInputs)   
+                    } else if(this.refFormEdit[i].type == 'file') {
+                        this.refFormEdit[i].addEventListener('change', this.handlerInputs)
+                    }                    
                 }
                 this.refButtonSave.addEventListener('click', this.handlerButtonsEdit)
                 break
             case 'saveButton':
-                //if(this.refFormEdit['password'].value !== this.refFormEdit['repeat_password'].value) {
-                //    alert('Input right repeat password please')
-                //    return false
-                //} else if (this.refFormEdit['password'].value.length > 0) {
-                //    _newValue = this.refFormEdit['password'].value
-                //    if(_newValue.length < 6) {
-                //        alert('Password must be large then 6 symbols')
-                //        return false
-                //    }
-                //    _objToSend = { targetId: _id, newPassword: _newValue }
-                //    delete _сurrentState._id;
-                //    Meteor.users.update(_id, {$set: _сurrentState}, () => {
-                //        this.setState({editAble: 0}, () => {
-                //            Meteor.call('setNewPassword', _objToSend, (err, result) => {
-                //                if(!err) {
-                //                    alert('Your password has been change. Sign in again please');
-                //                    //browserHistory.push('/')
-                //                } else {
-                //                    console.log(err);
-                //                }
-                //            })
-                //        })
-                //    });
-                //}
                 delete _сurrentState._id
                 Meteor.users.update(_id, {$set: _сurrentState}, false, (err, result) => {
                     if(err) {
@@ -83,7 +89,6 @@ class UserProfile extends React.Component {
                                 return false
                             }
                             _objToSend = { targetId: _id, newPassword: _newValue }
-                            console.log(_objToSend)
                             Meteor.call('setNewPassword', _objToSend, (err, result) => {
                                 if(!err) {
                                     alert('Your password has been change. Sign in again please')
@@ -114,59 +119,74 @@ class UserProfile extends React.Component {
         let editAble = (!this.state.editAble) ? 'disabled' : false;
         let { username, emails, profile } = this.state.user || '',
             email = (emails) ? emails[0].address : '';
-        let { userType, name, birthDate, phone, address } = (profile) ? profile : '';
+        let { userType, name, birthDate, phone, address, _images } = (profile) ? profile : '';
+        let { imgId, imgLicense } = _images || ''
         return (
             <div>
                 <div className='panel panel-default'>
                     <div className='panel-heading'>
-                        <h4>{username} / {name}</h4>
+                        <h4>Customer / {name}</h4>
                         <input type='button' name='editButton' className='btn btn-primary p-x-1' value='Edit' onClick={this.handlerButtonsEdit} />
                         <input type='button' name='saveButton' className='btn btn-primary p-x-1 m-x-1' ref={(ref) => this.refButtonSave = ref} value='Save' disabled={editAble} />
                     </div>
                     <div className='col-xs-6 panel-body'>
                         <form className='form-horizontal text-left edit-user-form' ref={(ref) => {this.refFormEdit = ref}} >
                             <div className='form-group'>
-                                <label htmlFor='username' className='control-label col-xs-2'>User Name</label>
-                                <div className='col-xs-10'>
+                                <label htmlFor='username' className='col-xs-4'>User Name</label>
+                                <div className='col-xs-8'>
                                     <input type='text' id='username' className='form-control' value={username} disabled />
                                 </div>
                             </div><br />
                             <div className='form-group'>
-                                <label htmlFor='name' className='control-label col-xs-2'>Name</label>
-                                <div className='col-xs-10'>
+                                <label htmlFor='name' className='col-xs-4'>Name</label>
+                                <div className='col-xs-8'>
                                     <input type='text' id='name' className='form-control' value={name} disabled={editAble} />
                                 </div>
                             </div><br />
                             <div className='form-group'>
-                                <label htmlFor='email' className='control-label col-xs-2'>Email</label>
-                                <div className='col-xs-10'>
+                                <label htmlFor='email' className='col-xs-4'>Email</label>
+                                <div className='col-xs-8'>
                                     <input type='email' id='email' className='form-control' value={email} disabled={editAble}  />
                                 </div>
                             </div><br />
                             <div className='form-group'>
-                                <label htmlFor='phone' className='control-label col-xs-2'>Phone Number</label>
-                                <div className='col-xs-10'>
+                                <label htmlFor='phone' className='col-xs-4'>Phone Number</label>
+                                <div className='col-xs-8'>
                                     <input type='text' id='phone' className='form-control' value={phone} disabled={editAble}  />
                                 </div>
                             </div><br />
                             <div className='form-group'>
-                                <label htmlFor='address' className='control-label col-xs-2'>Address</label>
-                                <div className='col-xs-10'>
+                                <label htmlFor='address' className='col-xs-4'>Address</label>
+                                <div className='col-xs-8'>
                                     <input type='text' id='address' className='form-control' value={address} disabled={editAble} />
                                 </div>
                             </div><br />
                             <div className='form-group'>
-                                <label htmlFor='password' className='control-label col-xs-2'>Password</label>
-                                <div className='col-xs-10'>
+                                <label htmlFor='password' className='col-xs-4'>Password</label>
+                                <div className='col-xs-8'>
                                     <input type='password' id='password' className='form-control' disabled={editAble}  />
                                 </div>
-                            </div><br />
+                            </div>
                             <div className='form-group'>
-                                <label htmlFor='repeat_password' className='control-label col-xs-2'>Repeat password</label>
-                                <div className='col-xs-10'>
+                                <label htmlFor='repeat_password' className='col-xs-4'>Repeat password</label>
+                                <div className='col-xs-8'>
                                     <input type='password' id='repeat_password' className='form-control' disabled={editAble}  />
                                 </div>
-                            </div><br />
+                            </div>
+                            <div className='form-group'>
+                                <label htmlFor='imgId' className='col-xs-4'>Image ID</label>
+                                <div className='col-xs-8'>
+                                    <img src={imgId} />
+                                    <input type='file' id='imgId' className='form-control' accept='image/*' disabled={editAble} />
+                                </div>                                
+                            </div>
+                            <div className='form-group'>
+                                <label htmlFor='imgLicense' className='col-xs-4'>Image License</label>
+                                <div className='col-xs-8'>
+                                    <img src={imgLicense} />
+                                    <input type='file' id='imgLicense' className='form-control' accept='image/*' disabled={editAble} />
+                                </div>                                
+                            </div>                            
                         </form>
                     </div>
                 </div>

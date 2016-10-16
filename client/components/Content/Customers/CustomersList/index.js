@@ -58,9 +58,18 @@ class CustomersList extends React.Component {
                 break
             case 'remover-users':
                 arrForRemove.map(elem => {
-                    Meteor.users.remove({_id: elem})                    
+                    Meteor.call('removeAllUserData', elem, (err) => {
+                        if(err) {
+                            console.log(err)
+                        }
+                    })                    
                 })
-                this.setState({stateForRemove: []})                
+                if(arrForRemove.length >= this.state.maxPage) {
+                    this.setState({stateForRemove: [], currentPage: this.state.currentPage - 1})   
+                } else {
+                    this.setState({stateForRemove: []})
+                }
+                                
                 break
             default: break
         }
@@ -107,7 +116,7 @@ class CustomersList extends React.Component {
                     </tbody>
                 </table>
                 <input type='button' className='btn btn-danger' name='remover-users' value='Delete users' onClick={this.handlerDeleteCustomer} />
-                <input type='button' className='btn btn-success m-x-1' name='add-user' value='Add user' onClick={() => {let _new = 'new'; browserHistory.push(`/customer/${_new}`)}} />
+                <input type='button' className='btn btn-success m-x-1' name='add-user' value='Add user' onClick={() => {let _new = 'new'; browserHistory.push(`/managePanel/customer/${_new}`)}} />
                 {(this.state.maxPage > 1) ? <div className='text-center'>
                     <Pagination num={this.state.maxPage} handlerPagination={this.handlerPagination} key={Math.random()} />
                 </div> : ''}                

@@ -1,4 +1,7 @@
 /* Toggle Styles */
+#main_container {
+    position: relative;
+}
 
 #wrapper {
     padding-left: 0;
@@ -44,9 +47,15 @@
 
 /* Sidebar Styles */
 
+#sidebar-wrapper {
+    position: absolute;
+    background: #eeeeee ;
+    overflow: hidden;
+    height: 25em;
+}
 .sidebar-nav {
     position: absolute;
-    top: 0;
+    display: block;
     width: 250px;
     margin: 0;
     padding: 0;
@@ -61,13 +70,13 @@
 .sidebar-nav li a {
     display: block;
     text-decoration: none;
-    color: #999999;
+    color: #090909 ;
 }
 
 .sidebar-nav li a:hover {
     text-decoration: none;
-    color: #fff;
-    background: rgba(255,255,255,0.2);
+    color: #000;
+    background: rgba(155,255,255,0.2);
 }
 
 .sidebar-nav li a:active,
@@ -125,15 +134,36 @@
 .content {
     margin-left: 260px;
 }
+.m-x-0 {
+    margin-left: 0;
+    margin-right: 0;
+}
 .m-x-1 {
     margin: 0 10px;
 }
-
+.m-x-2 {
+    margin: 0 20px;
+}
+.m-x-3 {
+    margin: 0 30px;
+}
 .m-l-1 {
-    margin: 10px;
+    margin-left: 10px;
+}
+.m-l-2 {
+    margin-left: 20px;
+}
+.m-l-3 {
+    margin-left: 30px;
 }
 .m-r-1 {
-    margin: 10px;
+    margin-right: 10px;
+}
+.m-r-2 {
+    margin-right: 20px;
+}
+.m-r-3 {
+    margin-right: 30px;
 }
 .m-y-1 {
     margin: 10px 0;
@@ -152,6 +182,15 @@
 }
 .m-t-3 {
     margin-top: 30px;
+}
+.p-l-1 {
+    padding-left: 10px;
+}
+.p-l-2 {
+    padding-left: 20px;
+}
+.p-l-3 {
+    padding-left: 30px;
 }
 .p-x-1 {
     padding: 0 10px;
