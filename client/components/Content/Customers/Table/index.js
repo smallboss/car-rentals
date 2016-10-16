@@ -158,8 +158,10 @@ class Table extends React.Component {
                             <th className='col-xs-1'>#</th>
                             {_stateToTh.map(prop => {
                                 if(prop != '_id' && prop != '_toedit' && prop !== 'customerId') {
+                                    let replaceProp = prop.replace( /([A-Z])/g, (l) => {return ' ' + l.toUpperCase()}  )
+                                    replaceProp = replaceProp.charAt(0).toUpperCase() + replaceProp.slice(1)
                                     return (
-                                        <th key={Math.random()}>{prop}</th>
+                                        <th key={Math.random()}>{replaceProp}</th>
                                     )   
                                 }
                                 if(this.props.currentComponent == 'payments' && prop == '_id') {
@@ -207,10 +209,14 @@ class Table extends React.Component {
                                                 let _typeInput = (val.indexOf('date') != -1) ? 'date' : 'text'
                                                 if(elem._toedit) {
                                                     if(val == 'status') {
+                                                        let selectOpen = (elem.status == 'open') ? true : false //not use defaultValue instead selected because defaultValue not boolean value
+                                                        let selectClose = (elem.status == 'close') ? true : false //not use defaultValue instead selected because defaultValue not boolean value
                                                         return (
                                                             <td key={Math.random()} width='100'>
-                                                                <datalist id='statusList'><option value='open' /><option value='close' /></datalist>
-                                                                <input list='statusList' className='form-control' name='status' defaultValue={elem[val]} onChange={(e) => {this.handlerInputs(elem._id._str, e)}} />
+                                                                <select name='status' className='form-control' onChange={(e) => {this.handlerInputs(elem._id._str, e)}}>
+                                                                    <option value='open' selected={selectOpen}>Open</option>
+                                                                    <option value='close' selected={selectClose}>Close</option> 
+                                                                </select>
                                                             </td>
                                                         )
                                                     }

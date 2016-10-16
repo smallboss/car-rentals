@@ -26,8 +26,10 @@ class TableForUser extends React.Component {
                         <tr>
                             {_stateToTh.map(prop => {
                                 if(prop != '_id' && prop != '_toedit' && prop !== 'customerId') {
+                                    let replaceProp = prop.replace( /([A-Z])/g, (l) => {return ' ' + l.toUpperCase()}  )
+                                    replaceProp = replaceProp.charAt(0).toUpperCase() + replaceProp.slice(1)
                                     return (
-                                        <th key={Math.random()}>{prop}</th>
+                                        <th key={Math.random()}>{replaceProp}</th>
                                     )   
                                 }                                
                             }) }                            
