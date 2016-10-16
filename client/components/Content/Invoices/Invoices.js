@@ -5,6 +5,7 @@ import { createContainer } from 'meteor/react-meteor-data';
 
 import { ApiInvoices } from '/imports/api/invoices.js';
 import { ApiUsers } from '/imports/api/customers'
+import { ApiLines } from '/imports/api/lines.js';
 import InvoiceRow from './InvoiceRow.js';
 import HeadList from './HeadList.js';
 
@@ -55,7 +56,7 @@ class Invoices extends Component {
 
 
   addInvoice() {
-    browserHistory.push(`/invoices/new`);
+    browserHistory.push(`/managePanel/invoices/new`);
   }
 
 
@@ -120,7 +121,7 @@ class Invoices extends Component {
 
 
   handleInvoiceSingleOnClick(invoiceId) {
-    browserHistory.push(`/invoices/${invoiceId}`);
+    browserHistory.push(`/managePanel/invoices/${invoiceId}`);
     // this.context.router.push(`/payments/${paymentId}`)
   }
 
@@ -191,6 +192,7 @@ export default createContainer(() => {
   Meteor.subscribe('invoices');
   Meteor.subscribe('users');
   Meteor.subscribe('yearwrite');
+  Meteor.subscribe('lines');
 
   return {
     invoices: ApiInvoices.find().fetch(),

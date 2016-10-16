@@ -5,7 +5,7 @@ export default class HeadList extends Component {
         super(props);
 
         this.state = {
-            listName: "Payments",
+            listName: "Cars Report",
             searchField: "",
             disableRemove: true
         }
@@ -72,27 +72,46 @@ export default class HeadList extends Component {
             return rightArrow;
         }
 
-        return (
-            <div className="headList">
-                <div className="col-xs-6 left-headList">
-                    <h2>{this.state.listName}</h2>
-
+        const renderButtons = () => {
+            if (this.props.isReport) {
+                return (
+                    <div className="btn-box">
+                        <button 
+                            onClick={this.props.onReportCars} 
+                            ref={(ref) => this.buttonRemove = ref}
+                            className='btn btn-success' >
+                            Export to Excel
+                        </button>
+                    </div>
+                )
+            } else {
+                return (
                     <div className="btn-box">
                         <button onClick={this.props.onAddNew} className='btn btn-success m-x-1'>Add New</button>
                         <button 
-                            onClick={this.props.onRemovePayments} 
+                            onClick={this.props.onRemoveCars} 
                             ref={(ref) => this.buttonRemove = ref}
                             className='btn btn-danger' >
                             Delete
                         </button>
                     </div>
+                )
+            }
+
+        }
+
+        return (
+            <div className="headList">
+                <div className="col-xs-6 left-headList">
+                    <h2>{this.state.listName}</h2>
+
+                    { renderButtons() }
                 </div>
 
-                <div className="col-xs-6 right-headList">                    
+                <div className="col-xs-6 right-headList">
                     <input type="text" className='form-control' placeholder='Search' onChange={ (e) => this.props.onChangeSearchField(e.target.value) } />
-                    
-
                 </div>
+                
                 <div className='col-xs-12'>
                     <div className="navBox">
                         <span className="pages">

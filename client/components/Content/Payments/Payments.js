@@ -56,11 +56,13 @@ class Payments extends Component {
 
 
   addPayment() {
-    browserHistory.push(`/payments/new`);
+    browserHistory.push(`/managePanel/payments/new`);
   }
 
 
   removePayments() {
+    
+
     this.state.selectedPaymentsID.map((paymentID) => {
       ApiPayments.remove(new Mongo.ObjectID(paymentID));
     })
@@ -121,7 +123,7 @@ class Payments extends Component {
 
 
   handlePaymentSingleOnClick(paymentId) {
-    browserHistory.push(`/payments/${paymentId}`);
+    browserHistory.push(`/managePanel/payments/${paymentId}`);
     // this.context.router.push(`/payments/${paymentId}`)
   }
 

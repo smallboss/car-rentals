@@ -7,7 +7,9 @@ import { ApiUsers } from '/imports/api/users'
 import { ApiContracts } from '/imports/api/contracts'
 import { ApiYearWrite } from '/imports/api/yearWrite.js';
 import LinesOnTab from './LinesOnTab/LinesOnTab.js';
+import InvSettings from './InvSettings.js';
 import HeadSingle from './HeadSingle.js';
+import TopDetailsTable from './TopDetailsTable.js';
 import { browserHistory } from 'react-router';
 import React, { Component } from 'react';
 import { clone, cloneDeep, reverse, concat } from 'lodash';
@@ -46,9 +48,31 @@ export default class ContractSingle extends Component {
     this.handleEdit = this.handleEdit.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
     this.handleSendByEmail = this.handleSendByEmail.bind(this);
+
+    this.onChangeGenAuto = this.onChangeGenAuto.bind(this);
+    this.onChangeRepeatPeriod = this.onChangeRepeatPeriod.bind(this);
+    this.onChangeRepeatNumb = this.onChangeRepeatNumb.bind(this);
+
   }
 
 // ====================== ON CHANGE ======================
+  onChangeGenAuto(checked) {
+    console.log(checked);
+    let newContract = this.state.dispContract;
+    newContract.genAuto = checked;
+    this.setState({dispContract: newContract});
+  }
+  onChangeRepeatPeriod(value) {
+    let newContract = this.state.dispContract;
+    newContract.repeatPeriod = value;
+    this.setState({dispContract: newContract});
+  }
+  onChangeRepeatNumb(value) {
+    let newContract = this.state.dispContract;
+    newContract.repeatNumb = value;
+    this.setState({dispContract: newContract});
+  }
+
   onChangeTitle(value) {
     let newContract = this.state.dispContract;
     newContract.title = value;
@@ -115,7 +139,7 @@ export default class ContractSingle extends Component {
 
     const allowSave = this.state.editable 
                             ? this.state.allowSave 
-                            : (c.customerId && c.managerId);
+                            : (c && c.customerId && c.managerId);
 
     c = nextProps.contract;
 
@@ -175,7 +199,7 @@ export default class ContractSingle extends Component {
 
 
     Meteor.users.update({_id: newContract.contractId}, {$addToSet: { "profile.contracts": contractId}});
-    if (this.state.isNew) browserHistory.push(`/contracts/${contractId}`);
+    if (this.state.isNew) browserHistory.push(`/managePanel/contracts/${contractId}`);
     this.setState({contract: newContract, dispContract: newContract, editable: false, isNew: false});
   }
 
@@ -188,7 +212,7 @@ export default class ContractSingle extends Component {
   }
 
   handleDelete() {
-    browserHistory.push('/contracts');
+    browserHistory.push('/managePanel/contracts');
 
     // Meteor.users.update({_id: this.state.payment.customerId}, {$pull: { "profile.payments": this.state.payment._id}});
     ApiContracts.remove(this.state.contract._id);
@@ -196,6 +220,10 @@ export default class ContractSingle extends Component {
 
   handleSendByEmail(){
     console.log('SEND BY EMAIL >>>>')
+  }
+
+  componentWillMount() {
+    this.inputGenAuto = {};
   }
 
 
@@ -207,6 +235,9 @@ export default class ContractSingle extends Component {
     const allowSave = (this.props.contract) 
                             ? (this.props.contract.customerId && this.props.contract.managerId)
                             : undefined;
+
+
+    this.inputGenAuto.checked = this.state.contract ? this.state.contract.genAuto : false;
 
     this.setState({allowSave});
   }
@@ -434,7 +465,7 @@ export default class ContractSingle extends Component {
                   const custId = this.state.editable ? this.state.dispContract.customerId : customerId;
                   const custName = Meteor.users.findOne(custId) ? (Meteor.users.findOne(custId).profile.name + " profile") : '';
 
-                  return <Link to={`/customer/${custId}`}>{`${custName}`}</Link>
+                  return <Link to={`/managePanel/customer/${custId}`}>{`${custName}`}</Link>
                 })()}
               </div>
               <div className="form-group profit col-xs-6">
@@ -451,7 +482,7 @@ export default class ContractSingle extends Component {
                   const manId = this.state.editable ? this.state.dispContract.managerId : managerId;
                   const manName = Meteor.users.findOne(manId) ? (Meteor.users.findOne(manId).profile.name + " profile") : '';
 
-                  return <Link to={`/customer/${manId}`}>{`${manName}`}</Link>
+                  return <Link to={`/managePanel/customer/${manId}`}>{`${manName}`}</Link>
                 })()}
               </div>
               <div className="form-group profit col-xs-6">
@@ -502,6 +533,23 @@ export default class ContractSingle extends Component {
             </ul>
             <div className="tab-content">
               <div role="tabpanel" className="tab-pane p-x-1 active" id="details">
+                <TopDetailsTable />
+
+                <h3>Invoicing settings</h3>
+                {(() => {
+                  if (this.state.editable)
+                    return <InvSettings 
+                                onChangeGenAuto={this.onChangeGenAuto}
+                                onChangeRepeatPeriod={this.onChangeRepeatPeriod}
+                                onChangeRepeatNumb={this.onChangeRepeatNumb}
+                                contract={this.state.dispContract} 
+                                editable={this.state.editable}/>
+                  else 
+                    return <InvSettings
+                                contract={this.state.contract} 
+                                editable={this.state.editable}/>
+                })()}
+
                 <h3>Invoice lines</h3>
                 { renderInvoiceLinesTable() }
               </div>

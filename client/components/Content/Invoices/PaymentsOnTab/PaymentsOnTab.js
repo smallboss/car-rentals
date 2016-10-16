@@ -4,6 +4,7 @@ import { createContainer } from 'meteor/react-meteor-data'
 
 import { ApiPayments } from '/imports/api/payments.js';
 import { ApiInvoices } from '/imports/api/invoices.js';
+import { ApiYearWrite } from '/imports/api/yearWrite';
 import TableHeadButtons from './TableHeadButtons.js';
 import PaymentTabRow from './PaymentTabRow.js';
 
@@ -47,12 +48,53 @@ export default class PaymentsOnTab extends Component {
 // ====================== ADD = EDIT = REMOVE = SAVE ======================
     handleAddNewPayment(){
         const paymentId = new Mongo.ObjectID();
-        ApiPayments.insert({_id: paymentId, customerId: this.props.invoice.customerId});
-        ApiInvoices.update(this.props.invoice._id, {$push: { paymentsId: paymentId }});
-        Meteor.users.update({_id: this.props.invoice.customerId}, {$push: { "profile.payments": paymentId}});
+        
 
         let selectedListId = this.state.selectedListId;
         selectedListId.push(paymentId)
+
+
+        /////
+
+      let yearWrite = ApiYearWrite.findOne({year: '2016'});
+      let paymentsNumb = '1';
+
+      if (yearWrite) {
+        if(!yearWrite.paymentsNumb) yearWrite.paymentsNumb = '0';
+        yearWrite.paymentsNumb = ''+(parseInt(yearWrite.paymentsNumb)+1);
+        paymentsNumb = parseInt(yearWrite.paymentsNumb);
+      } else {
+        yearWrite = {
+            _id: new Mongo.ObjectID(),
+            paymentsNumb: paymentsNumb
+        };
+        
+        ApiYearWrite.insert({
+            _id: yearWrite._id, 
+            year: ''+(new Date()).getFullYear()
+        });
+      }
+
+      if (yearWrite.paymentsNumb.length == 1)
+        paymentsNumb = '00'+paymentsNumb;
+      else if (yearWrite.paymentsNumb.length <= 2)
+          paymentsNumb = '0'+paymentsNumb;
+          else paymentsNumb = ''+paymentsNumb;
+
+      let codeName = `PAY/${(new Date()).getFullYear()}/${paymentsNumb}`;
+
+      ApiPayments.update(paymentId, {$set: { codeName }});
+
+      paymentsNumb = ''+parseInt(paymentsNumb);
+      ApiYearWrite.update({_id: yearWrite._id }, {$set: { paymentsNumb }});
+
+
+
+        ApiPayments.insert({_id: paymentId, customerId: this.props.invoice.customerId, codeName});
+        ApiInvoices.update(this.props.invoice._id, {$push: { paymentsId: paymentId }});
+        Meteor.users.update({_id: this.props.invoice.customerId}, {$push: { "profile.payments": paymentId}});
+    
+        /////
 
         this.setState({ selectedListId, isEdit: true });
     }
@@ -156,6 +198,7 @@ PaymentsOnTab.contextTypes = {
 
 export default createContainer(() => {
   Meteor.subscribe('payments');
+  Meteor.subscribe('yearwrite');
 
   return {
     payments: ApiPayments.find().fetch()

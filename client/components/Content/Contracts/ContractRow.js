@@ -29,7 +29,7 @@ export default class ContractRow extends Component {
                 </th>
                 <td onClick={onClick} >{ item.title }</td>
                 <td>
-                    <Link to={`/customer/${item.customerId}`}>{ customerName ? customerName.username : ''}</Link>
+                    <Link to={`/managePanel/customer/${item.customerId}`}>{ customerName ? customerName.username : ''}</Link>
                 </td>
                 <td onClick={onClick} >{ item.codeName }</td>
                 <td onClick={onClick} >{ 'last invoice' }</td>
@@ -38,7 +38,7 @@ export default class ContractRow extends Component {
                 <td onClick={onClick} >{ item.endDate }</td>
                 <td onClick={onClick} >{ item.status }</td>
                 <td>
-                    <Link to={`/customer/${item.managerId}`}>{ managerName ? managerName.username : ''}</Link>
+                    <Link to={`/managePanel/customer/${item.managerId}`}>{ managerName ? managerName.username : ''}</Link>
                 </td>
             </tr>
         )

@@ -56,7 +56,7 @@ class Contracts extends Component {
 
 
   addContract() {
-    browserHistory.push(`/contracts/new`);
+    browserHistory.push(`/managePanel/contracts/new`);
   }
 
 
@@ -132,7 +132,7 @@ class Contracts extends Component {
 
 
   handleClickOnRow(itemId) {
-    browserHistory.push(`/contracts/${itemId}`);
+    browserHistory.push(`/managePanel/contracts/${itemId}`);
     // this.context.router.push(`/payments/${paymentId}`)
   }
 

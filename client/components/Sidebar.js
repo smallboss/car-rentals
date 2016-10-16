@@ -20,7 +20,7 @@ const backEndMenu = <ul className="sidebar-nav">
     <a type="button" data-toggle="dropdown">Reports
       <span className="caret"></span></a>
     <ul className="dropdown-menu">
-      <li><a href="#">Cars</a></li>
+      <li><Link to="/managePanel/cars_report">Cars</Link></li>
     </ul>
   </li>
   <li className="dropdown">
@@ -74,9 +74,9 @@ class Sidebar extends Component {
             <ul className='sidebar-nav p-l-3'>
               <li><Link to='/user_profile' className='navbar-link'>Profile</Link></li>
               <li><Link to='/user_profile/history'>Rental History</Link></li>
-              <li><Link to='/user_profile/payments'>Payments</Link></li>
-              <li><Link to='/user_profile/contracts'>Contracts</Link></li>
-              <li><Link to='/user_profile/invoices'>Invoices</Link></li>
+              <li><Link to='/managePanel/payments'>Payments</Link></li>
+              <li><Link to='/managePanel/contracts'>Contracts</Link></li>
+              <li><Link to='/managePanel/invoices'>Invoices</Link></li>
               {adminPart}
             </ul>
           </div>

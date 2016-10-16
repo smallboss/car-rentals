@@ -159,7 +159,7 @@ export default class InvoiceSingle extends Component {
 
 
     Meteor.users.update({_id: newInvoice.customerId}, {$addToSet: { "profile.invoices": invoiceId}});
-    if (this.state.isNew) browserHistory.push(`/invoices/${invoiceId}`);
+    if (this.state.isNew) browserHistory.push(`/managePanel/invoices/${invoiceId}`);
     this.setState({invoice: newInvoice, dispInvoice: newInvoice, editable: false, isNew: false});
   }
 
@@ -172,13 +172,16 @@ export default class InvoiceSingle extends Component {
   }
 
   handleDelete() {
-    browserHistory.push('/invoices');
+    browserHistory.push('/managePanel/invoices');
 
     map(newInvoice.paymentsId, (el) => {
       Meteor.users.update({_id: this.state.invoice.customerId}, {$pull: { "profile.payments": el}});
       ApiPayments.remove({_id: el});
     })
 
+
+    ApiContracts.update({_id: this.state.invoice.customerId}, {$pull: { "profile.paymentsId": this.state.invoice._id}});
+    Meteor.users.update({_id: this.state.invoice.customerId}, {$pull: { "profile.payments": this.state.invoice._id}});
     ApiInvoices.remove(this.state.invoice._id);
   }
 
@@ -199,8 +202,6 @@ export default class InvoiceSingle extends Component {
 
 
   render() {
-
-    console.log(this.state.invoice);
     
     const renderHeadSingle = () => {
       return (
@@ -281,7 +282,7 @@ export default class InvoiceSingle extends Component {
                   const custId = this.state.editable ? this.state.dispInvoice.customerId : customerId;
                   const custName = Meteor.users.findOne(custId) ? (Meteor.users.findOne(custId).profile.name + ' propfile') : '';
 
-                  return (<Link to={`/customer/${custId}`}>{custName}</Link>);
+                  return (<Link to={`/managePanel/customer/${custId}`}>{custName}</Link>);
                 })()}
               </div>
               { /* END ============================= DROPDOWN CUSTOMERS ============================== */}
@@ -439,8 +440,6 @@ export default createContainer(({params}) => {
   let isNew = false;
   let invoiceId = params.invoiceId;
   let invoice = {};
-
-  console.log('invoiceId', invoiceId);
 
   if (params.invoiceId.indexOf('new') === 0) {
     isNew = true;

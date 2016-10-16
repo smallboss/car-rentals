@@ -5,6 +5,7 @@ import { createContainer } from 'meteor/react-meteor-data'
 import { ApiPayments } from '/imports/api/payments.js'
 import { ApiUsers } from '/imports/api/users'
 import { ApiYearWrite } from '/imports/api/yearWrite'
+import { ApiInvoices } from '/imports/api/invoices'
 import HeadSingle from './HeadSingle.js';
 import { browserHistory } from 'react-router';
 import React, { Component } from 'react';
@@ -80,8 +81,6 @@ export default class PaymentSingle extends Component {
   }
 // END ================== ON CHANGE ======================
 
-
-
   componentWillReceiveProps(nextProps) {
     let c = nextProps.payment;
 
@@ -151,6 +150,9 @@ export default class PaymentSingle extends Component {
       paymentId = newPayment._id;
       delete newPayment._id;
       ApiPayments.update(paymentId, {$set: newPayment});
+      if (newPayment.customerId != this.state.payment.customerId) {
+        Meteor.users.update({_id: this.state.payment.customerId}, {$pull: { "profile.payments": paymentId}});        
+      }
     }
 
     Meteor.users.update({_id: newPayment.customerId}, {$addToSet: { "profile.payments": paymentId}});
@@ -168,6 +170,10 @@ export default class PaymentSingle extends Component {
 
   handleDelete() {
     browserHistory.push('/payments');
+
+    const invoice = ApiInvoices.findOne({paymentsId: this.state.payment._id});
+    
+    if (invoice) ApiInvoices.update({_id: invoice._id}, {$pull: { paymentsId: this.state.payment._id}});
 
     Meteor.users.update({_id: this.state.payment.customerId}, {$pull: { "profile.payments": this.state.payment._id}});
     ApiPayments.remove(this.state.payment._id);
@@ -345,7 +351,7 @@ export default class PaymentSingle extends Component {
                   const custId = this.state.editable ? this.state.dispPayment.customerId : customerId;
                   const custName = Meteor.users.findOne(custId) ? (Meteor.users.findOne(custId).profile.name + " profile") : '';
 
-                  return (<Link to={`/customer/${custId}`}>{custName}</Link>);
+                  return (<Link to={`/managePanel/customer/${custId}`}>{custName}</Link>);
                 })()}
               </div>
             </div>
@@ -406,6 +412,7 @@ export default class PaymentSingle extends Component {
 
 export default createContainer(({params}) => {
   Meteor.subscribe('payments');
+  Meteor.subscribe('invoices');
   Meteor.subscribe('users');
   Meteor.subscribe('yearwrite');
 
