@@ -5,7 +5,6 @@ import React from 'react'
 
 class Home extends React.Component {
     handlerContact (e) {
-        console.log(e.target)
         e.preventDefault()
     }
     render () {

@@ -53,7 +53,7 @@ const _user = {
 class Customer extends React.Component {
     constructor (props) {
         super(props)
-        this.state = {customer: props.customer || _user, editAble: 0}
+        this.state = {customer: (this.props.params.id == 'new') ? _user : props.customer || _user, editAble: 0}
         this.handlerEditCustomer = this.handlerEditCustomer.bind(this)
         this.handlerChildState = this.handlerChildState.bind(this)
     }
@@ -78,6 +78,9 @@ class Customer extends React.Component {
         this.setState({customer: customer})
         this.forceUpdate()
     }
+    componentWillUnMount () {
+        this.setState({customer: {}})
+    }
     handlerNavUserEdit (e) {
         let li_s = $('.nav-user-edit li').removeClass('active-href-nav'),
             _target = $(this).data('target')
@@ -89,7 +92,7 @@ class Customer extends React.Component {
         let _confirm = confirm('Are You sure to delete this customer?')
         if(_confirm) {
             Meteor.call('removeAllUserData', id, (err) => {
-                browserHistory.push('/managePanel/customers_list')
+                browserHistory.push('/managePanel')
             })                        
         }
     }
@@ -171,12 +174,17 @@ class Customer extends React.Component {
                     _newState._id = new Mongo.ObjectID()
                     _newState.password = '123456'
                     _newState.profile.userType = 'customer'
+                    if(!_newState.username || !_newState.email) {
+                        alert('Need Username or Email')
+                        return false
+                    }
                     Meteor.call('createNewUser', _newState, (err, result) => {
                         if(err) {
                             alert(err.reason)
                         } else {
                             alert('Default user`s password is 123456')
                             _href = '/managePanel/customer/' + result
+                            this.setState({customers: _newState, editAble: 0})
                             browserHistory.push(_href)   
                         }                        
                     })
@@ -198,6 +206,9 @@ class Customer extends React.Component {
             //currentPayments = this.state.customer.profile.payments
         if(target == 'payments') {
             data.forEach(item => {
+                if(item._new) {
+                    return
+                }
                 _idPayment = new Mongo.ObjectID(item._id._str)
                 if(ApiPayments.findOne({_id: _idPayment})) {
                     delete item._id
@@ -280,7 +291,7 @@ class Customer extends React.Component {
                         <div className='col-xs-6'>
                             <label htmlFor='phone' className='col-xs-2'>Phone</label>
                             <div className='col-xs-8 form-horizontal'>
-                                <input type='text' id='phone' className='form-control' value={phone} disabled={editAble} />
+                                <input type='text' id='phone' className='form-control' maxLength='15' value={phone} disabled={editAble} />
                             </div>
                         </div>
                     </div>
