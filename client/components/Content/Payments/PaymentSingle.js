@@ -13,8 +13,8 @@ import { clone, cloneDeep, reverse } from 'lodash';
 
 import { paymentStateTypes } from '/imports/startup/typesList.js';
 
-
 import './paymentStyle.css'
+import '/client/main.css'
 
 
 export default class PaymentSingle extends Component {
@@ -224,7 +224,7 @@ export default class PaymentSingle extends Component {
             <div className="row">
 { /* ============================== DROPDOWN CUSTOMERS ============================== */}
               <div className="form-group profit col-xs-6">
-                <label htmlFor="paymentCustomerName" className='col-xs-2'>Customer Name</label>
+                <label htmlFor="paymentCustomerName" className='col-xs-3'>Customer Name</label>
                 {(() => {
                   if (this.state.editable) {
                     return (
@@ -261,7 +261,7 @@ export default class PaymentSingle extends Component {
                   }
 
                   return (
-                    <div className='col-xs-8'>
+                    <div className='col-xs-8 m-t-05'>
                       {(() => {
                         if (Meteor.users.findOne(customerId)) {
                           const profile = Meteor.users.findOne(customerId).profile;
@@ -276,7 +276,7 @@ export default class PaymentSingle extends Component {
 { /* END ============================= DROPDOWN CUSTOMERS ============================== */}
 
               <div className="form-group profit col-xs-6">
-                <label htmlFor="paymentDate" className='col-xs-2'>Date</label>
+                <label htmlFor="paymentDate" className='col-xs-3'>Date</label>
                 {(() => {
                   if (this.state.editable) {
                     return (
@@ -291,14 +291,14 @@ export default class PaymentSingle extends Component {
                     )
                   }
 
-                  return <div className='col-xs-8'>{date}</div>
+                  return <div className='col-xs-8 m-t-05'>{date}</div>
                 })()}
               </div>
             </div>
 
             <div className="row">
               <div className="form-group profit col-xs-6">
-                <label htmlFor="paymentStatus" className='col-xs-2'>Status</label>
+                <label htmlFor="paymentStatus" className='col-xs-3'>Status</label>
                 {(() => {
                   if (this.state.editable) {
                     return (
@@ -320,12 +320,12 @@ export default class PaymentSingle extends Component {
                     )
                   }
 
-                  return <div className='col-xs-8'>{status}</div>
+                  return <div className='col-xs-8 m-t-05'>{status}</div>
                 })()}
               </div>
               
               <div className="form-group name col-xs-6">
-                <label htmlFor="paymentAmount" className='col-xs-2'>Amount</label>
+                <label htmlFor="paymentAmount" className='col-xs-3'>Amount</label>
                 {(() => {
                   if (this.state.editable) {
                     return (
@@ -340,18 +340,18 @@ export default class PaymentSingle extends Component {
                     )
                   }
 
-                  return <div className='col-xs-8'>{amount}</div>
+                  return <div className='col-xs-8 m-t-05'>{amount}</div>
                 })()}
               </div>
             </div>
             <div className="row">
               <div className="form-group profit col-xs-6">
-                <label htmlFor="paymentRef" className='col-xs-2'>Ref.</label>
+                <label htmlFor="paymentRef" className='col-xs-3'>Ref.</label>
                 {(() => {
                   const custId = this.state.editable ? this.state.dispPayment.customerId : customerId;
                   const custName = Meteor.users.findOne(custId) ? (Meteor.users.findOne(custId).profile.name + " profile") : '';
 
-                  return (<Link to={`/managePanel/customer/${custId}`}>{custName}</Link>);
+                  return (<Link to={`/managePanel/customer/${custId}`} className="col-xs-12">{custName}</Link>);
                 })()}
               </div>
             </div>

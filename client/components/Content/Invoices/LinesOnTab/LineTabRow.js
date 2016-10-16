@@ -56,7 +56,15 @@ export default class LineTabRow extends Component {
     }
     onChangeAmount(value){
         let newLine = this.state.dispLine;
-        newLine.amount = value;
+        value = (value!='' && isNaN(parseInt(value))) ? '0' : value;
+        let isDepr = false;
+
+        isDepr = ((parseInt(value) < 0) || 
+                  (value.indexOf('e') != -1) || 
+                  (value.indexOf('E') != -1) ||  
+                  (value.length > 5));
+
+        newLine.amount = isDepr ?  newLine.amount : value;
         this.setState({dispLine: newLine});
     }
 // END ================ CHANGERS FIELDS =============================
@@ -144,7 +152,7 @@ export default class LineTabRow extends Component {
             let carIdStr = line.car ? line.car._str : '';
 
             return (
-                <Link to={`/cars/${carIdStr}`}>
+                <Link to={`/managePanel/cars/${carIdStr}`}>
                     <span>{(line && car) ? car.plateNumber : ''}</span>
                 </Link>
             )
@@ -190,13 +198,15 @@ export default class LineTabRow extends Component {
         const showAmount = () => {
             if (this.state.isEdit){
                 return(
-                    <input  type="text"
+                    <input  type="number"
+                            min="0"
+                            max="99999"
                             value={dispLine.amount}
                             onChange={(e) => this.onChangeAmount(e.target.value)} />
                 )
             }
 
-            return <span>{line ? line.amount : ''}</span>
+            return <span>{(line && line.amount) ? line.amount : '0'}</span>
         }
 
 

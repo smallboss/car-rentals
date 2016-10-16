@@ -27,7 +27,6 @@ export default class InvoiceRow extends Component {
 
             if (item.linesId) {
                 item.linesId.map((el) => {
-                    console.log('el', el);
                     const amount = ApiLines.findOne({ _id: el }).amount;
                     totalAmount += parseInt(amount ? amount : 0);
                 })
