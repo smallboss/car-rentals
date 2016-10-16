@@ -9,9 +9,7 @@
 }
 .nav-justified a {
     font-size: 1.2em;
-    color: black;
 }
-.nav-justified a:hover {
+.nav-justified li a:hover {
     background: #abb4cc;
-    color: #abb4cc;
 }

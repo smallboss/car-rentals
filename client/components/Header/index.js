@@ -8,12 +8,12 @@ export default class Header extends Component {
   render() {
     return (
       <nav className='row navbar header-nav'>
-          <div className='col-xs-2'>
+          <div className='col-xs-3'>
               <div className='navbar-header'>
                   <Link className='navbar-brand m-x-2' to='/'>Cars Rentals</Link>
               </div>
           </div>
-          <div className='col-xs-7'>
+          <div className='col-xs-6'>
               <NavBar />
           </div>
           <div className='col-xs-3'>
