@@ -176,16 +176,18 @@ class Customer extends React.Component {
                     _newState.profile.userType = 'customer'
                     if(!_newState.username || !_newState.email) {
                         alert('Need Username or Email')
-                        return false
+                        break
                     }
                     Meteor.call('createNewUser', _newState, (err, result) => {
                         if(err) {
                             alert(err.reason)
+                            location.reload()
                         } else {
                             alert('Default user`s password is 123456')
                             _href = '/managePanel/customer/' + result
                             this.setState({customers: _newState, editAble: 0})
-                            browserHistory.push(_href)   
+                            browserHistory.push(_href)
+                            location.reload()
                         }                        
                     })
                     this.setState({customers: _newState, editAble: 0})

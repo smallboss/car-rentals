@@ -62,14 +62,9 @@ class CustomersList extends React.Component {
                         if(err) {
                             console.log(err)
                         }
-                    })                    
+                    })
                 })
-                if(arrForRemove.length >= this.state.maxPage) {
-                    this.setState({customers: this.props.customers, stateForRemove: [], currentPage: this.state.currentPage - 1})   
-                } else {
-                    this.setState({customers: this.props.customers, stateForRemove: []})
-                }
-                                
+                location.reload()                
                 break
             default: break
         }
