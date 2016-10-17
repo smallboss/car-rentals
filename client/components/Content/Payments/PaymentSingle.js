@@ -156,7 +156,7 @@ export default class PaymentSingle extends Component {
     }
 
     Meteor.users.update({_id: newPayment.customerId}, {$addToSet: { "profile.payments": paymentId}});
-    if (this.state.isNew) browserHistory.push(`/payments/${paymentId}`);
+    if (this.state.isNew) browserHistory.push(`/managePanel/payments/${paymentId}`);
     this.setState({payment: newPayment, dispPayment: newPayment, editable: false, isNew: false});
   }
 
@@ -169,7 +169,7 @@ export default class PaymentSingle extends Component {
   }
 
   handleDelete() {
-    browserHistory.push('/payments');
+    browserHistory.push('/managePanel/payments');
 
     const invoice = ApiInvoices.findOne({paymentsId: this.state.payment._id});
     
