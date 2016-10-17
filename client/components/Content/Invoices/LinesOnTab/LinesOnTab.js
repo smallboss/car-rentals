@@ -76,7 +76,8 @@ export default class LinesOnTab extends Component {
     }
 
     handleSaveLine(line){
-        const _id = clone(line._id);
+        console.log('line', line);
+        const _id = line._id;
         delete line._id;
 
         ApiLines.update(_id, {$set: line });
@@ -84,7 +85,9 @@ export default class LinesOnTab extends Component {
         let selectedListId = this.state.selectedListId;
         selectedListId.splice(selectedListId.indexOf(_id), 1);
 
-        this.setState({ selectedListId });
+        const isEdit = (selectedListId.length === 0) ? false : this.state.isEdit;
+
+        this.setState({ selectedListId, isEdit });
     }
 // END =================== ADD = EDIT = REMOVE = SAVE ======================
 
@@ -133,7 +136,8 @@ export default class LinesOnTab extends Component {
                                             <LineTabRow key={`line-${key}`}
                                                 onSelect={this.changeSelectedItem.bind(null,item)}
                                                 line={clone(ApiLines.findOne({_id: item}))}
-                                                onSave={this.handleSaveLine}
+                                                numbers={ this.props.lines ? this.props.lines.length : 0}
+                                                onSave={this.handleSaveLine.bind(null,item)}
                                                 selectedListId={this.state.selectedListId}
                                                 isEdit={this.state.isEdit}
                                                 cars={this.props.cars}

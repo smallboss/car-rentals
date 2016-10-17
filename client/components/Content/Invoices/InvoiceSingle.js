@@ -49,7 +49,11 @@ export default class InvoiceSingle extends Component {
   onChangeCustomer(value) {
     let newInvoice = this.state.dispInvoice;
     newInvoice.customerId = value;
-    this.setState({dispInvoice: newInvoice, allowSave: true});
+    const allowSave = this.state.dispInvoice.customerId ? true : false;
+    this.setState({ 
+        dispInvoice: newInvoice, 
+        allowSave: this.state.dispInvoice.customerId 
+    });
   }
   onChangeStatus(value) {
     let newInvoice = this.state.dispInvoice;

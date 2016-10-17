@@ -47,7 +47,10 @@ export default class PaymentSingle extends Component {
   onChangeCustomer(value) {
     let newPayment = this.state.dispPayment;
     newPayment.customerId = value;
-    this.setState({dispPayment: newPayment, allowSave: true});
+    this.setState({
+        dispPayment: newPayment, 
+        allowSave: this.state.dispPayment.customerId
+    });
   }
   onChangeAmount(value) {
     let newPayment = this.state.dispPayment;

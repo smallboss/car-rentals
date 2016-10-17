@@ -30,9 +30,17 @@ export default class LineTabRow extends Component {
 
         const isEdit = (isSelected && nextProps.isEdit) ? true : false;
 
-        console.log('ed', isSelected, isEdit, (this.state.dispLine ? this.state.dispLine.amount : ''));
+        if (isEdit)
+            console.log('ed', isSelected, isEdit, (this.state.dispLine ? this.state.dispLine.amount : ''));
 
         this.setState({dispLine, isEdit});
+    }
+
+    componentDidMount() {
+        if (this.state.isEdit != this.props.isEdit) {
+            // this.checkbox.checked = this.props.isEdit;
+            this.setState({isEdit: this.props.isEdit});
+        }
     }
 
 // ==================== CHANGERS FIELDS =============================
@@ -70,23 +78,9 @@ export default class LineTabRow extends Component {
         this.setState({dispLine: newLine});
     }
 
-    componentWillUpdate(nextProps, nextState) {
-        const nextLine = nextProps.line ? nextProps.line._id._str : '';
-        console.log('this.state.isEdit update', nextState.isEdit, nextState.dispLine ? nextState.dispLine.amount : '');
-        // if(find(nextProps.selectedListId, {_str: nextLine}) && nextState.isEdit != this.state.isEdit) {
-        //     this.setState({isEdit: nextState.isEdit});
-        // }
-    }
-
 // END ================ CHANGERS FIELDS =============================
 
     render(){
-
-        const nextLine = this.props.line ? this.props.line._id._str : '';
-        const isSelected = find(this.props.selectedListId, {_str: nextLine});
-        const isEdit = (isSelected && this.props.isEdit) ? true : false;
-
-        console.log('this.state.isEdit', this.state.isEdit, this.state.dispLine ? this.state.dispLine.amount : '');
         let line = this.props.line ? this.props.line : {};
         let dispLine = this.state.dispLine;
         const cars = this.props.cars ? this.props.cars : [];
