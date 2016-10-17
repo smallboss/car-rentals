@@ -378,7 +378,10 @@ export default class InvoiceSingle extends Component {
               {
                 <LinesOnTab 
                     invoice={cloneDeep(this.state.invoice)}
-                    linesId={ clone(this.state.invoice.linesId).reverse() }
+                    linesId={ clone(this.state.invoice.linesId 
+                                        ? this.state.invoice.linesId 
+                                        : []).reverse() 
+                            }
                     readOnly={!this.state.invoice.customerId}/>
               }
               </div>

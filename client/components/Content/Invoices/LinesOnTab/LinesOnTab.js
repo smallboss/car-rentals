@@ -42,14 +42,11 @@ export default class LinesOnTab extends Component {
         let isEdit = this.state.isEdit;
         isEdit = !selectedListId.length ? false : isEdit;
 
-        console.log('selectedListId', selectedListId);
-
         this.setState({selectedListId, isEdit});
     }
 
 // ====================== ADD = EDIT = REMOVE = SAVE ======================
     handleAddNewLine(){
-        console.log('now', now());
         // ApiLines.insert({_id: lineId, customerId: this.props.invoice.customerId, dateCreate: now()});
         const lineId = new Mongo.ObjectID();
 
@@ -75,14 +72,12 @@ export default class LinesOnTab extends Component {
             ApiLines.remove(itemId);
         })
 
-        this.setState({selectedListId: []});
+        this.setState({selectedListId: [], isEdit: false});
     }
 
     handleSaveLine(line){
         const _id = clone(line._id);
         delete line._id;
-
-        console.log('line', line)
 
         ApiLines.update(_id, {$set: line });
 

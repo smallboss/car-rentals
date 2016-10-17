@@ -95,7 +95,7 @@ export default class InvSettings extends Component {
                 })()*/}
               </div>
               <div className="form-group profit col-xs-12">
-                <Link to="/managePanel/invoices/new">Create invoices</Link>
+                <Link to="/managePanel/invoices/new" target="_blank">Create invoices</Link>
               </div>
               <div className="form-group profit col-xs-12">
                 <label htmlFor="generateAuto" className="col-xs-2">Repeat every</label>
