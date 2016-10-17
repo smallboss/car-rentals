@@ -16,8 +16,7 @@ import { clone, cloneDeep, reverse, concat } from 'lodash';
 
 import { contractStateTypes } from '/imports/startup/typesList.js';
 
-
-import './paymentStyle.css'
+import '/client/main.css'
 
 
 export default class ContractSingle extends Component {
@@ -275,7 +274,7 @@ export default class ContractSingle extends Component {
       const renderTitle = () => {
         if (this.state.editable) {
           return (
-            <div className='col-xs-10 form-horizontal'>
+            <div className='col-xs-9 form-horizontal'>
               <input
                 type="text"
                 id="contractTitle"
@@ -286,7 +285,7 @@ export default class ContractSingle extends Component {
           )
         }
 
-        return <div className='col-xs-10'>{title}</div>
+        return <div className='col-xs-10 m-t-05'>{title}</div>
       }
 
       const renderStartDate = () => {
@@ -303,7 +302,7 @@ export default class ContractSingle extends Component {
           )
         }
 
-        return <div className='col-xs-8'>{startDate}</div>
+        return <div className='col-xs-8 m-t-05'>{startDate}</div>
       }
 
       const renderEndDate = () => {
@@ -320,7 +319,7 @@ export default class ContractSingle extends Component {
           )
         }
 
-        return <div className='col-xs-8'>{endDate}</div>
+        return <div className='col-xs-8 m-t-05'>{endDate}</div>
       }
 
       const renderStatus = () => {
@@ -344,7 +343,7 @@ export default class ContractSingle extends Component {
           )
         }
 
-        return <div className='col-xs-8'>{status}</div>
+        return <div className='col-xs-8 m-t-05'>{status}</div>
       }
 
 
@@ -384,7 +383,7 @@ export default class ContractSingle extends Component {
         }
 
         return (
-          <div className='col-xs-8'>
+          <div className='col-xs-8 m-t-05'>
             {(() => {
               if (Meteor.users.findOne(customerId)) {
                 const profile = Meteor.users.findOne(customerId).profile;
@@ -433,7 +432,7 @@ export default class ContractSingle extends Component {
         }
 
         return (
-          <div className='col-xs-8'>
+          <div className='col-xs-8 m-t-05'>
             {(() => {
 
               if (Meteor.users.findOne(managerId)) {
@@ -452,47 +451,47 @@ export default class ContractSingle extends Component {
           <div className="topFields">
             <div className="row">
               <div className="form-group profit col-xs-12">
-                <label htmlFor="contractTitle" className='col-xs-2'><h4>Contract Title:</h4></label>
+                <label htmlFor="contractTitle" className='col-xs-3'><h4>Contract Title:</h4></label>
                 { renderTitle() }
               </div>
             </div>
             <div className="row">
               <div className="form-group profit col-xs-6">
-                <label htmlFor="contractCustomerName" className='col-xs-2'>Customer Name</label>
+                <label htmlFor="contractCustomerName" className='col-xs-3'>Customer Name</label>
                 { renderCustomer() }
 
                 {(() => {
                   const custId = this.state.editable ? this.state.dispContract.customerId : customerId;
                   const custName = Meteor.users.findOne(custId) ? (Meteor.users.findOne(custId).profile.name + " profile") : '';
 
-                  return <Link to={`/managePanel/customer/${custId}`}>{`${custName}`}</Link>
+                  return <Link to={`/managePanel/customer/${custId}`} className="col-xs-12">{`${custName}`}</Link>
                 })()}
               </div>
               <div className="form-group profit col-xs-6">
-                <label htmlFor="contractStartDate" className='col-xs-2'>Start Date</label>
+                <label htmlFor="contractStartDate" className='col-xs-3'>Start Date</label>
                 { renderStartDate() }
               </div>
             </div>
             <div className="row">
               <div className="form-group profit col-xs-6">
-                <label htmlFor="contractAccountManager" className='col-xs-2'>Account manager</label>
+                <label htmlFor="contractAccountManager" className='col-xs-3'>Account manager</label>
                 { renderManager() }
 
                 {(() => {
                   const manId = this.state.editable ? this.state.dispContract.managerId : managerId;
                   const manName = Meteor.users.findOne(manId) ? (Meteor.users.findOne(manId).profile.name + " profile") : '';
 
-                  return <Link to={`/managePanel/customer/${manId}`}>{`${manName}`}</Link>
+                  return <Link to={`/managePanel/customer/${manId}`} className="col-xs-12">{`${manName}`}</Link>
                 })()}
               </div>
               <div className="form-group profit col-xs-6">
-                <label htmlFor="contractEndDate" className='col-xs-2'>End Date</label>
+                <label htmlFor="contractEndDate" className='col-xs-3'>End Date</label>
                 { renderEndDate() }
               </div>
             </div>
             <div className="row">
               <div className="form-group profit col-xs-6 col-xs-push-6">
-                <label htmlFor="contractStatus" className='col-xs-2'>Status</label>
+                <label htmlFor="contractStatus" className='col-xs-3'>Status</label>
                 { renderStatus() }
               </div>
             </div>

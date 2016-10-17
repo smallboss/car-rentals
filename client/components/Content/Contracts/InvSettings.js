@@ -80,8 +80,10 @@ export default class InvSettings extends Component {
           <div className="invoicingSettings">
             <div className="row">
               <div className="form-group profit col-xs-12">
-                <label htmlFor="generateAuto">Generate recurring invoices automatically</label>
-                {(() => {
+                
+                {
+                    // <label htmlFor="generateAuto">Generate recurring invoices automatically</label>
+                /*(() => {
                     if (this.props.editable) {
                         return (
                             <input 
@@ -90,7 +92,7 @@ export default class InvSettings extends Component {
                         )
                     }
                     return  <input type="checkbox" ref={(ref) => this.inputGenAuto = ref} disabled/>
-                })()}
+                })()*/}
               </div>
               <div className="form-group profit col-xs-12">
                 <Link to="/managePanel/invoices/new">Create invoices</Link>
@@ -101,8 +103,10 @@ export default class InvSettings extends Component {
                 { renderRepeatReriod() }
               </div>
               <div className="form-group profit col-xs-12">
-                <label htmlFor="generateAuto">Date of the next invoice</label>
-                {(() => {
+                
+                {
+                    // <label htmlFor="generateAuto">Date of the next invoice</label>
+                /*(() => {
                     if (this.props.editable) {
                         <input 
                             type="date" 
@@ -110,7 +114,7 @@ export default class InvSettings extends Component {
                             value={this.props.contract.nextInvoice}/>
                     }
                     return  <div>{this.props.contract.nextInvoice}</div>
-                })}
+                })*/}
               </div>
             </div>
           </div>

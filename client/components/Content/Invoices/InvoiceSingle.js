@@ -17,6 +17,7 @@ import LinesOnTab from './LinesOnTab/LinesOnTab.js'
 import { invoiceStateTypes } from '/imports/startup/typesList.js';
 
 import './invoiceStyle.css'
+import '/client/main.css'
 
 
 export default class InvoiceSingle extends Component {
@@ -86,7 +87,9 @@ export default class InvoiceSingle extends Component {
       dataDispInvoice = clone(nextProps.invoice)
     }
     
-    const allowSave = this.state.editable ? this.state.allowSave : c.customerId;
+    const allowSave = this.state.editable 
+                            ? this.state.allowSave 
+                            : ( c ? c.customerId : false);
 
     c = nextProps.invoice;
 
@@ -230,7 +233,7 @@ export default class InvoiceSingle extends Component {
             <div className="row">
             { /* ============================== DROPDOWN CUSTOMERS ============================== */}
               <div className="form-group profit col-xs-6">
-                <label htmlFor="paymentCustomerName" className='col-xs-2'>Customer Name</label>
+                <label htmlFor="paymentCustomerName" className='col-xs-3'>Customer Name</label>
                 {(() => {
                   if (this.state.editable) {
                     return (
@@ -267,7 +270,7 @@ export default class InvoiceSingle extends Component {
                   }
 
                   return (
-                    <div className='col-xs-8'>
+                    <div className='col-xs-8 m-t-05'>
                       {(() => {
                         if (Meteor.users.findOne(customerId)) {
                           const profile = Meteor.users.findOne(customerId).profile;
@@ -282,12 +285,12 @@ export default class InvoiceSingle extends Component {
                   const custId = this.state.editable ? this.state.dispInvoice.customerId : customerId;
                   const custName = Meteor.users.findOne(custId) ? (Meteor.users.findOne(custId).profile.name + ' propfile') : '';
 
-                  return (<Link to={`/managePanel/customer/${custId}`}>{custName}</Link>);
+                  return (<Link to={`/managePanel/customer/${custId}`} className="col-xs-12">{custName}</Link>);
                 })()}
               </div>
               { /* END ============================= DROPDOWN CUSTOMERS ============================== */}
               <div className="form-group name col-xs-6">
-                <label htmlFor="invoiceDate" className='col-xs-2'>Invoice date</label>
+                <label htmlFor="invoiceDate" className='col-xs-3'>Invoice date</label>
                 {(() => {
                   if (this.state.editable) {
                     return (
@@ -302,14 +305,14 @@ export default class InvoiceSingle extends Component {
                     )
                   }
 
-                  return <div className='col-xs-8'>{date}</div>
+                  return <div className='col-xs-8 m-t-05'>{date}</div>
                 })()}
               </div>
             </div>
 
             <div className="row">
               <div className="form-group profit col-xs-6">
-                <label htmlFor="invoiceStatus" className='col-xs-2'>Status</label>
+                <label htmlFor="invoiceStatus" className='col-xs-3'>Status</label>
                 {(() => {
                   if (this.state.editable) {
                     return (
@@ -331,12 +334,12 @@ export default class InvoiceSingle extends Component {
                     )
                   }
 
-                  return <div className='col-xs-8'>{status}</div>
+                  return <div className='col-xs-8 m-t-05'>{status}</div>
                 })()}
               </div>
               
               <div className="form-group name col-xs-6">
-                <label htmlFor="invoiceDueDate" className='col-xs-2'>Invoice Due date</label>
+                <label htmlFor="invoiceDueDate" className='col-xs-3'>Invoice Due date</label>
                 {(() => {
                   if (this.state.editable) {
                     return (
@@ -351,7 +354,7 @@ export default class InvoiceSingle extends Component {
                     )
                   }
 
-                  return <div className='col-xs-8'>{dueDate}</div>
+                  return <div className='col-xs-8 m-t-05'>{dueDate}</div>
                 })()}
               </div>
             </div>
@@ -375,14 +378,14 @@ export default class InvoiceSingle extends Component {
               {
                 <LinesOnTab 
                     invoice={cloneDeep(this.state.invoice)}
-                    linesId={reverse(this.state.invoice.linesId)}
+                    linesId={ clone(this.state.invoice.linesId).reverse() }
                     readOnly={!this.state.invoice.customerId}/>
               }
               </div>
               <div role="tabpanel" className="tab-pane p-x-1" id="payments">
                 <PaymentsOnTab 
                     invoice={cloneDeep(this.state.invoice)}
-                    paymentsId={reverse(this.state.invoice.paymentsId)}
+                    paymentsId={this.state.invoice.paymentsId}
                     readOnly={!this.state.invoice.customerId}/>
               </div>
               <div role="tabpanel" className="tab-pane p-x-1" id="notes">
