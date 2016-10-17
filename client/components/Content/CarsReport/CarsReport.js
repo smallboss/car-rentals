@@ -98,10 +98,15 @@ class CarsReport extends Component {
         const carName        = el.name ? el.name.toLowerCase() : '';
         const carPlateNumber = el.plateNumber ? el.plateNumber.toLowerCase() : '';
         const carStatus      = el.status ? el.status.toLowerCase() : '';
+        const carTotalExpense      = el.totalExpense ? el.totalExpense.toLowerCase() : '';
+        const carTotalIncome      = el.totalIncome ? el.totalIncome.toLowerCase() : '';
+        const carProfit      = el.profit ? el.profit.toLowerCase() : '';
 
         return (carName.indexOf(searchQuery) !== -1 || 
                 carPlateNumber.indexOf(searchQuery) !== -1 || 
-                carStatus.indexOf(searchQuery) !== -1)
+                carStatus.indexOf(searchQuery) !== -1 ||
+                carTotalExpense.indexOf(searchQuery) !== -1 ||
+                carTotalIncome.indexOf(searchQuery) !== -1)
     });
 
 

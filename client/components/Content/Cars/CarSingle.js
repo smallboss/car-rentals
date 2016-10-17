@@ -61,13 +61,31 @@ export default class CarSingle extends Component {
 
   onChangeExpense(value) {
     let newCar = this.state.dispCar;
-    newCar.totalExpense = value;
+
+    value = (value!='' && isNaN(parseInt(value))) ? '0' : value;
+    let isDepr = false;
+
+    isDepr = ((parseInt(value) < 0) || 
+              (value.indexOf('e') != -1) || 
+              (value.indexOf('E') != -1) ||  
+              (value.length > 5));
+
+    newCar.totalExpense = isDepr ?  newCar.totalExpense : value;
     this.setState({dispCar: newCar});
   }
 
   onChangeIncome(value) {
     let newCar = this.state.dispCar;
-    newCar.totalIncome = value;
+
+    value = (value!='' && isNaN(parseInt(value))) ? '0' : value;
+    let isDepr = false;
+
+    isDepr = ((parseInt(value) < 0) || 
+              (value.indexOf('e') != -1) || 
+              (value.indexOf('E') != -1) ||  
+              (value.length > 5));
+
+    newCar.totalIncome = isDepr ?  newCar.totalIncome : value;
     this.setState({dispCar: newCar});
   }
 
@@ -85,7 +103,13 @@ export default class CarSingle extends Component {
 
   onChangeProfit(value) {
     let newCar = this.state.dispCar;
-    newCar.profit = value;
+    let isDepr = false;
+
+    isDepr = ((value.indexOf('e') != -1) || 
+              (value.indexOf('E') != -1) ||  
+              (value.length > 5));
+
+    newCar.profit = isDepr ? newCar.profit : value;
     this.setState({dispCar: newCar});
   }
 
@@ -161,7 +185,7 @@ export default class CarSingle extends Component {
   }
 
   handleDelete() {
-    browserHistory.push('/cars');
+    browserHistory.push('/managePanel/cars');
 
     ApiCars.remove(this.state.car._id);
   }
@@ -294,7 +318,7 @@ export default class CarSingle extends Component {
           <div className="topFields">
             <div className="row">
               <div className="form-group name col-xs-6">
-                <label htmlFor="carName" className='col-xs-2'>Name</label>
+                <label htmlFor="carName" className='col-xs-3'>Name</label>
                 {(() => {
                   if (this.state.editable) {
                     return (
@@ -309,12 +333,12 @@ export default class CarSingle extends Component {
                     )
                   }
 
-                  return <div className='col-xs-8'>{name}</div>
+                  return <div className='col-xs-8 m-t-05'>{name}</div>
                 })()}
               </div>
 
               <div className="form-group status col-xs-6">
-                <label htmlFor="carStatus" className='col-xs-2'>Status</label>
+                <label htmlFor="carStatus" className='col-xs-3'>Status</label>
                 {(() => {
                   if (this.state.editable) {
                     return (
@@ -336,14 +360,14 @@ export default class CarSingle extends Component {
                     )
                   }
 
-                  return <div className='col-xs-8'>{status}</div>
+                  return <div className='col-xs-8 m-t-05'>{status}</div>
                 })()}
               </div>
             </div>
 
             <div className="row">
               <div className="form-group plateNumber col-xs-6">
-                <label htmlFor="carPlateNumber" className='col-xs-2'>Plate#</label>
+                <label htmlFor="carPlateNumber" className='col-xs-3'>Plate#</label>
                 {(() => {
                   if (this.state.editable) {
                     return (
@@ -358,18 +382,20 @@ export default class CarSingle extends Component {
                     )
                   }
 
-                  return <div className='col-xs-8'>{plateNumber}</div>
+                  return <div className='col-xs-8 m-t-05'>{plateNumber}</div>
                 })()}
               </div>
 
               <div className="form-group profit col-xs-6">
-                <label htmlFor="carprofit" className='col-xs-2'>Profit</label>
+                <label htmlFor="carprofit" className='col-xs-3'>Profit</label>
                 {(() => {
                   if (this.state.editable) {
                     return (
                       <div className=' col-xs-8 form-horizontal'>
                         <input
-                          type="text"
+                          type="number"
+                          min="-99999"
+                          max="99999"
                           id="carProfit"
                           className="form-control "
                           onChange={(e) => this.onChangeProfit(e.target.value)}
@@ -378,7 +404,7 @@ export default class CarSingle extends Component {
                     )
                   }
 
-                  return <div className='col-xs-8'>{profit}</div>
+                  return <div className='col-xs-8 m-t-05'>{profit}</div>
                 })()}
               </div>
             </div>
@@ -491,7 +517,9 @@ export default class CarSingle extends Component {
                 {(() => {
                   if (this.state.editable) {
                     return (
-                      <input type="text"
+                      <input type="number"
+                             min="0"
+                             max="99999"
                              className='form-control'
                              onChange={(e) => this.onChangeExpense(e.target.value)}
                              value={ this.state.dispCar.totalExpense }/>
@@ -505,7 +533,9 @@ export default class CarSingle extends Component {
                 {(() => {
                   if (this.state.editable) {
                     return (
-                      <input type="text"
+                      <input type="number"
+                             min="0"
+                             max="99999"
                              className='form-control'
                              onChange={(e) => this.onChangeIncome(e.target.value)}
                              value={ this.state.dispCar.totalIncome }/>
@@ -549,7 +579,7 @@ export default createContainer(({params}) => {
   if (params.carId.indexOf('new') === 0) {
     isNew = true;
     carId = params.carId.substring(3);
-    window.history.pushState('object or string', 'Title', `/cars/${carId}`);
+    window.history.pushState('object or string', 'Title', `/managePanel/cars/${carId}`);
     // window.history.back();
   }
 
@@ -557,7 +587,7 @@ export default createContainer(({params}) => {
   const idForQuery = new Mongo.ObjectID(carId);
 
   if (!idForQuery) {
-    browserHistory.push('/cars');
+    browserHistory.push('/managePanel/cars');
   }
 
   return {
