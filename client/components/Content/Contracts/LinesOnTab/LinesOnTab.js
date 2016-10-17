@@ -71,7 +71,7 @@ export default class LinesOnTab extends Component {
             ApiLines.remove(itemId);
         })
 
-        this.setState({selectedListId: []});
+        this.setState({selectedListId: [], isEdit: false});
     }
 
     handleSaveLine(line){
