@@ -388,7 +388,9 @@ export default class InvoiceSingle extends Component {
               <div role="tabpanel" className="tab-pane p-x-1" id="payments">
                 <PaymentsOnTab 
                     invoice={cloneDeep(this.state.invoice)}
-                    paymentsId={this.state.invoice.paymentsId}
+                    paymentsId={clone(this.state.invoice.paymentsId 
+                                        ? this.state.invoice.paymentsId 
+                                        : []).reverse()}
                     readOnly={!this.state.invoice.customerId}/>
               </div>
               <div role="tabpanel" className="tab-pane p-x-1" id="notes">
