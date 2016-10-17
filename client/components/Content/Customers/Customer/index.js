@@ -208,9 +208,6 @@ class Customer extends React.Component {
             //currentPayments = this.state.customer.profile.payments
         if(target == 'payments') {
             data.forEach(item => {
-                if(item._new) {
-                    return
-                }
                 _idPayment = new Mongo.ObjectID(item._id._str)
                 if(ApiPayments.findOne({_id: _idPayment})) {
                     delete item._id
