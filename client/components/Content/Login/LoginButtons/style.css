@@ -12,3 +12,8 @@
 .modal-sm .form-group label {
     margin-top: 15px;
 }
+.btn-register {
+    background: #636eff;
+    text-shadow: none;
+    color: #ffffff;
+}

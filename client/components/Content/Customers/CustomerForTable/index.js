@@ -7,7 +7,6 @@ import './style.css'
 
 class CustomerForTable extends React.Component {
     render () {
-        console.log(this.props.customer_data)
         let { _id, username} = this.props.customer_data
         let email = this.props.customer_data.emails[0].address
         let { name, phone } = this.props.customer_data.profile

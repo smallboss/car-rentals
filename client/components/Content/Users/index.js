@@ -59,7 +59,7 @@ class Users extends React.Component {
                 arrForRemove.map(elem => {
                     Meteor.users.remove({_id: elem})
                 })
-                this.setState({stateForRemove: []})
+                location.reload()
                 break
             default: break
         }

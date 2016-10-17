@@ -5,7 +5,7 @@ import Login from '../Content/Login'
 import './style.css'
 
 export default class Header extends Component {
-  render() {
+  render() {      
     return (
       <nav className='row navbar header-nav'>
           <div className='col-xs-3'>
