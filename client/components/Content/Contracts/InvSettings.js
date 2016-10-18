@@ -95,7 +95,25 @@ export default class InvSettings extends Component {
                 })()*/}
               </div>
               <div className="form-group profit col-xs-12">
-                <Link to="/managePanel/invoices/new" target="_blank">Create invoices</Link>
+              {(() => {
+                if (this.props.editable) {
+                  if (!this.props.contract._id) {
+                    return (<div className="col-xs-12">To select the invoice, select the customer and manager and save contract</div>)
+                  }
+
+                  console.log('this.props.contract.invoicesId', this.props.contract.invoicesId);
+
+                  if (this.props.contract.invoicesId) {
+                    return (<Link to={`/managePanel/invoices/${this.props.invoicesId._id._str}`} 
+                                  target="_blank">{ ApiInvoices.findOne({_id: Mongo.ObjectID(this.props.invoicesId._id._str)}).codeName }</Link>)
+                  }
+
+
+                  return (<Link to={`/managePanel/invoices/new${this.props.contract ? this.props.contract._id._str : ''}`} 
+                                target="_blank">Create invoices</Link>)
+                }
+                return null;
+              })()}
               </div>
               <div className="form-group profit col-xs-12">
                 <label htmlFor="generateAuto" className="col-xs-2">Repeat every</label>

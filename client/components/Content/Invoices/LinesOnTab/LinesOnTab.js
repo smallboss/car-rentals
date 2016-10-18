@@ -47,10 +47,9 @@ export default class LinesOnTab extends Component {
 
 // ====================== ADD = EDIT = REMOVE = SAVE ======================
     handleAddNewLine(){
-        // ApiLines.insert({_id: lineId, customerId: this.props.invoice.customerId, dateCreate: now()});
         const lineId = new Mongo.ObjectID();
 
-        ApiLines.insert({_id: lineId, invoiceId: this.props.invoice._id, dateCreate: now()});
+        ApiLines.insert({_id: lineId, invoiceId: this.props.invoice._id, dateCreate: now(), amount: '100'});
         ApiInvoices.update(this.props.invoice._id, {$push: { linesId: lineId }});
 
         let selectedListId = this.state.selectedListId;
@@ -76,7 +75,7 @@ export default class LinesOnTab extends Component {
     }
 
     handleSaveLine(line){
-        console.log('line', line);
+        console.log('SAVE line', line._id);
         const _id = line._id;
         delete line._id;
 
@@ -135,9 +134,9 @@ export default class LinesOnTab extends Component {
                                         return (
                                             <LineTabRow key={`line-${key}`}
                                                 onSelect={this.changeSelectedItem.bind(null,item)}
-                                                line={clone(ApiLines.findOne({_id: item}))}
+                                                line={ApiLines.findOne({_id: item})}
                                                 numbers={ this.props.lines ? this.props.lines.length : 0}
-                                                onSave={this.handleSaveLine.bind(null,item)}
+                                                onSave={this.handleSaveLine}
                                                 selectedListId={this.state.selectedListId}
                                                 isEdit={this.state.isEdit}
                                                 cars={this.props.cars}

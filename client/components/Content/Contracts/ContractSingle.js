@@ -513,8 +513,8 @@ export default class ContractSingle extends Component {
 
         return (
           <LinesOnTab 
-              invoice={cloneDeep(this.state.invoice)}
-              linesId={reverse(linesId)}
+              invoice={this.state.invoice}
+              linesId={reverse(clone(linesId))}
               readOnly={true}/>
         )
       }

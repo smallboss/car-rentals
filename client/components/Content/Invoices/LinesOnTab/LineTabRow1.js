@@ -13,12 +13,11 @@ export default class LineTabRow extends Component {
 
         this.onChangeCarName= this.onChangeCarName.bind(this);
         this.onChangeAmount = this.onChangeAmount.bind(this);
-        this.sendSave = this.sendSave.bind(this);
+
     } 
 
 
     componentWillReceiveProps(nextProps){
-        
         let dispLine = (!this.state.dispLine)
                                     ? nextProps.line 
                                     : this.state.dispLine
@@ -32,18 +31,17 @@ export default class LineTabRow extends Component {
 
         const isEdit = (isSelected && nextProps.isEdit) ? true : false;
 
-        // if (isEdit)
-        //     console.log('ed', isSelected, isEdit, (this.state.dispLine ? this.state.dispLine.amount : ''));
+        if (isEdit)
+            console.log('ed', isSelected, isEdit, (this.state.dispLine ? this.state.dispLine.amount : ''));
 
         this.setState({dispLine, isEdit});
-        
     }
 
     componentDidMount() {
-        // if (this.state.isEdit != this.props.isEdit) {
-        //     // this.checkbox.checked = this.props.isEdit;
-        //     this.setState({isEdit: this.props.isEdit});
-        // }
+        if (this.state.isEdit != this.props.isEdit) {
+            // this.checkbox.checked = this.props.isEdit;
+            this.setState({isEdit: this.props.isEdit});
+        }
     }
 
 // ==================== CHANGERS FIELDS =============================
@@ -81,17 +79,10 @@ export default class LineTabRow extends Component {
         this.setState({dispLine: newLine});
     }
 
-    sendSave(dispLine) {
-        const line = this.state.dispLine;
-        console.log('linelineline', line);
-        this.props.onSave(line);
-    }
-
 // END ================ CHANGERS FIELDS =============================
 
     render(){
-        // console.log('line', this.state.dispLine);
-
+        console.log('line', this.props.line);
         let line = this.props.line ? this.props.line : {};
         let dispLine = this.state.dispLine;
         const cars = this.props.cars ? this.props.cars : [];
@@ -101,7 +92,7 @@ export default class LineTabRow extends Component {
             if (this.state.isEdit) {
                 return (
                     <button
-                        onClick={this.sendSave}
+                        onClick={() => this.props.onSave(this.state.dispLine)}
                         className='btn btn-danger'>
                         Save
                     </button>
@@ -223,7 +214,7 @@ export default class LineTabRow extends Component {
                     <input  type="number"
                             min="0"
                             max="99999"
-                            value={this.state.dispLine.amount}
+                            value={dispLine.amount}
                             onChange={(e) => this.onChangeAmount(e.target.value)} />
                 )
             }

@@ -5,6 +5,7 @@ import { createContainer } from 'meteor/react-meteor-data'
 import { ApiInvoices } from '/imports/api/invoices.js'
 import { ApiPayments } from '/imports/api/payments.js'
 import { ApiUsers } from '/imports/api/customers'
+import { ApiContracts } from '/imports/api/contracts'
 import { ApiYearWrite } from '/imports/api/yearWrite'
 import HeadSingle from './HeadSingle.js';
 import { browserHistory } from 'react-router';
@@ -112,7 +113,8 @@ export default class InvoiceSingle extends Component {
 
     if(this.state.isNew){
       invoiceId = new Mongo.ObjectID();
-      newInvoice._id = invoiceId;
+      newInvoice._id = this.props.contract._id;
+      newInvoice.contractId = this.props.contractId;
       ApiInvoices.insert(newInvoice);
 
       let yearWrite = ApiYearWrite.findOne({year: '2016'});
@@ -164,7 +166,10 @@ export default class InvoiceSingle extends Component {
       })
     }
 
-
+console.log(this.props.contract, this.state.isNew);
+    if (this.props.contract) {
+      ApiContracts.update({_id: this.props.contractId}, {$addToSet: { invoicesId: invoiceId}});
+    }
     Meteor.users.update({_id: newInvoice.customerId}, {$addToSet: { "profile.invoices": invoiceId}});
     if (this.state.isNew) browserHistory.push(`/managePanel/invoices/${invoiceId}`);
     this.setState({invoice: newInvoice, dispInvoice: newInvoice, editable: false, isNew: false});
@@ -447,14 +452,19 @@ export default createContainer(({params}) => {
   Meteor.subscribe('invoices');
   Meteor.subscribe('users');
   Meteor.subscribe('yearwrite');
+  Meteor.subscribe('contracts');
 
 
   let isNew = false;
   let invoiceId = params.invoiceId;
   let invoice = {};
+  let contract;
 
   if (params.invoiceId.indexOf('new') === 0) {
     isNew = true;
+    if (params.invoiceId.substr(3)) {
+      contract = ApiContracts.findOne(new Mongo.ObjectID(params.invoiceId.substr(3)));
+    }
   } else {
     invoice = ApiInvoices.findOne(new Mongo.ObjectID(invoiceId));
   }
@@ -462,6 +472,7 @@ export default createContainer(({params}) => {
   return {
     invoice,
     userList: Meteor.users.find({'profile.userType': 'customer'}).fetch(),
+    contract,
     isNew
   }
 
