@@ -208,18 +208,18 @@ class Customer extends React.Component {
         //console.log(data)
         if(target == 'payments') {
             data.forEach(item => {
-                if(item._toedit) return
-                _idPayment = item._id
+                _idPayment = new Mongo.ObjectID(item._id._str)
                 if(ApiPayments.findOne({_id: _idPayment})) {
-                    //delete item._id
-                    //ApiPayments.update({_id: _idPayment}, {$set: item})
-                    ApiPayments.update(_idPayment, {$set: item})
+                    if(!item._toedit) delete item._id
+
+                    ApiPayments.update({_id: _idPayment}, {$set: item})                                        
                 } else {
                     Meteor.users.update({_id: _id}, {$push: {'profile.payments': _idPayment}})
                     item.customerId = _id
                     ApiPayments.insert(item)
-                }
+                }                
             })
+            this.setState({customer: this.props.customer})
             return
         }
         _state = this.state.customer
@@ -253,8 +253,8 @@ class Customer extends React.Component {
                 _id: new Mongo.ObjectID(),
                 amount: '',
                 customerId: _id,
+                codeName: '',
                 date: '',
-                ref: '',
                 status: ''
             }]
         }

@@ -63,6 +63,7 @@ class Table extends React.Component {
                 break
             case 'add_note':
                 this.setState({addNewField: 1})
+                this.forceUpdate()
                 break
             case 'edit_notes':
                 _arrToEdit = this.state.arrChecked
@@ -94,6 +95,7 @@ class Table extends React.Component {
                 currentArray.unshift(objToAdd)
                 this.props.handlerChildState(this.props.currentComponent, currentArray)
                 this.setState({arrToTable: currentArray, addNewField: 0})
+                this.forceUpdate()
                 break
             case 'save_notes':
                 currentArray = this.state.arrToTable
@@ -195,10 +197,6 @@ class Table extends React.Component {
                     </tr>
                     {this.state.arrToTable.map((elem, i) => {
                         const elemId = elem._id._str
-                        if(this.props.currentComponent == 'payments') {
-                            console.log(elemId)
-                            console.log(elem)
-                        }
                         let _stateToTd = Object.keys(this.state.arrToTable[i], key => elem[key])
                         if(elem[_stateToTd[1]].length > 0) {
                             return (
