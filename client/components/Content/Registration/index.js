@@ -19,7 +19,7 @@ class Registration extends React.Component {
             return false
         }
         if (e.target[6].value != e.target[7].value){
-            alert('Введенные пароли не совпадают');
+            alert('Password repeat must be equal password');
             return false
         }
 

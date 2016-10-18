@@ -205,13 +205,15 @@ class Customer extends React.Component {
         let _state,
             _id = this.state.customer._id, 
             _idPayment
-            //currentPayments = this.state.customer.profile.payments
+        //console.log(data)
         if(target == 'payments') {
             data.forEach(item => {
-                _idPayment = new Mongo.ObjectID(item._id._str)
+                if(item._toedit) return
+                _idPayment = item._id
                 if(ApiPayments.findOne({_id: _idPayment})) {
-                    delete item._id
-                    ApiPayments.update({_id: _idPayment}, {$set: item})    
+                    //delete item._id
+                    //ApiPayments.update({_id: _idPayment}, {$set: item})
+                    ApiPayments.update(_idPayment, {$set: item})
                 } else {
                     Meteor.users.update({_id: _id}, {$push: {'profile.payments': _idPayment}})
                     item.customerId = _id
