@@ -11,7 +11,7 @@ import HeadList from './HeadList.js';
 import { map, debounce } from 'lodash';
 
 
-class Cars extends Component {
+class CarsReport extends Component {
   constructor(props, context) {
     super(props, context); 
 
@@ -27,6 +27,7 @@ class Cars extends Component {
     this.handleChangeSearchField = debounce(this.handleChangeSearchField.bind(this), 350);
     this.removeCars = this.removeCars.bind(this);
     this.addCar = this.addCar.bind(this);
+    this.onReportCars = this.onReportCars.bind(this);
     this.pageUp = this.pageUp.bind(this);
     this.pageDown = this.pageDown.bind(this);
     this.handleCarSingleOnClick = this.handleCarSingleOnClick.bind(this);
@@ -70,6 +71,10 @@ class Cars extends Component {
     this.setState({selectedCarsID: []});
   }
 
+  onReportCars(){
+    console.log('CARS REPORT >>>');
+  }
+
 
   handleSelect(e, Car){
     let newSelectedCarsID = this.state.selectedCarsID;
@@ -93,10 +98,15 @@ class Cars extends Component {
         const carName        = el.name ? el.name.toLowerCase() : '';
         const carPlateNumber = el.plateNumber ? el.plateNumber.toLowerCase() : '';
         const carStatus      = el.status ? el.status.toLowerCase() : '';
+        const carTotalExpense      = el.totalExpense ? el.totalExpense.toLowerCase() : '';
+        const carTotalIncome      = el.totalIncome ? el.totalIncome.toLowerCase() : '';
+        const carProfit      = el.profit ? el.profit.toLowerCase() : '';
 
         return (carName.indexOf(searchQuery) !== -1 || 
                 carPlateNumber.indexOf(searchQuery) !== -1 || 
-                carStatus.indexOf(searchQuery) !== -1)
+                carStatus.indexOf(searchQuery) !== -1 ||
+                carTotalExpense.indexOf(searchQuery) !== -1 ||
+                carTotalIncome.indexOf(searchQuery) !== -1)
     });
 
 
@@ -150,7 +160,9 @@ class Cars extends Component {
           pageDown={this.pageDown}
           onChangeSearchField={this.handleChangeSearchField}
           onAddNew={this.addCar} 
-          onRemoveCars={this.removeCars} />
+          onRemoveCars={this.removeCars}
+          onReportCars={this.onReportCars}
+          isReport={true} />
 
         <table className="table table-bordered table-hover">
           <thead>
@@ -159,6 +171,9 @@ class Cars extends Component {
               <th>Name</th>
               <th>Plate number</th>
               <th>Status</th>
+              <th>Expenses</th>
+              <th>Income</th>
+              <th>Profit</th>
             </tr>
           </thead>
 
@@ -171,11 +186,11 @@ class Cars extends Component {
   }
 }
 
-Cars.propTypes = {
+CarsReport.propTypes = {
   cars: PropTypes.array.isRequired,
 };
 
-Cars.contextTypes = {
+CarsReport.contextTypes = {
     router: React.PropTypes.object.isRequired
 }
 
@@ -186,4 +201,4 @@ export default createContainer(() => {
   return {
     cars: ApiCars.find().fetch(),
   };
-}, Cars);
+}, CarsReport);

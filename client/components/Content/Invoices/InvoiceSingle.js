@@ -4,7 +4,8 @@ import { Link } from 'react-router';
 import { createContainer } from 'meteor/react-meteor-data'
 import { ApiInvoices } from '/imports/api/invoices.js'
 import { ApiPayments } from '/imports/api/payments.js'
-import { ApiCustomers } from '/imports/api/customers'
+import { ApiUsers } from '/imports/api/customers'
+import { ApiYearWrite } from '/imports/api/yearWrite'
 import HeadSingle from './HeadSingle.js';
 import { browserHistory } from 'react-router';
 import React, { Component } from 'react';
@@ -16,6 +17,7 @@ import LinesOnTab from './LinesOnTab/LinesOnTab.js'
 import { invoiceStateTypes } from '/imports/startup/typesList.js';
 
 import './invoiceStyle.css'
+import '/client/main.css'
 
 
 export default class InvoiceSingle extends Component {
@@ -85,7 +87,11 @@ export default class InvoiceSingle extends Component {
       dataDispInvoice = clone(nextProps.invoice)
     }
     
-    const allowSave = this.state.editable ? this.state.allowSave : c.customerId;
+    const allowSave = this.state.editable 
+                            ? this.state.allowSave 
+                            : ( c ? c.customerId : false);
+
+    c = nextProps.invoice;
 
     this.setState({
       invoice: clone(c),
@@ -97,46 +103,88 @@ export default class InvoiceSingle extends Component {
 
   handleSave() {
     let newInvoice = clone(this.state.dispInvoice);
+    let invoiceId;
 
 
-    const id = newInvoice._id;
-    delete newInvoice._id;
+    if(this.state.isNew){
+      invoiceId = new Mongo.ObjectID();
+      newInvoice._id = invoiceId;
+      ApiInvoices.insert(newInvoice);
+
+      let yearWrite = ApiYearWrite.findOne({year: '2016'});
+      let invoicesNumb = '1';
+/////
+      if (yearWrite) {
+        if(!yearWrite.invoicesNumb) yearWrite.invoicesNumb = '0';
+        yearWrite.invoicesNumb = ''+(parseInt(yearWrite.invoicesNumb)+1);
+        invoicesNumb = parseInt(yearWrite.invoicesNumb);
+      } else {
+        yearWrite = {
+            _id: new Mongo.ObjectID(),
+            invoicesNumb: invoicesNumb
+        };
+        
+        ApiYearWrite.insert({
+            _id: yearWrite._id, 
+            year: ''+(new Date()).getFullYear()
+        });
+      }
+
+      if (yearWrite.invoicesNumb.length == 1)
+        invoicesNumb = '00'+invoicesNumb;
+      else if (yearWrite.invoicesNumb.length <= 2)
+          invoicesNumb = '0'+invoicesNumb;
+          else invoicesNumb = ''+invoicesNumb;
+
+      let codeName = `INV/${(new Date()).getFullYear()}/${invoicesNumb}`;
+
+      ApiInvoices.update(invoiceId, {$set: { codeName }});
+
+      map(newInvoice.paymentsId, (el) => {
+        Meteor.users.update({_id: this.state.invoice.customerId}, {$pull: { "profile.payments": el}});
+        ApiPayments.update({_id: el}, {$set: {customerId: newInvoice.customerId}});
+        Meteor.users.update({_id: newInvoice.customerId}, {$addToSet: { "profile.payments": el}});
+      })
+
+      invoicesNumb = ''+parseInt(invoicesNumb);
+      ApiYearWrite.update({_id: yearWrite._id }, {$set: { invoicesNumb }});
+    } else {
+      invoiceId = newInvoice._id;
+      delete newInvoice._id;
+      ApiInvoices.update(invoiceId, {$set: newInvoice});
+
+      map(newInvoice.paymentsId, (el) => {
+        Meteor.users.update({_id: this.state.invoice.customerId}, {$pull: { "profile.payments": el}});
+        ApiPayments.update({_id: el}, {$set: {customerId: newInvoice.customerId}});
+        Meteor.users.update({_id: newInvoice.customerId}, {$addToSet: { "profile.payments": el}});
+      })
+    }
 
 
-    ApiInvoices.update(id, {$set: newInvoice});
-
-    map(newInvoice.paymentsId, (el) => {
-      Meteor.users.update({_id: this.state.invoice.customerId}, {$pull: { "profile.payments": el}});
-      ApiPayments.update({_id: el}, {$set: {customerId: newInvoice.customerId}});
-      Meteor.users.update({_id: newInvoice.customerId}, {$addToSet: { "profile.payments": el}});
-    })
-
-
-    newInvoice_id = id;
-
-    this.setState({invoice: newInvoice, dispInvoice: newInvoice, editable: false});
+    Meteor.users.update({_id: newInvoice.customerId}, {$addToSet: { "profile.invoices": invoiceId}});
+    if (this.state.isNew) browserHistory.push(`/managePanel/invoices/${invoiceId}`);
+    this.setState({invoice: newInvoice, dispInvoice: newInvoice, editable: false, isNew: false});
   }
 
   handleEdit() {
-    const allowSave = (this.state.editable && !this.state.invoice.customerId) 
-                            ? this.state.allowSave
-                            : false;
-
     this.setState({
         editable: !this.state.editable, 
         dispInvoice: clone(this.state.invoice), 
-        allowSave
+        allowSave: this.state.invoice.customerId
     });
   }
 
   handleDelete() {
-    browserHistory.push('/invoices');
+    browserHistory.push('/managePanel/invoices');
 
     map(newInvoice.paymentsId, (el) => {
       Meteor.users.update({_id: this.state.invoice.customerId}, {$pull: { "profile.payments": el}});
       ApiPayments.remove({_id: el});
     })
 
+
+    ApiContracts.update({_id: this.state.invoice.customerId}, {$pull: { "profile.paymentsId": this.state.invoice._id}});
+    Meteor.users.update({_id: this.state.invoice.customerId}, {$pull: { "profile.payments": this.state.invoice._id}});
     ApiInvoices.remove(this.state.invoice._id);
   }
 
@@ -157,8 +205,6 @@ export default class InvoiceSingle extends Component {
 
 
   render() {
-
-    console.log(this.state.invoice);
     
     const renderHeadSingle = () => {
       return (
@@ -187,7 +233,7 @@ export default class InvoiceSingle extends Component {
             <div className="row">
             { /* ============================== DROPDOWN CUSTOMERS ============================== */}
               <div className="form-group profit col-xs-6">
-                <label htmlFor="paymentCustomerName" className='col-xs-2'>Customer Name</label>
+                <label htmlFor="paymentCustomerName" className='col-xs-3'>Customer Name</label>
                 {(() => {
                   if (this.state.editable) {
                     return (
@@ -224,7 +270,7 @@ export default class InvoiceSingle extends Component {
                   }
 
                   return (
-                    <div className='col-xs-8'>
+                    <div className='col-xs-8 m-t-05'>
                       {(() => {
                         if (Meteor.users.findOne(customerId)) {
                           const profile = Meteor.users.findOne(customerId).profile;
@@ -239,12 +285,12 @@ export default class InvoiceSingle extends Component {
                   const custId = this.state.editable ? this.state.dispInvoice.customerId : customerId;
                   const custName = Meteor.users.findOne(custId) ? (Meteor.users.findOne(custId).profile.name + ' propfile') : '';
 
-                  return (<Link to={`/customer/${custId}`}>{custName}</Link>);
+                  return (<Link to={`/managePanel/customer/${custId}`} className="col-xs-12">{custName}</Link>);
                 })()}
               </div>
               { /* END ============================= DROPDOWN CUSTOMERS ============================== */}
               <div className="form-group name col-xs-6">
-                <label htmlFor="invoiceDate" className='col-xs-2'>Invoice date</label>
+                <label htmlFor="invoiceDate" className='col-xs-3'>Invoice date</label>
                 {(() => {
                   if (this.state.editable) {
                     return (
@@ -259,14 +305,14 @@ export default class InvoiceSingle extends Component {
                     )
                   }
 
-                  return <div className='col-xs-8'>{date}</div>
+                  return <div className='col-xs-8 m-t-05'>{date}</div>
                 })()}
               </div>
             </div>
 
             <div className="row">
               <div className="form-group profit col-xs-6">
-                <label htmlFor="invoiceStatus" className='col-xs-2'>Status</label>
+                <label htmlFor="invoiceStatus" className='col-xs-3'>Status</label>
                 {(() => {
                   if (this.state.editable) {
                     return (
@@ -288,12 +334,12 @@ export default class InvoiceSingle extends Component {
                     )
                   }
 
-                  return <div className='col-xs-8'>{status}</div>
+                  return <div className='col-xs-8 m-t-05'>{status}</div>
                 })()}
               </div>
               
               <div className="form-group name col-xs-6">
-                <label htmlFor="invoiceDueDate" className='col-xs-2'>Invoice Due date</label>
+                <label htmlFor="invoiceDueDate" className='col-xs-3'>Invoice Due date</label>
                 {(() => {
                   if (this.state.editable) {
                     return (
@@ -308,7 +354,7 @@ export default class InvoiceSingle extends Component {
                     )
                   }
 
-                  return <div className='col-xs-8'>{dueDate}</div>
+                  return <div className='col-xs-8 m-t-05'>{dueDate}</div>
                 })()}
               </div>
             </div>
@@ -332,14 +378,19 @@ export default class InvoiceSingle extends Component {
               {
                 <LinesOnTab 
                     invoice={cloneDeep(this.state.invoice)}
-                    linesId={reverse(this.state.invoice.linesId)}
+                    linesId={ clone(this.state.invoice.linesId 
+                                        ? this.state.invoice.linesId 
+                                        : []).reverse() 
+                            }
                     readOnly={!this.state.invoice.customerId}/>
               }
               </div>
               <div role="tabpanel" className="tab-pane p-x-1" id="payments">
                 <PaymentsOnTab 
                     invoice={cloneDeep(this.state.invoice)}
-                    paymentsId={reverse(this.state.invoice.paymentsId)}
+                    paymentsId={clone(this.state.invoice.paymentsId 
+                                        ? this.state.invoice.paymentsId 
+                                        : []).reverse()}
                     readOnly={!this.state.invoice.customerId}/>
               </div>
               <div role="tabpanel" className="tab-pane p-x-1" id="notes">
@@ -390,30 +441,24 @@ export default class InvoiceSingle extends Component {
 
 export default createContainer(({params}) => {
   Meteor.subscribe('invoices');
-  Meteor.subscribe('customers');
+  Meteor.subscribe('users');
+  Meteor.subscribe('yearwrite');
+
 
   let isNew = false;
   let invoiceId = params.invoiceId;
+  let invoice = {};
 
   if (params.invoiceId.indexOf('new') === 0) {
     isNew = true;
-    invoiceId = params.invoiceId.substring(3);
-    window.history.pushState('object or string', 'Title', `/invoices/${invoiceId}`);
-    // window.history.back();
+  } else {
+    invoice = ApiInvoices.findOne(new Mongo.ObjectID(invoiceId));
   }
-
-
-  const idForQuery = new Mongo.ObjectID(invoiceId);
-
-  if (!idForQuery) {
-    browserHistory.push('/invoices');
-  }
-
 
   return {
-    invoice: ApiInvoices.findOne(idForQuery),
-    userList: Meteor.users.find().fetch(),
-    isNew: isNew
+    invoice,
+    userList: Meteor.users.find({'profile.userType': 'customer'}).fetch(),
+    isNew
   }
 
 }, InvoiceSingle)

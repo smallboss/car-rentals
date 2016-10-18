@@ -48,7 +48,8 @@ export default class LinesOnTab extends Component {
 // ====================== ADD = EDIT = REMOVE = SAVE ======================
     handleAddNewLine(){
         const lineId = new Mongo.ObjectID();
-        ApiLines.insert({_id: lineId, customerId: this.props.invoice.customerId});
+        console.log('now', now());
+        ApiLines.insert({_id: lineId, customerId: this.props.invoice.customerId, dateCreate: now()});
         ApiInvoices.update(this.props.invoice._id, {$push: { linesId: lineId }});
 
         let selectedListId = this.state.selectedListId;
@@ -70,7 +71,7 @@ export default class LinesOnTab extends Component {
             ApiLines.remove(itemId);
         })
 
-        this.setState({selectedListId: []});
+        this.setState({selectedListId: [], isEdit: false});
     }
 
     handleSaveLine(line){
@@ -89,7 +90,7 @@ export default class LinesOnTab extends Component {
 // END =================== ADD = EDIT = REMOVE = SAVE ======================
 
     render(){
-        let lineListId = reverse(this.props.linesId);
+        let lineListId = this.props.linesId;
 
         return(
             <div>
@@ -117,7 +118,7 @@ export default class LinesOnTab extends Component {
                         {(() => {
                             if (lineListId) {
                                 return (
-                                    reverse(lineListId).map((item, key) => {
+                                    lineListId.map((item, key) => {
                                         return (
                                             <LineTabRow key={`line-${key}`}
                                                 onSelect={this.changeSelectedItem.bind(null,item)}

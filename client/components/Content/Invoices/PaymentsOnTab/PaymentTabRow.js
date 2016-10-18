@@ -73,8 +73,9 @@ export default class PaymentTabRow extends Component {
         }
 
         const showPaymentId = () => {
+            const paymentCodeName = payment ? payment.codeName : '';
             const paymentIdStr = payment ? payment._id._str : '';
-            return (<Link to={`/payments/${paymentIdStr}`}>{paymentIdStr}</Link>)
+            return (<Link to={`managePanel/payments/${paymentIdStr}`}>{paymentCodeName}</Link>)
         }
 
 

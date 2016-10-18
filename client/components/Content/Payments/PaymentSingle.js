@@ -3,7 +3,9 @@ import { Mongo } from 'meteor/mongo'
 import { Link } from 'react-router';
 import { createContainer } from 'meteor/react-meteor-data'
 import { ApiPayments } from '/imports/api/payments.js'
-import { ApiCustomers } from '/imports/api/customers'
+import { ApiUsers } from '/imports/api/users'
+import { ApiYearWrite } from '/imports/api/yearWrite'
+import { ApiInvoices } from '/imports/api/invoices'
 import HeadSingle from './HeadSingle.js';
 import { browserHistory } from 'react-router';
 import React, { Component } from 'react';
@@ -11,8 +13,8 @@ import { clone, cloneDeep, reverse } from 'lodash';
 
 import { paymentStateTypes } from '/imports/startup/typesList.js';
 
-
 import './paymentStyle.css'
+import '/client/main.css'
 
 
 export default class PaymentSingle extends Component {
@@ -79,8 +81,6 @@ export default class PaymentSingle extends Component {
   }
 // END ================== ON CHANGE ======================
 
-
-
   componentWillReceiveProps(nextProps) {
     let c = nextProps.payment;
 
@@ -97,6 +97,8 @@ export default class PaymentSingle extends Component {
 
     const allowSave = this.state.editable ? this.state.allowSave : c.customerId;
 
+    c = nextProps.payment;
+
     this.setState({
       payment: clone(c),
       dispPayment: dataDispPayment,
@@ -106,39 +108,72 @@ export default class PaymentSingle extends Component {
 
   handleSave() {
     let newPayment = clone(this.state.dispPayment);
+    let paymentId;
 
+    if(this.state.isNew){
+      paymentId = new Mongo.ObjectID();
+      newPayment._id = paymentId;
+      ApiPayments.insert(newPayment);
 
-    let id = newPayment._id;
-    delete newPayment._id;
+      let yearWrite = ApiYearWrite.findOne({year: '2016'});
+      let paymentsNumb = '1';
 
+      if (yearWrite) {
+        if(!yearWrite.paymentsNumb) yearWrite.paymentsNumb = '0';
+        yearWrite.paymentsNumb = ''+(parseInt(yearWrite.paymentsNumb)+1);
+        paymentsNumb = parseInt(yearWrite.paymentsNumb);
+      } else {
+        yearWrite = {
+            _id: new Mongo.ObjectID(),
+            paymentsNumb: paymentsNumb
+        };
+        
+        ApiYearWrite.insert({
+            _id: yearWrite._id, 
+            year: ''+(new Date()).getFullYear()
+        });
+      }
 
-    ApiPayments.update(id, {$set: newPayment});
-    const payment = {
-      _id : id
-    };
+      if (yearWrite.paymentsNumb.length == 1)
+        paymentsNumb = '00'+paymentsNumb;
+      else if (yearWrite.paymentsNumb.length <= 2)
+          paymentsNumb = '0'+paymentsNumb;
+          else paymentsNumb = ''+paymentsNumb;
 
-    Meteor.users.update({_id: newPayment.customerId}, {$addToSet: { "profile.payments": id}});
-    
+      let codeName = `PAY/${(new Date()).getFullYear()}/${paymentsNumb}`;
 
-    newPayment._id = id;
+      ApiPayments.update(paymentId, {$set: { codeName }});
 
-    this.setState({payment: newPayment, dispPayment: newPayment, editable: false});
+      paymentsNumb = ''+parseInt(paymentsNumb);
+      ApiYearWrite.update({_id: yearWrite._id }, {$set: { paymentsNumb }});
+    } else {
+      paymentId = newPayment._id;
+      delete newPayment._id;
+      ApiPayments.update(paymentId, {$set: newPayment});
+      if (newPayment.customerId != this.state.payment.customerId) {
+        Meteor.users.update({_id: this.state.payment.customerId}, {$pull: { "profile.payments": paymentId}});        
+      }
+    }
+
+    Meteor.users.update({_id: newPayment.customerId}, {$addToSet: { "profile.payments": paymentId}});
+    if (this.state.isNew) browserHistory.push(`/managePanel/payments/${paymentId}`);
+    this.setState({payment: newPayment, dispPayment: newPayment, editable: false, isNew: false});
   }
 
   handleEdit() {
-    const allowSave = (this.state.editable && !this.state.invoice.customerId) 
-                        ? this.state.allowSave
-                        : false;
-
     this.setState({
         editable: !this.state.editable,
         dispPayment: clone(this.state.payment),
-        allowSave
+        allowSave: this.state.payment.customerId
     });
   }
 
   handleDelete() {
-    browserHistory.push('/payments');
+    browserHistory.push('/managePanel/payments');
+
+    const invoice = ApiInvoices.findOne({paymentsId: this.state.payment._id});
+    
+    if (invoice) ApiInvoices.update({_id: invoice._id}, {$pull: { paymentsId: this.state.payment._id}});
 
     Meteor.users.update({_id: this.state.payment.customerId}, {$pull: { "profile.payments": this.state.payment._id}});
     ApiPayments.remove(this.state.payment._id);
@@ -189,7 +224,7 @@ export default class PaymentSingle extends Component {
             <div className="row">
 { /* ============================== DROPDOWN CUSTOMERS ============================== */}
               <div className="form-group profit col-xs-6">
-                <label htmlFor="paymentCustomerName" className='col-xs-2'>Customer Name</label>
+                <label htmlFor="paymentCustomerName" className='col-xs-3'>Customer Name</label>
                 {(() => {
                   if (this.state.editable) {
                     return (
@@ -226,7 +261,7 @@ export default class PaymentSingle extends Component {
                   }
 
                   return (
-                    <div className='col-xs-8'>
+                    <div className='col-xs-8 m-t-05'>
                       {(() => {
                         if (Meteor.users.findOne(customerId)) {
                           const profile = Meteor.users.findOne(customerId).profile;
@@ -241,7 +276,7 @@ export default class PaymentSingle extends Component {
 { /* END ============================= DROPDOWN CUSTOMERS ============================== */}
 
               <div className="form-group profit col-xs-6">
-                <label htmlFor="paymentDate" className='col-xs-2'>Date</label>
+                <label htmlFor="paymentDate" className='col-xs-3'>Date</label>
                 {(() => {
                   if (this.state.editable) {
                     return (
@@ -256,14 +291,14 @@ export default class PaymentSingle extends Component {
                     )
                   }
 
-                  return <div className='col-xs-8'>{date}</div>
+                  return <div className='col-xs-8 m-t-05'>{date}</div>
                 })()}
               </div>
             </div>
 
             <div className="row">
               <div className="form-group profit col-xs-6">
-                <label htmlFor="paymentStatus" className='col-xs-2'>Status</label>
+                <label htmlFor="paymentStatus" className='col-xs-3'>Status</label>
                 {(() => {
                   if (this.state.editable) {
                     return (
@@ -285,12 +320,12 @@ export default class PaymentSingle extends Component {
                     )
                   }
 
-                  return <div className='col-xs-8'>{status}</div>
+                  return <div className='col-xs-8 m-t-05'>{status}</div>
                 })()}
               </div>
               
               <div className="form-group name col-xs-6">
-                <label htmlFor="paymentAmount" className='col-xs-2'>Amount</label>
+                <label htmlFor="paymentAmount" className='col-xs-3'>Amount</label>
                 {(() => {
                   if (this.state.editable) {
                     return (
@@ -305,18 +340,18 @@ export default class PaymentSingle extends Component {
                     )
                   }
 
-                  return <div className='col-xs-8'>{amount}</div>
+                  return <div className='col-xs-8 m-t-05'>{amount}</div>
                 })()}
               </div>
             </div>
             <div className="row">
               <div className="form-group profit col-xs-6">
-                <label htmlFor="paymentRef" className='col-xs-2'>Ref.</label>
+                <label htmlFor="paymentRef" className='col-xs-3'>Ref.</label>
                 {(() => {
                   const custId = this.state.editable ? this.state.dispPayment.customerId : customerId;
                   const custName = Meteor.users.findOne(custId) ? (Meteor.users.findOne(custId).profile.name + " profile") : '';
 
-                  return (<Link to={`/customer/${custId}`}>{custName}</Link>);
+                  return (<Link to={`/managePanel/customer/${custId}`} className="col-xs-12">{custName}</Link>);
                 })()}
               </div>
             </div>
@@ -377,28 +412,24 @@ export default class PaymentSingle extends Component {
 
 export default createContainer(({params}) => {
   Meteor.subscribe('payments');
-  Meteor.subscribe('customers');
+  Meteor.subscribe('invoices');
+  Meteor.subscribe('users');
+  Meteor.subscribe('yearwrite');
 
   let isNew = false;
   let paymentId = params.paymentId;
+  let payment = {};
 
   if (params.paymentId.indexOf('new') === 0) {
     isNew = true;
-    paymentId = params.paymentId.substring(3);
-    window.history.pushState('object or string', 'Title', `/payments/${paymentId}`);
-    // window.history.back();
-  }
-
-  const idForQuery = new Mongo.ObjectID(paymentId);
-
-  if (!idForQuery) {
-    browserHistory.push('/payments');
+  } else {
+    payment = ApiPayments.findOne(new Mongo.ObjectID(paymentId));
   }
 
   return {
-    payment: ApiPayments.findOne(idForQuery),
-    userList: Meteor.users.find().fetch(),
-    isNew: isNew
+    payment,
+    userList: Meteor.users.find({'profile.userType': 'customer'}).fetch(),
+    isNew
   }
 
 }, PaymentSingle)

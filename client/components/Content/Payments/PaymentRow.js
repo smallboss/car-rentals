@@ -28,7 +28,7 @@ export default class PaymentRow extends Component {
                         onChange={(e) => onHandleSelect(e, item)} />
                 </th>
                 <td>
-                    <Link to={`/customer/${item.customerId}`}>{ customerName ? customerName.profile.name : ''}</Link>
+                    <Link to={`/managePanel/customer/${item.customerId}`}>{ customerName ? customerName.profile.name : ''}</Link>
                 </td>
                 <td onClick={onClick} >{ item.date }</td>
                 <td onClick={onClick} >{ item.codeName }</td>

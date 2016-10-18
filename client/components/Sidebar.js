@@ -20,7 +20,7 @@ const backEndMenu = <ul className="sidebar-nav">
     <a type="button" data-toggle="dropdown">Reports
       <span className="caret"></span></a>
     <ul className="dropdown-menu">
-      <li><a href="#">Cars</a></li>
+      <li><Link to="/managePanel/cars_report">Cars</Link></li>
     </ul>
   </li>
   <li className="dropdown">

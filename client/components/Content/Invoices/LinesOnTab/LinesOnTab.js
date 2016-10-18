@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import { clone, map, reverse, cloneDeep, find } from 'lodash';
+import { clone, map, reverse, cloneDeep, find, now } from 'lodash';
 import { createContainer } from 'meteor/react-meteor-data'
 
 import { ApiCars } from '/imports/api/cars.js';
@@ -47,9 +47,10 @@ export default class LinesOnTab extends Component {
 
 // ====================== ADD = EDIT = REMOVE = SAVE ======================
     handleAddNewLine(){
+        // ApiLines.insert({_id: lineId, customerId: this.props.invoice.customerId, dateCreate: now()});
         const lineId = new Mongo.ObjectID();
-        // let custId = this.props.invoice.customerId ? this.props.invoice.customerId : ''
-        ApiLines.insert({_id: lineId, customerId: this.props.invoice.customerId});
+
+        ApiLines.insert({_id: lineId, invoiceId: this.props.invoice._id, dateCreate: now()});
         ApiInvoices.update(this.props.invoice._id, {$push: { linesId: lineId }});
 
         let selectedListId = this.state.selectedListId;
@@ -71,14 +72,12 @@ export default class LinesOnTab extends Component {
             ApiLines.remove(itemId);
         })
 
-        this.setState({selectedListId: []});
+        this.setState({selectedListId: [], isEdit: false});
     }
 
     handleSaveLine(line){
         const _id = clone(line._id);
         delete line._id;
-
-        console.log('line', line)
 
         ApiLines.update(_id, {$set: line });
 
@@ -90,16 +89,16 @@ export default class LinesOnTab extends Component {
 // END =================== ADD = EDIT = REMOVE = SAVE ======================
 
     render(){
-        let lineListId = reverse(this.props.linesId);
+        let lineListId = this.props.linesId;
 
         const RenderTableHeadButtons = () => {
             if (!this.props.readOnly) {
                 return (
                     <TableHeadButtons 
                         selectedItems={this.state.selectedListId.length}
-                        onAddNew={this.handleAddNewPayment}
-                        onEdit={this.handleEditPayments}
-                        onRemove={this.handleRemovePayments}/>
+                        onAddNew={this.handleAddNewLine}
+                        onEdit={this.handleEditLines}
+                        onRemove={this.handleRemoveLines}/>
                 )
             }
 
@@ -129,7 +128,7 @@ export default class LinesOnTab extends Component {
                         {(() => {
                             if (lineListId) {
                                 return (
-                                    reverse(lineListId).map((item, key) => {
+                                    lineListId.map((item, key) => {
                                         return (
                                             <LineTabRow key={`line-${key}`}
                                                 onSelect={this.changeSelectedItem.bind(null,item)}
@@ -165,7 +164,7 @@ export default createContainer(() => {
   Meteor.subscribe('cars');
 
   return {
-    lines: ApiLines.find().fetch(),
+    lines: ApiLines.find().fetch().reverse(),
     cars: ApiCars.find().fetch()
   };
 }, LinesOnTab);
