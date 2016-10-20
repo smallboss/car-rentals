@@ -2,10 +2,23 @@
  * Created by watcher on 10/15/16.
  */
 import React from 'react'
+import { browserHistory } from 'react-router'
 
 class Home extends React.Component {
     handlerContact (e) {
         e.preventDefault()
+        let to = 'paradoxkb@gmail.com',
+            from = e.target['email'].value,
+            subject = 'Cars Rental',
+            text = 'From ' + e.target['firstName'].value + ' ' + e.target['lastName'].value + '\n Phone: ' + e.target['phone'].value + '\n Email: ' + e.target['email'].value + ' \n ' + e.target['textContact'].value
+        Meteor.call('sendEmail', to, from, subject, text, (err, result) => {
+            if(err) {
+                alert(err)
+            } else {
+                alert('Email was sent. Our manager will be connect with You soon')
+                location.reload()
+            }            
+        })        
     }
     render () {
         return (

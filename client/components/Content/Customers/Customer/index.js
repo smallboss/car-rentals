@@ -10,8 +10,11 @@ import $ from 'jquery'
 import { browserHistory } from 'react-router'
 import { imgToBase64 } from '../../../../helpers/handlerImages'
 import Table from '../Table'
+import Fines from '../../Fines'
+import Tolls from '../../Tolls'
+import CustomerPayments from '../CustomerPayments'
 import './style.css'
-
+const DatePicker = require('react-bootstrap-date-picker')
 const _user = {
     id: new Mongo.ObjectID(),
     username: '',
@@ -45,15 +48,16 @@ const _user = {
         tolls: '',
         _images: {
             imgId: '',
-            imgLicense: ''
+            imgLicense: '',
+            imgUser: ''
         }
     }
 }
 
 class Customer extends React.Component {
-    constructor (props) {
+    constructor (props, context) {
         super(props)
-        this.state = {customer: (this.props.params.id == 'new') ? _user : props.customer || _user, editAble: 0}
+        this.state = {loginLevel: context.loginLevel, customer: (this.props.params.id == 'new') ? _user : props.customer || _user, editAble: 0}
         this.handlerEditCustomer = this.handlerEditCustomer.bind(this)
         this.handlerChildState = this.handlerChildState.bind(this)
     }
@@ -73,9 +77,10 @@ class Customer extends React.Component {
             $('#button_edit').click()
         }
     }
-    componentWillReceiveProps (nextProps) {
+    componentWillReceiveProps (nextProps, nextContext) {
         let customer = nextProps.customer
-        this.setState({customer: customer})
+            loginLevel = nextContext.loginLevel
+        this.setState({customer: customer, loginLevel})
         this.forceUpdate()
     }
     componentWillUnMount () {
@@ -89,6 +94,7 @@ class Customer extends React.Component {
         $('#' + _target).show()
     }
     handlerRemoveCustomer (id) {
+        if(this.state.loginLevel !== 3) return false
         let _confirm = confirm('Are You sure to delete this customer?')
         if(_confirm) {
             Meteor.call('removeAllUserData', id, (err) => {
@@ -205,19 +211,21 @@ class Customer extends React.Component {
         let _state,
             _id = this.state.customer._id, 
             _idPayment
-            //currentPayments = this.state.customer.profile.payments
+        //console.log(data)
         if(target == 'payments') {
             data.forEach(item => {
                 _idPayment = new Mongo.ObjectID(item._id._str)
                 if(ApiPayments.findOne({_id: _idPayment})) {
-                    delete item._id
-                    ApiPayments.update({_id: _idPayment}, {$set: item})    
+                    if(!item._toedit) delete item._id
+
+                    ApiPayments.update({_id: _idPayment}, {$set: item})                                        
                 } else {
                     Meteor.users.update({_id: _id}, {$push: {'profile.payments': _idPayment}})
                     item.customerId = _id
                     ApiPayments.insert(item)
-                }
+                }                
             })
+            this.setState({customer: this.props.customer})
             return
         }
         _state = this.state.customer
@@ -246,16 +254,6 @@ class Customer extends React.Component {
                 payments.push(finder)
             }
         }) 
-        if(payments.length == 0) {
-            payments = [ {
-                _id: new Mongo.ObjectID(),
-                amount: '',
-                customerId: _id,
-                date: '',
-                ref: '',
-                status: ''
-            }]
-        }
         return (
             <div className='panel panel-default'>
                 <div className='panel-heading'>
@@ -263,7 +261,7 @@ class Customer extends React.Component {
                     <input type='button' className='btn btn-primary p-x-1' value='Print' />
                     <input type='button' id='button_save' className='btn btn-primary p-x-1 m-x-1' value='Save' disabled={editAble} />
                     <input type='button' id='button_edit' className='btn btn-primary p-x-1' value='Edit' onClick={this.handlerEditCustomer} />
-                    <input type='button' className='btn btn-primary p-x-1 m-x-1' value='Delete' onClick={() => { this.handlerRemoveCustomer(_id) }} />
+                    {(this.state.loginLevel === 3) ? <input type='button' className='btn btn-primary p-x-1 m-x-1' value='Delete' onClick={() => { this.handlerRemoveCustomer(_id) }} /> : ''}
                 </div>
                 <div className='panel-body'>
                     <div className='row'>
@@ -298,7 +296,11 @@ class Customer extends React.Component {
                         <div className='col-xs-6'>
                             <label htmlFor='birhdate' className='col-xs-2'>Birth Date</label>
                             <div className='col-xs-8 form-horizontal'>
-                                <input type='date' id='birthDate' className='form-control' value={birthDate} disabled={editAble}/>
+                                <DatePicker dateFormat='MM/DD/YYYY' value={birthDate} name='check-picker' onChange={(date) => {
+                                let customer = this.state.customer
+                                customer.profile['birthDate'] = date.slice(0,10) 
+                                this.setState({customer: customer})
+                                }} disabled={editAble} />
                             </div>
                         </div>
                         <div className='col-xs-6'>
@@ -339,23 +341,13 @@ class Customer extends React.Component {
                                 <Table arrToTable={rentals} currentComponent='rentals' handlerChildState={this.handlerChildState} />
                             </div>
                             <div id='div_payments' className='inner-div-users-edit'>
-                                <Table arrToTable={payments} currentComponent='payments' handlerChildState={this.handlerChildState} />
+                                <CustomerPayments payments={payments} customerId={_id} />
                             </div>
                             <div id='div_fines' className='inner-div-users-edit'>
-                                <div className='form-group'>
-                                    <label htmlFor='fines' className='col-xs-2'>Fines</label>
-                                    <div className='col-xs-7'>
-                                        <input type='text' id='fines' className='form-control' value={fines} disabled={editAble} />
-                                    </div>
-                                </div>
+                                <Fines />
                             </div>
                             <div id='div_tolls' className='inner-div-users-edit'>
-                                <div className='form-group'>
-                                    <label htmlFor='tolls' className='col-xs-2'>Tolls</label>
-                                    <div className='col-xs-7'>
-                                        <input type='text' id='tolls' className='form-control' value={tolls} disabled={editAble} />
-                                    </div>
-                                </div>
+                                <Tolls />
                             </div>
                         </div>
                     </div>
@@ -363,6 +355,10 @@ class Customer extends React.Component {
             </div>
         )
     }
+}
+
+Customer.contextTypes = {
+    loginLevel: React.PropTypes.number.isRequired
 }
 
 export default createContainer(({params}) => {
@@ -380,3 +376,7 @@ export default createContainer(({params}) => {
         }
     }
 }, Customer)
+
+
+//<Table arrToTable={payments} currentComponent='payments' handlerChildState={this.handlerChildState} />
+//<input type='date' id='birthDate' className='form-control' value={birthDate} disabled={editAble}/>

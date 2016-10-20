@@ -40,6 +40,9 @@ class UserProfile extends React.Component {
             }
             imgToBase64(file, (result) => {
                 _newFile = result
+                if(!_newUser.profile._images) {
+                    _newUser.profile._images = {}
+                }
                 _newUser.profile._images[_target] = _newFile
                 this.setState({user: _newUser})
             })
@@ -120,7 +123,7 @@ class UserProfile extends React.Component {
         let { username, emails, profile } = this.state.user || '',
             email = (emails) ? emails[0].address : '';
         let { userType, name, birthDate, phone, address, _images } = (profile) ? profile : '';
-        let { imgId, imgLicense } = _images || ''
+        let { imgId, imgLicense, imgUser } = _images || ''
         return (
             <div>
                 <div className='panel panel-default'>
@@ -185,6 +188,13 @@ class UserProfile extends React.Component {
                                 <div className='col-xs-8'>
                                     <img src={imgLicense} />
                                     <input type='file' id='imgLicense' className='form-control' accept='image/*' disabled={editAble} />
+                                </div>                                
+                            </div>
+                            <div className='form-group'>
+                                <label htmlFor='imgUser' className='col-xs-4'>Image User</label>
+                                <div className='col-xs-8'>
+                                    <img src={imgUser} />
+                                    <input type='file' id='imgUser' className='form-control' accept='image/*' disabled={editAble} />
                                 </div>                                
                             </div>                            
                         </form>

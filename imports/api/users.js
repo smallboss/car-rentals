@@ -47,10 +47,29 @@ if(Meteor.isServer) {
         update: function (userId, doc, fields, modifier) {
             return true
         },
-        remove: function (userId, doc) {
+        insert: (userId, doc) => {
             return true
+        },
+        remove: (userId, doc) => {
+            let _type = Meteor.user().profile.userType
+            return (_type !== 'admin') ? false : true
         }
     })
+    //Meteor.users.remove({})
+    /*Create default user start*/
+    if(!Meteor.users.find().count()) {
+        let options = {
+            username: 'admin',
+            password: 'qqqqqq',
+            email: 'admin_rental@gmail.com',
+            profile: {
+                name: 'admin',
+                userType: 'admin'
+            }
+        }
+        Accounts.createUser(options)
+    }
+    /*Create default user end*/
     //Meteor.users.remove({})
     Meteor.publish('users', function publishUsers () {        
         return Meteor.users.find()        

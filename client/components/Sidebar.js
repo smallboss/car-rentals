@@ -28,8 +28,8 @@ const backEndMenu = <ul className="sidebar-nav">
     <a type="button" data-toggle="dropdown">Imports
       <span className="caret"></span></a>
     <ul className="dropdown-menu">
-      <li><a href="#">Fines</a></li>
-      <li><a href="#">Tolls</a></li>
+      <li><Link to="/managePanel/imports/fines">Fines</Link></li>
+      <li><Link to="/managePanel/imports/tolls">Tolls</Link></li>
     </ul>
   </li>
   <li><Link to="/managePanel/users_list">All Users</Link></li>
@@ -44,7 +44,7 @@ class Sidebar extends Component {
   componentWillReceiveProps(nextProps) {
     let loginIn = nextProps.loginIn
     if(loginIn) {
-      let loginAdmin = (loginIn.profile.userType == 'admin') ? 1 : 0
+      let loginAdmin = (loginIn.profile.userType == 'admin' || loginIn.profile.userType == 'employee') ? 1 : 0
       this.setState({loginIn: 1, loginAdmin})
     } else {
       this.setState({loginIn: 0, loginAdmin: 0})
@@ -64,8 +64,10 @@ class Sidebar extends Component {
           </div>
       )
     } else {
+      const imgUser = (this.props.loginIn.profile._images && this.props.loginIn.profile._images.imgUser) ? this.props.loginIn.profile._images.imgUser : '/img/userImage.png'
       return (
           <div id='sidebar-wrapper'>
+            <div id='circle-user' style={{backgroundImage: 'url(' + imgUser + ')'}}></div>
             <ul className='sidebar-nav'>
               <li><Link to='/user_profile' className='p-l-3'>Profile</Link></li>
               <li><Link to='/user_profile/history' className='p-l-3'>Rental History</Link></li>

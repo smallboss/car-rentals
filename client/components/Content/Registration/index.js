@@ -19,7 +19,7 @@ class Registration extends React.Component {
             return false
         }
         if (e.target[6].value != e.target[7].value){
-            alert('Введенные пароли не совпадают');
+            alert('Password repeat must be equal password');
             return false
         }
 
@@ -29,7 +29,8 @@ class Registration extends React.Component {
             _user,
             _images = {
                 imgId: '',
-                imgLicense: ''
+                imgLicense: '',
+                imgUser: ''
             }
         let fileId = _target[8].files[0] || '',
             fileLicense = _target[9].files[0] || ''

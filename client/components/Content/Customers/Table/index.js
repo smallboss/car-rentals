@@ -30,6 +30,7 @@ class Table extends React.Component {
     }
     handlerEditButtons (e, targetId) {
         let _target = e.target.name,
+            i,
             idCustomer,
             currentArray = [],
             _arrToDel = [],
@@ -62,6 +63,7 @@ class Table extends React.Component {
                 break
             case 'add_note':
                 this.setState({addNewField: 1})
+                this.forceUpdate()
                 break
             case 'edit_notes':
                 _arrToEdit = this.state.arrChecked
@@ -93,22 +95,18 @@ class Table extends React.Component {
                 currentArray.unshift(objToAdd)
                 this.props.handlerChildState(this.props.currentComponent, currentArray)
                 this.setState({arrToTable: currentArray, addNewField: 0})
+                this.forceUpdate()
                 break
             case 'save_notes':
                 currentArray = this.state.arrToTable
                 _arrToEdit = this.state.arrChecked
-                currentArray.forEach(item => {
-                    if(item._id._str == targetId) {
-                        if(item._toedit) {
-                            delete item._toedit
-                        }
-                        _arrToEdit = _arrToEdit.filter(elem => {
-                            if(elem != item._id._str) {
-                                return elem
-                            }
-                        })
+                //console.log(currentArray.filter((elem, i) => {console.log(elem); console.log(targetId);  if(elem._id._str == targetId){return i}})) 
+                currentArray.forEach(elem => {
+                    if (elem._id._str == targetId) {
+                        delete elem._toedit
                     }
                 })
+                delete _arrToEdit[_arrToEdit.indexOf(targetId)]
                 this.props.handlerChildState(this.props.currentComponent, currentArray)
                 this.setState({arrToTable: currentArray, arrChecked: _arrToEdit})
                 this.forceUpdate()
@@ -189,7 +187,7 @@ class Table extends React.Component {
                                     <td key={Math.random()} width='100'><select id='status' className='form-control'><option value='open' defaultValue>open</option><option value='close'>close</option></select></td>
                                 )
                             }
-                            if(prop != '_id' && prop != 'customerId') {
+                            if(prop != '_id' && prop != 'customerId' && prop != '_toedit') {
                                 let maxLength = (prop == 'amount' || prop == 'phone') ? '15' : ''
                                 return (
                                     <td key={Math.random()}><input type={_typeInput} id={prop} maxLength={maxLength} className='form-control' defaultValue={_defaultValue}/></td>
@@ -198,12 +196,13 @@ class Table extends React.Component {
                         }) }
                     </tr>
                     {this.state.arrToTable.map((elem, i) => {
+                        const elemId = elem._id._str
                         let _stateToTd = Object.keys(this.state.arrToTable[i], key => elem[key])
                         if(elem[_stateToTd[1]].length > 0) {
                             return (
                                 <tr key={Math.random()}>
-                                    <td><input type='checkbox' id={elem._id._str} onChange={this.handlerChecker} />
-                                        {(elem._toedit) ? <input key={Math.random()} type='button' className='btn btn-success m-l-1' name='save_notes' value='Save' onClick={(e) => {this.handlerEditButtons(e, elem._id._str)}} /> : ''}
+                                    <td><input type='checkbox' id={elemId} onChange={this.handlerChecker} />
+                                        {(elem._toedit) ? <input key={Math.random()} type='button' className='btn btn-success m-l-1' name='save_notes' value='Save' onClick={(e) => {this.handlerEditButtons(e, elemId)}} /> : ''}
                                     </td>
                                     {_stateToTd.map(val => {
                                         if(typeof elem[val] == 'string' && val != 'customerId') {

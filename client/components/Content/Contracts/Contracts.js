@@ -4,7 +4,6 @@ import { Email } from 'meteor/email'
 import { createContainer } from 'meteor/react-meteor-data';
 
 import { ApiContracts } from '/imports/api/contracts.js';
-import { ApiUsers } from '/imports/api/customers';
 
 import ContractRow from './ContractRow.js';
 import HeadList from './HeadList.js';
