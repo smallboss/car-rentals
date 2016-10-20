@@ -51,7 +51,7 @@
     position: absolute;
     background: #eeeeee ;
     overflow: hidden;
-    height: 25em;
+    height: 35em;
 }
 .sidebar-nav {
     position: absolute;
@@ -212,4 +212,15 @@
 }
 .m-t-05 {
     margin-top: 5px;
+}
+.font-weight-bold {
+    font-weight: bold;
+}
+#circle-user {
+    width: 250px;
+    height: 250px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    border-radius: 125px;
 }

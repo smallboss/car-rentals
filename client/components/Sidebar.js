@@ -63,8 +63,10 @@ class Sidebar extends Component {
           </div>
       )
     } else {
+      const imgUser = (this.props.loginIn.profile._images && this.props.loginIn.profile._images.imgUser) ? this.props.loginIn.profile._images.imgUser : '/img/userImage.png'
       return (
           <div id='sidebar-wrapper'>
+            <div id='circle-user' style={{backgroundImage: 'url(' + imgUser + ')'}}></div>
             <ul className='sidebar-nav'>
               <li><Link to='/user_profile' className='p-l-3'>Profile</Link></li>
               <li><Link to='/user_profile/history' className='p-l-3'>Rental History</Link></li>

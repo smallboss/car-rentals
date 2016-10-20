@@ -7,10 +7,11 @@ import { browserHistory } from 'react-router'
 class Home extends React.Component {
     handlerContact (e) {
         e.preventDefault()
-        let to = '',
-            from = e.target['firstName'].value + ' ' + e.target['lastName'].value,
-            text = 'From ' + e.target['firstName'].value + ' ' + e.target['lastName'].value + '\n Phone: ' + e.target['phone'].value + ' \n Email: ' + e.target['email'].value + ' \n ' + e.target['textContact'].value
-        Meteor.call('sendEmail', from, text, (err, result) => {
+        let to = 'paradoxkb@gmail.com',
+            from = e.target['email'].value,
+            subject = 'Cars Rental',
+            text = 'From ' + e.target['firstName'].value + ' ' + e.target['lastName'].value + '\n Phone: ' + e.target['phone'].value + '\n Email: ' + e.target['email'].value + ' \n ' + e.target['textContact'].value
+        Meteor.call('sendEmail', to, from, subject, text, (err, result) => {
             if(err) {
                 alert(err)
             } else {

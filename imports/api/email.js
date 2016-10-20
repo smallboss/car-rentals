@@ -3,15 +3,15 @@ import { Email } from 'meteor/email';
 
 if (Meteor.isServer) {
     Meteor.methods({
-      sendEmail: function (from, text) {
+      sendEmail: function (to, from, subject, text) {
         //check([to, from, subject, text], [String]);
         // Let other method calls from the same client start running,
         // without waiting for the email sending to complete.
         this.unblock();
         let objToSend = {
-          to: 'paradoxkb@gmail.com',
+          to,
           from,
-          subject: 'Cars Rental',
+          subject,
           text
         }
         console.log('SEND EMAIL');

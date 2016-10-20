@@ -10,8 +10,11 @@ import $ from 'jquery'
 import { browserHistory } from 'react-router'
 import { imgToBase64 } from '../../../../helpers/handlerImages'
 import Table from '../Table'
+import Fines from '../../Fines'
+import Tolls from '../../Tolls'
+import CustomerPayments from '../CustomerPayments'
 import './style.css'
-
+const DatePicker = require('react-bootstrap-date-picker')
 const _user = {
     id: new Mongo.ObjectID(),
     username: '',
@@ -45,7 +48,8 @@ const _user = {
         tolls: '',
         _images: {
             imgId: '',
-            imgLicense: ''
+            imgLicense: '',
+            imgUser: ''
         }
     }
 }
@@ -248,16 +252,6 @@ class Customer extends React.Component {
                 payments.push(finder)
             }
         }) 
-        if(payments.length == 0) {
-            payments = [ {
-                _id: new Mongo.ObjectID(),
-                amount: '',
-                customerId: _id,
-                codeName: '',
-                date: '',
-                status: ''
-            }]
-        }
         return (
             <div className='panel panel-default'>
                 <div className='panel-heading'>
@@ -300,7 +294,11 @@ class Customer extends React.Component {
                         <div className='col-xs-6'>
                             <label htmlFor='birhdate' className='col-xs-2'>Birth Date</label>
                             <div className='col-xs-8 form-horizontal'>
-                                <input type='date' id='birthDate' className='form-control' value={birthDate} disabled={editAble}/>
+                                <DatePicker dateFormat='MM/DD/YYYY' value={birthDate} name='check-picker' onChange={(date) => {
+                                let customer = this.state.customer
+                                customer.profile['birthDate'] = date.slice(0,10) 
+                                this.setState({customer: customer})
+                                }} disabled={editAble} />
                             </div>
                         </div>
                         <div className='col-xs-6'>
@@ -341,23 +339,13 @@ class Customer extends React.Component {
                                 <Table arrToTable={rentals} currentComponent='rentals' handlerChildState={this.handlerChildState} />
                             </div>
                             <div id='div_payments' className='inner-div-users-edit'>
-                                <Table arrToTable={payments} currentComponent='payments' handlerChildState={this.handlerChildState} />
+                                <CustomerPayments payments={payments} customerId={_id} />
                             </div>
                             <div id='div_fines' className='inner-div-users-edit'>
-                                <div className='form-group'>
-                                    <label htmlFor='fines' className='col-xs-2'>Fines</label>
-                                    <div className='col-xs-7'>
-                                        <input type='text' id='fines' className='form-control' value={fines} disabled={editAble} />
-                                    </div>
-                                </div>
+                                <Fines />
                             </div>
                             <div id='div_tolls' className='inner-div-users-edit'>
-                                <div className='form-group'>
-                                    <label htmlFor='tolls' className='col-xs-2'>Tolls</label>
-                                    <div className='col-xs-7'>
-                                        <input type='text' id='tolls' className='form-control' value={tolls} disabled={editAble} />
-                                    </div>
-                                </div>
+                                <Tolls />
                             </div>
                         </div>
                     </div>
@@ -382,3 +370,7 @@ export default createContainer(({params}) => {
         }
     }
 }, Customer)
+
+
+//<Table arrToTable={payments} currentComponent='payments' handlerChildState={this.handlerChildState} />
+//<input type='date' id='birthDate' className='form-control' value={birthDate} disabled={editAble}/>

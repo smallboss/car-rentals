@@ -8,6 +8,8 @@ import '../imports/api/contracts.js';
 import '../imports/api/users.js';
 import '../imports/api/email.js';
 import '../imports/api/yearWrite.js';
+import '../imports/api/fines'
+import '../imports/api/tolls'
 
 import './smtp.js';
 Meteor.startup(() => {
