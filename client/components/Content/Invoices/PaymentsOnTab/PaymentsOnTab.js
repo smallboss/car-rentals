@@ -109,6 +109,8 @@ export default class PaymentsOnTab extends Component {
         map(this.state.selectedListId, (itemId, index) => {
             invoice.paymentsId.splice(invoice.paymentsId.indexOf(itemId), 1);
             ApiInvoices.update({_id: invoice._id}, {$pull: {paymentsId: itemId}})
+            const payment = ApiPayments.findOne({_id: itemId});
+            Meteor.users.update({_id: payment.customerId}, {$pull:{"profile.payments": itemId}})
             ApiPayments.remove(itemId);
         })
 

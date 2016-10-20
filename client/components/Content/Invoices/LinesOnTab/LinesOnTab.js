@@ -49,7 +49,7 @@ export default class LinesOnTab extends Component {
     handleAddNewLine(){
         const lineId = new Mongo.ObjectID();
 
-        ApiLines.insert({_id: lineId, invoiceId: this.props.invoice._id, dateCreate: now(), amount: '100'});
+        ApiLines.insert({_id: lineId, invoiceId: this.props.invoice._id, dateCreate: now(), amount: '0'});
         ApiInvoices.update(this.props.invoice._id, {$push: { linesId: lineId }});
 
         let selectedListId = this.state.selectedListId;
@@ -79,10 +79,12 @@ export default class LinesOnTab extends Component {
         const _id = line._id;
         delete line._id;
 
-        ApiLines.update(_id, {$set: line });
+        ApiLines.update({_id: _id }, {$set: line });
+
+        // this.props.s(line);
 
         let selectedListId = this.state.selectedListId;
-        selectedListId.splice(selectedListId.indexOf(_id), 1);
+        selectedListId.splice(selectedListId.indexOf(line._id), 1);
 
         const isEdit = (selectedListId.length === 0) ? false : this.state.isEdit;
 

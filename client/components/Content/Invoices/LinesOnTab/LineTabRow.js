@@ -1,6 +1,8 @@
 import React, { Component, PropTypes } from 'react';
+import DatePicker from 'react-bootstrap-date-picker'
 import { Link } from 'react-router';
-import { map, find } from 'lodash';
+import { ApiLines } from '/imports/api/lines.js';
+import { map, find, clone} from 'lodash';
 
 export default class LineTabRow extends Component {
     constructor(props) {
@@ -14,6 +16,9 @@ export default class LineTabRow extends Component {
         this.onChangeCarName= this.onChangeCarName.bind(this);
         this.onChangeAmount = this.onChangeAmount.bind(this);
         this.sendSave = this.sendSave.bind(this);
+        this.onChangeDateFrom = this.onChangeDateFrom.bind(this);
+        this.onChangeDateTo = this.onChangeDateTo.bind(this);
+        this.onChangeDescription = this.onChangeDescription.bind(this);
     } 
 
 
@@ -32,18 +37,51 @@ export default class LineTabRow extends Component {
 
         const isEdit = (isSelected && nextProps.isEdit) ? true : false;
 
-        // if (isEdit)
-        //     console.log('ed', isSelected, isEdit, (this.state.dispLine ? this.state.dispLine.amount : ''));
 
         this.setState({dispLine, isEdit});
-        
     }
 
+
     componentDidMount() {
-        // if (this.state.isEdit != this.props.isEdit) {
-        //     // this.checkbox.checked = this.props.isEdit;
-        //     this.setState({isEdit: this.props.isEdit});
-        // }
+        let dispLine = (!this.state.dispLine)
+                                ? this.props.line 
+                                : this.state.dispLine
+
+        dispLine = dispLine ? dispLine :  this.props.line;
+
+        const nextLine =  this.props.line ?  this.props.line._id._str : '';
+        const isSelected = find( this.props.selectedListId, {_str: nextLine});
+
+        if (this.checkbox)
+            this.checkbox.checked = isSelected;
+
+        const isEdit = (isSelected &&  this.props.isEdit) ? true : false;
+
+        console.log('dispLine', dispLine);
+
+        this.setState({dispLine, isEdit});
+    }
+
+    componentWillUpdate(nextProps, nextState) {
+        /*
+        let dispLine = (!this.state.dispLine)
+                                ? this.props.line 
+                                : this.state.dispLine
+
+        dispLine = dispLine ? dispLine :  this.props.line;
+
+        const nextLine =  this.props.line ?  this.props.line._id._str : '';
+        const isSelected = find( this.props.selectedListId, {_str: nextLine});
+
+        if (this.checkbox)
+            this.checkbox.checked = isSelected;
+
+        const isEdit = (isSelected &&  this.props.isEdit) ? true : false;
+
+        console.log('dispLine', dispLine);
+
+        if (nextProps.line.length != this.props.line.length)
+        this.setState({dispLine, isEdit});*/
     }
 
 // ==================== CHANGERS FIELDS =============================
@@ -59,12 +97,12 @@ export default class LineTabRow extends Component {
     }
     onChangeDateFrom(value){
         let newLine = this.state.dispLine;
-        newLine.dateFrom = value;
+        newLine.dateFrom = value.slice(0, 10);
         this.setState({dispLine: newLine});
     }
     onChangeDateTo(value){
         let newLine = this.state.dispLine;
-        newLine.dateTo = value;
+        newLine.dateTo = value.slice(0, 10);
         this.setState({dispLine: newLine});
     }
     onChangeAmount(value){
@@ -81,17 +119,17 @@ export default class LineTabRow extends Component {
         this.setState({dispLine: newLine});
     }
 
-    sendSave(dispLine) {
-        const line = this.state.dispLine;
+    sendSave(e) {
+        const line = clone(this.state.dispLine);
         console.log('linelineline', line);
+
+      
         this.props.onSave(line);
     }
 
 // END ================ CHANGERS FIELDS =============================
 
     render(){
-        // console.log('line', this.state.dispLine);
-
         let line = this.props.line ? this.props.line : {};
         let dispLine = this.state.dispLine;
         const cars = this.props.cars ? this.props.cars : [];
@@ -162,9 +200,8 @@ export default class LineTabRow extends Component {
         const showDate = () => {
             if (this.state.isEdit){
                 return(
-                    <input  type="date"
-                            value={dispLine.date}
-                            onChange={(e) => this.onChangeDate(e.target.value)} />
+                    <DatePicker value={dispLine.date}
+                                onChange={this.onChangeDate}/>
                 )
             }
 
@@ -182,9 +219,8 @@ export default class LineTabRow extends Component {
         const showDateFrom = () => {
             if (this.state.isEdit){
                 return(
-                    <input  type="date"
-                            value={dispLine.dateFrom}
-                            onChange={(e) => this.onChangeDateFrom(e.target.value)} />
+                    <DatePicker value={dispLine.dateFrom}
+                                onChange={ this.onChangeDateFrom } />
                 )
             }
 
@@ -193,9 +229,8 @@ export default class LineTabRow extends Component {
         const showDateTo = () => {
             if (this.state.isEdit){
                 return(
-                    <input  type="date"
-                            value={dispLine.dateTo}
-                            onChange={(e) => this.onChangeDateTo(e.target.value)} />
+                    <DatePicker value={dispLine.dateTo}
+                                onChange={ this.onChangeDateTo } />
                 )
             }
 
@@ -231,10 +266,8 @@ export default class LineTabRow extends Component {
             return <span>{(line && line.amount) ? line.amount : '0'}</span>
         }
 
-
         return(
             <tr className="LineTabRow">
-            {/*
                 <th>
                     <input  type="checkbox" 
                             onChange={() => this.props.onSelect(line._id)}
@@ -249,22 +282,6 @@ export default class LineTabRow extends Component {
                 <td>{ showDateFrom() }</td>
                 <td>{ showDateTo() }</td>
                 <td>{ showPeriod() }</td>
-                <td>{ showAmount() }</td>
-            */}
-                <th>
-                    <input  type="checkbox" 
-                            onChange={() => this.props.onSelect(line._id)}
-                            ref={(ref) => this.checkbox = ref}/>
-                </th>
-                <td>
-                    { buttonSave() }
-                    { showItem() }
-                </td>
-                <td>{  }</td>
-                <td>{  }</td>
-                <td>{  }</td>
-                <td>{  }</td>
-                <td>{  }</td>
                 <td>{ showAmount() }</td>
             </tr>
         )

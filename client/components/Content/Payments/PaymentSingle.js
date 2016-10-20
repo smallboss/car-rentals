@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor'
 import { Mongo } from 'meteor/mongo'
 import { Link } from 'react-router';
+import DatePicker from 'react-bootstrap-date-picker'
 import { createContainer } from 'meteor/react-meteor-data'
 import { ApiPayments } from '/imports/api/payments.js'
 import { ApiUsers } from '/imports/api/users'
@@ -54,7 +55,16 @@ export default class PaymentSingle extends Component {
   }
   onChangeAmount(value) {
     let newPayment = this.state.dispPayment;
-    newPayment.amount = value;
+    value = (value!='' && isNaN(parseInt(value))) ? '0' : value;
+    let isDepr = false;
+
+    isDepr = ((parseInt(value) < 0) || 
+              (value.indexOf('e') != -1) || 
+              (value.indexOf('E') != -1) ||  
+              (value.length > 5));
+
+    newPayment.amount = isDepr ?  newPayment.amount : value;
+
     this.setState({dispPayment: newPayment});
   }
   onChangeStatus(value) {
@@ -69,7 +79,7 @@ export default class PaymentSingle extends Component {
   }
   onChangeDate(value) {
     let newPayment = this.state.dispPayment;
-    newPayment.date = value;
+    newPayment.date = value.slice(0, 10);
     this.setState({dispPayment: newPayment});
   }
   onChangeRef(value) {
@@ -98,7 +108,9 @@ export default class PaymentSingle extends Component {
       dataDispPayment = clone(nextProps.payment)
     }
 
-    const allowSave = this.state.editable ? this.state.allowSave : c.customerId;
+    const allowSave = this.state.editable
+                            ? this.state.allowSave
+                            : c ? c.customerId : '';
 
     c = nextProps.payment;
 
@@ -284,12 +296,9 @@ export default class PaymentSingle extends Component {
                   if (this.state.editable) {
                     return (
                       <div className='col-xs-8 form-horizontal'>
-                        <input
-                          type="date"
-                          id="paymentDate"
-                          className="form-control "
-                          onChange={(e) => this.onChangeDate(e.target.value)}
-                          value={ this.state.dispPayment.date }/>
+                        <DatePicker
+                              onChange={ this.onChangeDate }
+                              value={ this.state.dispPayment.date }/>
                       </div>
                     )
                   }
@@ -334,7 +343,9 @@ export default class PaymentSingle extends Component {
                     return (
                       <div className='col-xs-8 form-horizontal'>
                         <input
-                          type="text"
+                          type="number"
+                          min="0"
+                          max="99999"
                           id="paymentAmount"
                           className="form-control "
                           onChange={(e) => this.onChangeAmount(e.target.value)}

@@ -2,8 +2,10 @@ import { Meteor } from 'meteor/meteor'
 import { Mongo } from 'meteor/mongo'
 import { Link } from 'react-router';
 import { createContainer } from 'meteor/react-meteor-data'
+import DatePicker from 'react-bootstrap-date-picker'
 import { ApiInvoices } from '/imports/api/invoices.js'
 import { ApiPayments } from '/imports/api/payments.js'
+import { ApiLines } from '/imports/api/lines.js'
 import { ApiUsers } from '/imports/api/customers'
 import { ApiContracts } from '/imports/api/contracts'
 import { ApiYearWrite } from '/imports/api/yearWrite'
@@ -58,17 +60,17 @@ export default class InvoiceSingle extends Component {
   }
   onChangeStatus(value) {
     let newInvoice = this.state.dispInvoice;
-    newInvoice.status = value;
+    newInvoice.status = status;
     this.setState({dispInvoice: newInvoice});
   }
   onChangeDate(value) {
     let newInvoice = this.state.dispInvoice;
-    newInvoice.date = value;
+    newInvoice.date = value.slice(0, 10);
     this.setState({dispInvoice: newInvoice});
   }
   onChangeDueDate(value) {
     let newInvoice = this.state.dispInvoice;
-    newInvoice.dueDate = value;
+    newInvoice.dueDate = value.slice(0, 10);
     this.setState({dispInvoice: newInvoice});
   }
   onChangeNotes(value) {
@@ -113,8 +115,8 @@ export default class InvoiceSingle extends Component {
 
     if(this.state.isNew){
       invoiceId = new Mongo.ObjectID();
-      newInvoice._id = this.props.contract._id;
-      newInvoice.contractId = this.props.contractId;
+      newInvoice._id = invoiceId;
+      if (this.props.contract) newInvoice.contractId = this.props.contract._id;
       ApiInvoices.insert(newInvoice);
 
       let yearWrite = ApiYearWrite.findOne({year: '2016'});
@@ -166,9 +168,9 @@ export default class InvoiceSingle extends Component {
       })
     }
 
-console.log(this.props.contract, this.state.isNew);
+
     if (this.props.contract) {
-      ApiContracts.update({_id: this.props.contractId}, {$addToSet: { invoicesId: invoiceId}});
+      ApiContracts.update({_id: this.props.contract._id}, {$addToSet: {invoicesId: invoiceId}});
     }
     Meteor.users.update({_id: newInvoice.customerId}, {$addToSet: { "profile.invoices": invoiceId}});
     if (this.state.isNew) browserHistory.push(`/managePanel/invoices/${invoiceId}`);
@@ -186,14 +188,19 @@ console.log(this.props.contract, this.state.isNew);
   handleDelete() {
     browserHistory.push('/managePanel/invoices');
 
-    map(newInvoice.paymentsId, (el) => {
-      Meteor.users.update({_id: this.state.invoice.customerId}, {$pull: { "profile.payments": el}});
+    map(this.state.invoice.paymentsId, (el) => {
+      const payment = ApiPayments.findOne({_id: el});
+      Meteor.users.update({_id: payment.customerId}, {$pull: { "profile.payments": el}});
       ApiPayments.remove({_id: el});
     })
 
+    map(this.state.invoice.linesId, (el) => {
+      ApiLines.remove({_id: el});
+    })
 
-    ApiContracts.update({_id: this.state.invoice.customerId}, {$pull: { "profile.paymentsId": this.state.invoice._id}});
-    Meteor.users.update({_id: this.state.invoice.customerId}, {$pull: { "profile.payments": this.state.invoice._id}});
+
+    ApiContracts.update({_id: this.state.invoice.contractId}, {$pull: { "profile.invoicesId": this.state.invoice._id}});
+    Meteor.users.update({_id: this.state.invoice.customerId}, {$pull: { "profile.invoices": this.state.invoice._id}});
     ApiInvoices.remove(this.state.invoice._id);
   }
 
@@ -210,7 +217,6 @@ console.log(this.props.contract, this.state.isNew);
     const allowSave = this.props.invoice ? this.props.invoice.customerId : undefined;
     this.setState({allowSave});
   }
-
 
 
   render() {
@@ -304,12 +310,7 @@ console.log(this.props.contract, this.state.isNew);
                   if (this.state.editable) {
                     return (
                       <div className='col-xs-8 form-horizontal'>
-                        <input
-                          type="date"
-                          id="invoceDate"
-                          className="form-control "
-                          onChange={(e) => this.onChangeDate(e.target.value)}
-                          value={ this.state.dispInvoice.date }/>
+                        <DatePicker value={this.state.dispInvoice.date} onChange={this.onChangeDate} />
                       </div>
                     )
                   }
@@ -353,12 +354,7 @@ console.log(this.props.contract, this.state.isNew);
                   if (this.state.editable) {
                     return (
                       <div className='col-xs-8 form-horizontal'>
-                        <input
-                          type="date"
-                          id="invoiceDueDate"
-                          className="form-control "
-                          onChange={(e) => this.onChangeDueDate(e.target.value)}
-                          value={ this.state.dispInvoice.dueDate }/>
+                        <DatePicker value={this.state.dispInvoice.dueDate} onChange={this.onChangeDueDate} />
                       </div>
                     )
                   }
@@ -387,11 +383,11 @@ console.log(this.props.contract, this.state.isNew);
               {
                 <LinesOnTab 
                     invoice={cloneDeep(this.state.invoice)}
-                    linesId={ clone(this.state.invoice.linesId 
+                    linesId={cloneDeep(this.state.invoice.linesId 
                                         ? this.state.invoice.linesId 
-                                        : []).reverse() 
+                                        : [])
                             }
-                    readOnly={!this.state.invoice.customerId}/>
+                    readOnly={!this.state.invoice.customerId} />
               }
               </div>
               <div role="tabpanel" className="tab-pane p-x-1" id="payments">
@@ -436,7 +432,7 @@ console.log(this.props.contract, this.state.isNew);
               <PaymentsOnTab 
                       invoice={cloneDeep(this.state.invoice)}
                       paymentsId={this.state.invoice.paymentsId}
-                      readOnly={true}/>
+                      readOnly={true} />
             </div>
           </div>                    
         </div>
@@ -453,6 +449,7 @@ export default createContainer(({params}) => {
   Meteor.subscribe('users');
   Meteor.subscribe('yearwrite');
   Meteor.subscribe('contracts');
+  Meteor.subscribe('lines');
 
 
   let isNew = false;

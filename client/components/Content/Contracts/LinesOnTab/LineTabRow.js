@@ -25,6 +25,7 @@ export default class LineTabRow extends Component {
 
         const nextLine = nextProps.line ? nextProps.line._id._str : '';
         const isSelected = find(nextProps.selectedListId, {_str: nextLine});
+        
         if (this.checkbox)
             this.checkbox.checked = isSelected;
 
@@ -46,12 +47,12 @@ export default class LineTabRow extends Component {
     }
     onChangeDateFrom(value){
         let newLine = this.state.dispLine;
-        newLine.dateFrom = value;
+        newLine.dateFrom = value.splice(0, 10);
         this.setState({dispLine: newLine});
     }
     onChangeDateTo(value){
         let newLine = this.state.dispLine;
-        newLine.dateTo = value;
+        newLine.dateTo = value.splice(0, 10);
         this.setState({dispLine: newLine});
     }
     onChangeAmount(value){
@@ -83,38 +84,9 @@ export default class LineTabRow extends Component {
         }
 
         const showItem = () => {
-            if (this.state.isEdit){
-                return(
-                    <select className=' form-control' onChange={(e) => this.onChangeCarName(e.target.value)}>
-                          {(() => {
-                            if (car) {
-                              
-                            return (    
-                              <option 
-                                className='' 
-                                value={car._id}>{ car.name }
-                              </option>
-                            )}
-
-                          })()}
-                          {
-                            cars.map((el, key) => {
-                                const carHelp = car ? car : {}
-                                if (el._id != carHelp._id) {
-                                  return (
-                                    <option 
-                                      key={`car-${key}`} 
-                                      value={el._id._str}>{el.name}</option>
-                                  )
-                                }
-                                return undefined;
-                              }
-                            )}
-                        </select>
-                )
-            }
-
-            return <span>{car ? car.name : ''}</span>
+            return <Link to={`/managePanel/invoices/${this.props.invId._str}`}>
+                        {this.props.codeName}
+                   </Link>
         }
 
         const showDescription = () => {

@@ -1,10 +1,12 @@
 import { Meteor } from 'meteor/meteor'
 import { Mongo } from 'meteor/mongo'
 import { Link } from 'react-router';
+import DatePicker from 'react-bootstrap-date-picker'
 import { createContainer } from 'meteor/react-meteor-data'
 import { ApiInvoices } from '/imports/api/invoices.js'
 import { ApiUsers } from '/imports/api/users'
 import { ApiContracts } from '/imports/api/contracts'
+import { ApiLines } from '/imports/api/lines'
 import { ApiYearWrite } from '/imports/api/yearWrite.js';
 import LinesOnTab from './LinesOnTab/LinesOnTab.js';
 import InvSettings from './InvSettings.js';
@@ -12,7 +14,7 @@ import HeadSingle from './HeadSingle.js';
 import TopDetailsTable from './TopDetailsTable.js';
 import { browserHistory } from 'react-router';
 import React, { Component } from 'react';
-import { clone, cloneDeep, reverse, concat } from 'lodash';
+import { clone, cloneDeep, reverse, concat, find } from 'lodash';
 
 import { contractStateTypes } from '/imports/startup/typesList.js';
 
@@ -31,6 +33,12 @@ export default class ContractSingle extends Component {
       customerList: this.props.customerList,
       managerList: this.props.managerList,
 
+      invs: [],
+      amount: 0,
+      invoices: 0,
+      remaining: 0,
+      toinvoice: 0,
+
       editable: this.props.isNew
     }
 
@@ -44,6 +52,7 @@ export default class ContractSingle extends Component {
     this.onChangeNotes = this.onChangeNotes.bind(this);
     this.onChangeStatus = this.onChangeStatus.bind(this);
     this.handleSave = this.handleSave.bind(this);
+    this.handlePrint = this.handlePrint.bind(this);
     this.handleEdit = this.handleEdit.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
     this.handleSendByEmail = this.handleSendByEmail.bind(this);
@@ -56,7 +65,6 @@ export default class ContractSingle extends Component {
 
 // ====================== ON CHANGE ======================
   onChangeGenAuto(checked) {
-    console.log(checked);
     let newContract = this.state.dispContract;
     newContract.genAuto = checked;
     this.setState({dispContract: newContract});
@@ -71,7 +79,6 @@ export default class ContractSingle extends Component {
     newContract.repeatNumb = value;
     this.setState({dispContract: newContract});
   }
-
   onChangeTitle(value) {
     let newContract = this.state.dispContract;
     newContract.title = value;
@@ -95,12 +102,12 @@ export default class ContractSingle extends Component {
   }
   onChangeStartDate(value) {
     let newContract = this.state.dispContract;
-    newContract.startDate = value;
+    newContract.startDate = value.slice(0, 10);
     this.setState({dispContract: newContract});
   }
   onChangeEndDate(value) {
     let newContract = this.state.dispContract;
-    newContract.endDate = value;
+    newContract.endDate = value.slice(0, 10);
     this.setState({dispContract: newContract});
   }
   onChangeStatus(value) {
@@ -142,10 +149,83 @@ export default class ContractSingle extends Component {
 
     c = nextProps.contract;
 
+
+    // ================
+      let linesId = [];
+      let invs = [];
+      let nextLines = [];
+      let nextTime = 0;
+
+      if (nextProps.contract && nextProps.contract.invoicesId) {
+        nextProps.contract.invoicesId.map((el) => {
+          const invoice = find(nextProps.invoices, ['_id', el]);
+          const codeName = invoice ? invoice.codeName : '';
+          const status = invoice ? invoice.status : '';
+          const length = (invoice && invoice.linesId) ? invoice.linesId.length : 0
+          invs.push({_id: el, codeName, numb: length, status});
+          linesId = linesId.concat(invoice ? invoice.linesId : []);
+
+          const date = invoice ? invoice.date : '';
+          if ((!nextTime || nextTime > new Date(date).getTime())) {
+            if (!isNaN((new Date(date)).getTime())) {
+
+              nextLines = invoice ? invoice.linesId : [];
+            }
+          }
+        })
+      }
+
+
+      let lines = [];
+      let amount = 0;
+      let invoices = 0;
+      let remaining = 0;
+      let toinvoice = 0;
+      
+      if (nextLines){
+        nextLines.map((el) => {
+          let line = find(nextProps.lines, ['_id', el]);
+          toinvoice += parseInt(line ? line.amount : 0);
+        })
+      }
+      
+
+      let inv = cloneDeep(invs);
+
+      if (linesId.length && nextProps.lines.length) {
+        linesId.map((el) => {
+          let line = find(nextProps.lines, ['_id', el]);
+          amount += parseInt(line ? line.amount : 0);
+          lines.push(line);
+          let status;
+          if (inv[0]) {
+              status = inv[0].status;
+              inv[0].numb--;
+              if (inv[0].numb === 0) inv.splice(0, 1);
+          }
+
+          console.log('line', line, status);
+
+          if (status === 'paid') invoices += parseInt(line ? line.amount : 0);
+          if (status === 'open' || !status) {
+            console.log('---');
+            remaining += parseInt(line ? line.amount : 0);
+          }
+        })
+      }
+    // ================
+
+
     this.setState({
       contract: clone(c),
       dispContract: dataDispContract,
-      allowSave
+      allowSave,
+      amount, 
+      invoices,
+      remaining,
+      toinvoice,
+      lines, 
+      invs
     });
   }
 
@@ -197,7 +277,8 @@ export default class ContractSingle extends Component {
     }
 
 
-    Meteor.users.update({_id: newContract.contractId}, {$addToSet: { "profile.contracts": contractId}});
+    Meteor.users.update({_id: newContract.customerId}, {$addToSet: { "profile.contracts": contractId}});
+    Meteor.users.update({_id: newContract.managerId}, {$addToSet: { "profile.contracts": contractId}});
     if (this.state.isNew) browserHistory.push(`/managePanel/contracts/${contractId}`);
     this.setState({contract: newContract, dispContract: newContract, editable: false, isNew: false});
   }
@@ -213,7 +294,32 @@ export default class ContractSingle extends Component {
   handleDelete() {
     browserHistory.push('/managePanel/contracts');
 
-    // Meteor.users.update({_id: this.state.payment.customerId}, {$pull: { "profile.payments": this.state.payment._id}});
+    let paymentsId = [];
+    let linesId = [];
+    let invs = cloneDeep(this.state.invs);
+
+    invs.map((el) => {
+      const inv = find(this.props.invoices, {_id: el._id });
+      paymentsId = paymentsId.concat(inv.paymentsId);
+      linesId = linesId.concat(inv.linesId);
+      const customerId = inv.customerId;
+      Meteor.users.update({_id: customerId}, {$pull: { 'profile.invoices': el }})
+      ApiInvoices.remove({_id: el});
+    })
+
+    // REMOVE PAYMENTS ========================
+    paymentsId.map((el) => {
+      const customerId = ApiPayments.find({_id: el}).customerId;
+      Meteor.users.update({_id: customerId}, {$pull: { 'profile.payments': el }})
+      ApiPayments.remove({_id: el});
+    })
+    // REMOVE LINES ========================
+    linesId.map((el) => {
+      ApiLines.remove({_id: el});
+    })
+
+    Meteor.users.update({_id: this.state.contract.customerId}, {$pull: { "profile.contracts": this.state.contract._id}});
+    Meteor.users.update({_id: this.state.contract.managerId}, {$pull: { "profile.contracts": this.state.contract._id}});
     ApiContracts.remove(this.state.contract._id);
   }
 
@@ -221,10 +327,9 @@ export default class ContractSingle extends Component {
     console.log('SEND BY EMAIL >>>>')
   }
 
-  componentWillMount() {
-    this.inputGenAuto = {};
+  handlePrint(){
+    console.log('PRINT >>>>')
   }
-
 
   componentDidMount() {
     if (this.buttonEdit) {
@@ -235,9 +340,6 @@ export default class ContractSingle extends Component {
                             ? (this.props.contract.customerId && this.props.contract.managerId)
                             : undefined;
 
-
-    this.inputGenAuto.checked = this.state.contract ? this.state.contract.genAuto : false;
-
     this.setState({allowSave});
   }
 
@@ -246,7 +348,8 @@ export default class ContractSingle extends Component {
 
     const renderHeadSingle = () => {
       return (
-        <HeadSingle onSave={this.handleSave}
+        <HeadSingle onPrint={this.handlePrint}
+                    onSave={this.handleSave}
                     onEdit={this.handleEdit}
                     onDelete={this.handleDelete}
                     onSendByEmail={this.handleSendByEmail}
@@ -292,12 +395,9 @@ export default class ContractSingle extends Component {
         if (this.state.editable) {
           return (
             <div className='col-xs-8 form-horizontal'>
-              <input
-                type="date"
-                id="startDate"
-                className="form-control "
-                onChange={(e) => this.onChangeStartDate(e.target.value)}
-                value={ this.state.dispContract.startDate }/>
+              <DatePicker
+                    onChange={ this.onChangeStartDate }
+                    value={ this.state.dispContract.startDate }/>
             </div>
           )
         }
@@ -309,12 +409,9 @@ export default class ContractSingle extends Component {
         if (this.state.editable) {
           return (
             <div className='col-xs-8 form-horizontal'>
-              <input
-                type="date"
-                id="startDate"
-                className="form-control "
-                onChange={(e) => this.onChangeEndDate(e.target.value)}
-                value={ this.state.dispContract.endDate }/>
+              <DatePicker
+                    onChange={ this.onChangeEndDate }
+                    value={ this.state.dispContract.endDate }/>
             </div>
           )
         }
@@ -345,7 +442,6 @@ export default class ContractSingle extends Component {
 
         return <div className='col-xs-8 m-t-05'>{status}</div>
       }
-
 
       const renderCustomer = () => {
         if (this.state.editable) {
@@ -395,7 +491,6 @@ export default class ContractSingle extends Component {
         )
       }
 
-
       const renderManager = () => {
         if (this.state.editable) {
           return (
@@ -444,7 +539,6 @@ export default class ContractSingle extends Component {
           </div>
         )
       }
-
 
       const renderTopFields = () => {
         return (
@@ -501,21 +595,11 @@ export default class ContractSingle extends Component {
 
 
       const renderInvoiceLinesTable = () => {
-
-        let linesId = [];
-
-        if (this.props.contract.invoicesId) {
-          this.props.contract.invoicesId.map((el) => {
-            let invoice = ApiInvoices.findOne({_id: el});
-            linesId = linesId.concat(invoice ? invoice.linesId : []);
-          })
-        }
-
         return (
-          <LinesOnTab 
-              invoice={this.state.invoice}
-              linesId={reverse(clone(linesId))}
-              readOnly={true}/>
+            <LinesOnTab 
+                invoices={reverse(clone(this.state.invs))}
+                lines={reverse(clone(this.state.lines))}
+                readOnly={true} />
         )
       }
 
@@ -532,7 +616,11 @@ export default class ContractSingle extends Component {
             </ul>
             <div className="tab-content">
               <div role="tabpanel" className="tab-pane p-x-1 active" id="details">
-                <TopDetailsTable />
+                <TopDetailsTable 
+                    amount={this.state.amount}
+                    invoices={this.state.invoices}
+                    remaining={this.state.remaining}
+                    toinvoice={this.state.toinvoice} />
 
                 <h3>Invoicing settings</h3>
                 {(() => {
@@ -545,7 +633,7 @@ export default class ContractSingle extends Component {
                                 editable={this.state.editable}/>
                   else 
                     return <InvSettings
-                                contract={this.state.contract} 
+                                contract={this.state.dispContract}
                                 editable={this.state.editable}/>
                 })()}
 
@@ -610,6 +698,7 @@ export default createContainer(({params}) => {
   Meteor.subscribe('users');
   Meteor.subscribe('invoices');
   Meteor.subscribe('yearwrite');
+  Meteor.subscribe('lines');
 
   let isNew = false;
   let contractId = params.contractId;
@@ -621,10 +710,17 @@ export default createContainer(({params}) => {
     contract = ApiContracts.findOne(new Mongo.ObjectID(contractId));
   }
 
+  const invoices = ApiInvoices.find({}).fetch();
+
+  // console.log('invoices', invoices);
+  // console.log('line', ApiLines.find({}).fetch());
+
   return {
     contract,
     customerList: Meteor.users.find({'profile.userType': 'customer'}).fetch(),
     managerList: Meteor.users.find({'profile.userType': {$in:["admin","employee"]}}).fetch(),
+    invoices,
+    lines: ApiLines.find({}).fetch(),
     isNew
   }
 

@@ -1,4 +1,5 @@
 import React, { Component, PropTypes } from 'react';
+import DatePicker from 'react-bootstrap-date-picker'
 import { map, find } from 'lodash';
 import { Link } from 'react-router';
 
@@ -38,12 +39,22 @@ export default class PaymentTabRow extends Component {
 // ==================== CHANGERS FIELDS =============================
     onChangeDate(value){
         let newPayment = this.state.dispPayment;
-        newPayment.date = value;
+        newPayment.date = value.slice(0, 10);
         this.setState({dispPayment: newPayment});
     }
     onChangeAmount(value){
         let newPayment = this.state.dispPayment;
-        newPayment.amount = value;
+        value = (value!='' && isNaN(parseInt(value))) ? '0' : value;
+        let isDepr = false;
+
+        isDepr = ((parseInt(value) < 0) || 
+                  (value.indexOf('e') != -1) || 
+                  (value.indexOf('E') != -1) ||  
+                  (value.length > 5));
+
+        newPayment.amount = isDepr ?  newPayment.amount : value;
+
+
         this.setState({dispPayment: newPayment});
     }
     onChangeStatus(value){
@@ -75,16 +86,15 @@ export default class PaymentTabRow extends Component {
         const showPaymentId = () => {
             const paymentCodeName = payment ? payment.codeName : '';
             const paymentIdStr = payment ? payment._id._str : '';
-            return (<Link to={`managePanel/payments/${paymentIdStr}`}>{paymentCodeName}</Link>)
+            return (<Link to={`/managePanel/payments/${paymentIdStr}`}>{paymentCodeName}</Link>)
         }
 
 
         const showDate = () => {
             if (this.state.isEdit){
                 return(
-                    <input  type="date"
-                            value={dispPayment.date}
-                            onChange={(e) => this.onChangeDate(e.target.value)} />
+                    <DatePicker value={dispPayment.date}
+                                onChange={ this.onChangeDate } />
                 )
             }
 
@@ -94,7 +104,9 @@ export default class PaymentTabRow extends Component {
         const showAmount = () => {
             if (this.state.isEdit){
                 return(
-                    <input  type="text"
+                    <input  type="number"
+                            min="0"
+                            max="99999"
                             value={dispPayment.amount}
                             onChange={(e) => this.onChangeAmount(e.target.value)} />
                 )

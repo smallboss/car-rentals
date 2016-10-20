@@ -4,7 +4,6 @@ import { createContainer } from 'meteor/react-meteor-data'
 
 import { ApiCars } from '/imports/api/cars.js';
 import { ApiLines } from '/imports/api/lines.js';
-import { ApiInvoices } from '/imports/api/invoices.js';
 import TableHeadButtons from './TableHeadButtons.js';
 import LineTabRow from './LineTabRow.js';
 
@@ -14,6 +13,7 @@ export default class LinesOnTab extends Component {
 
         this.state = {
             selectedListId: [],
+            invoices: this.props.invoices,
             isEdit: false
         }
 
@@ -22,7 +22,7 @@ export default class LinesOnTab extends Component {
         this.handleEditLines = this.handleEditLines.bind(this);
         this.handleRemoveLines = this.handleRemoveLines.bind(this);
         this.handleSaveLine = this.handleSaveLine.bind(this);
-    }   
+    }
 
 
     changeSelectedItem(itemId) {
@@ -48,7 +48,7 @@ export default class LinesOnTab extends Component {
 // ====================== ADD = EDIT = REMOVE = SAVE ======================
     handleAddNewLine(){
         const lineId = new Mongo.ObjectID();
-        console.log('now', now());
+
         ApiLines.insert({_id: lineId, customerId: this.props.invoice.customerId, dateCreate: now()});
         ApiInvoices.update(this.props.invoice._id, {$push: { linesId: lineId }});
 
@@ -78,8 +78,6 @@ export default class LinesOnTab extends Component {
         const _id = clone(line._id);
         delete line._id;
 
-        console.log('line', line)
-
         ApiLines.update(_id, {$set: line });
 
         let selectedListId = this.state.selectedListId;
@@ -90,14 +88,13 @@ export default class LinesOnTab extends Component {
 // END =================== ADD = EDIT = REMOVE = SAVE ======================
 
     render(){
-        let lineListId = this.props.linesId;
+        let lines = this.props.lines;
 
         return(
             <div>
                 <table className="table table-bordered table-hover">
                     <thead>
                         <tr>
-                            
                             {(() => {
                                 if (!this.props.readOnly) {
                                     return <th><input type="checkbox" disabled/></th>
@@ -116,13 +113,28 @@ export default class LinesOnTab extends Component {
 
                     <tbody>
                         {(() => {
-                            if (lineListId) {
+                            // console.log('this.props.lines', this.props.lines);
+                            if (lines) {
+                                let inv = cloneDeep(this.props.invoices);
+                                console.log('inv======', inv);
                                 return (
-                                    lineListId.map((item, key) => {
+                                    lines.map((item, key) => {
+                                        console.log(item);
+                                        let codeName = '';
+                                        let invId = {};
+                                        if (inv[0]) {
+                                            invId = inv[0]._id;
+                                            codeName = inv[0].codeName;
+                                            inv[0].numb--;
+                                            if (inv[0].numb === 0) inv.splice(0, 1);
+                                        }
+                                        
                                         return (
                                             <LineTabRow key={`line-${key}`}
+                                                invId={invId}
+                                                codeName={codeName}
                                                 onSelect={this.changeSelectedItem.bind(null,item)}
-                                                line={clone(ApiLines.findOne({_id: item}))}
+                                                line={item}
                                                 onSave={this.handleSaveLine}
                                                 selectedListId={this.state.selectedListId}
                                                 isEdit={this.state.isEdit}
@@ -140,21 +152,15 @@ export default class LinesOnTab extends Component {
     }
 }
 
-LinesOnTab.propTypes = {
-  lines: PropTypes.array.isRequired,
-};
-
 LinesOnTab.contextTypes = {
   router: React.PropTypes.object.isRequired
 }
 
 
 export default createContainer(() => {
-  Meteor.subscribe('lines');
   Meteor.subscribe('cars');
 
   return {
-    lines: ApiLines.find().fetch(),
     cars: ApiCars.find().fetch()
   };
 }, LinesOnTab);
