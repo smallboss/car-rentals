@@ -21,6 +21,8 @@ export default class InvSettings extends Component {
 
     render(){
 
+      const { amount, invoices, remaining, toinvoice } = this.props;
+
         return (
           <div className="TopDetailsTable">
             <table className="table table-bordered table-hover">
@@ -34,10 +36,10 @@ export default class InvSettings extends Component {
               </thead>
               <tbody>
                 <tr>
-                  <td>Amount</td>
-                  <td>Invoices</td>
-                  <td>Remaining</td>
-                  <td>To invoice</td>
+                  <td>{ amount }</td>
+                  <td>{ invoices }</td>
+                  <td>{ remaining }</td>
+                  <td>{ toinvoice }</td>
                 </tr>
               </tbody>
             </table>

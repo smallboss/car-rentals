@@ -4,6 +4,7 @@ import { browserHistory } from 'react-router'
 import { createContainer } from 'meteor/react-meteor-data';
 
 import { ApiInvoices } from '/imports/api/invoices.js';
+import { ApiPayments } from '/imports/api/payments.js';
 import { ApiUsers } from '/imports/api/customers'
 import { ApiLines } from '/imports/api/lines.js';
 import InvoiceRow from './InvoiceRow.js';
@@ -62,7 +63,20 @@ class Invoices extends Component {
 
   removeInvoices() {
     this.state.selectedInvoicesID.map((invoiceID) => {
+      const invoice = ApiInvoices.findOne(new Mongo.ObjectID(invoiceID));
       ApiInvoices.remove(new Mongo.ObjectID(invoiceID));
+      Meteor.users.update({_id: invoice.customerId}, {$pull: { "profile.invoices": new Mongo.ObjectID(invoiceID)}});
+
+      map(invoice.paymentsId, (el) => {
+        const payment = ApiPayments.findOne({_id: el});
+        const customer = Meteor.users.findOne({ "profile.payments": el});
+        Meteor.users.update({_id: customer._id}, {$pull: { "profile.payments": el}});
+        ApiPayments.remove({_id: el});
+      })
+
+      map(invoice.linesId, (el) => {
+        ApiLines.remove({_id: el});
+      })
     })
 
     this.setState({selectedInvoicesID: []});

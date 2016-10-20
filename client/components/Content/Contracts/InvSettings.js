@@ -95,7 +95,19 @@ export default class InvSettings extends Component {
                 })()*/}
               </div>
               <div className="form-group profit col-xs-12">
-                <Link to="/managePanel/invoices/new" target="_blank">Create invoices</Link>
+              {(() => {
+                if (!this.props.contract._id) {
+                    return (<div className="col-xs-12">To select the invoice, select the customer and manager and save contract</div>)
+                }
+
+                if (this.props.editable) {
+
+                  return (<Link to={`/managePanel/invoices/new${ this.props.contract._id._str }`} 
+                                target="_blank">Create invoices</Link>)
+                }
+
+                return <div className="col-xs-12">Create invoices</div>
+              })()}
               </div>
               <div className="form-group profit col-xs-12">
                 <label htmlFor="generateAuto" className="col-xs-2">Repeat every</label>

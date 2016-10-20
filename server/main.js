@@ -6,7 +6,7 @@ import '../imports/api/lines.js';
 import '../imports/api/invoices.js';
 import '../imports/api/contracts.js';
 import '../imports/api/users.js';
-//import '../imports/api/customers.js';
+import '../imports/api/rentals.js';
 //import '../imports/api/customers.js';
 
 import '../imports/api/email.js';

@@ -10,6 +10,7 @@ import UserProfile from './components/Content/UserProfile'
 import Cars from './components/Content/Cars';
 import CarSingle from './components/Content/Cars/CarSingle.js';
 import CarsReport from './components/Content/CarsReport/';
+import Rentals from './components/Content/Rentals/';
 import Invoices from './components/Content/Invoices';
 import InvoiceSingle from './components/Content/Invoices/InvoiceSingle.js';
 import Contracts from './components/Content/Contracts';
@@ -105,27 +106,28 @@ export const renderRoutes = () => (
       <IndexRoute component={App}/>
       <IndexRedirect to='home'/>
       <Route path="home" component={Home}/>
-      <Route path="registration" component={Registration}/>
-      <Route path="user_profile" component={UserProfile}/>
-      <Route path="user_profile/:tableTarget" component={TableForUser}/>
-      <Route path="/managePanel">
-        <IndexRoute component={CustomersList}/>
-        <Route path="cars" component={Cars}/>
-        <Route path="cars/:carId" component={CarSingle}/>
-        <Route path="payments" component={Payments}/>
-        <Route path="payments/:paymentId" component={PaymentSingle}/>
-        <Route path="contracts" component={Contracts}/>
-        <Route path="contracts/:contractId" component={ContractSingle}/>
-        <Route path="invoices" component={Invoices}/>
-        <Route path="invoices/:invoiceId" component={InvoiceSingle}/>
-        <Route path="customers" component={Customers}/>
-        <Route path="customers_list" component={CustomersList}/>
-        <Route path='customer/:id' component={Customer}/>
-        <Route path='users_list' component={Users}/>
-		<Route path='cars_report' component={CarsReport}/>
-        <Route path='user_single/:id' component={UserSingle}/>
-        <Route path="*" component={NotFoundPage}/>
-      </Route>
+        <Route path="registration" component={Registration}/>
+        <Route path="user_profile" component={UserProfile}/>
+        <Route path="user_profile/:tableTarget" component={TableForUser}/>
+        <Route path="/managePanel">
+            <IndexRoute component={CustomersList}/>
+            <Route path="cars" component={Cars}/>
+            <Route path="cars/:carId" component={CarSingle}/>
+            <Route path="cars_report" component={CarsReport}/>
+            <Route path="rentals" component={Rentals}/>
+            <Route path="payments" component={Payments}/>
+            <Route path="payments/:paymentId" component={PaymentSingle}/>
+            <Route path="contracts" component={Contracts}/>
+            <Route path="contracts/:contractId" component={ContractSingle}/>
+            <Route path="invoices" component={Invoices}/>
+            <Route path="invoices/:invoiceId" component={InvoiceSingle}/>
+            <Route path="customers" component={Customers}/>
+            <Route path="customers_list" component={CustomersList}/>
+            <Route path='customer/:id' component={Customer}/>
+            <Route path='users_list' component={Users}/>
+            <Route path='user_single/:id' component={UserSingle}/>
+            <Route path="*" component={NotFoundPage}/>
+        </Route>
       <Route path="*" component={NotFoundPage}/>
     </Route>
   </Router>
