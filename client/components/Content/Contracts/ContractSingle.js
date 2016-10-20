@@ -208,7 +208,6 @@ export default class ContractSingle extends Component {
 
           if (status === 'paid') invoices += parseInt(line ? line.amount : 0);
           if (status === 'open' || !status) {
-            console.log('---');
             remaining += parseInt(line ? line.amount : 0);
           }
         })

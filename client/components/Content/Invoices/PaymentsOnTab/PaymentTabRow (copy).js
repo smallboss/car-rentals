@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import DatePicker from 'react-bootstrap-date-picker'
-import { map, find, clone } from 'lodash';
+import { map, find } from 'lodash';
 import { Link } from 'react-router';
 
 import { paymentStateTypes } from '/imports/startup/typesList.js';
@@ -11,7 +11,7 @@ export default class PaymentTabRow extends Component {
 
         this.state = {
             dispPayment: this.props.payment,
-            isEdit: false
+            isEdit: this.props.isEdit
         }
 
         this.onChangeDate = this.onChangeDate.bind(this);
@@ -21,7 +21,9 @@ export default class PaymentTabRow extends Component {
 
 
     componentWillReceiveProps(nextProps){
-        let dispPayment = nextProps.payment;
+        let dispPayment = (!this.state.dispPayment)
+                                    ? nextProps.payment 
+                                    : this.state.dispPayment
 
         const nextPayment = nextProps.payment ? nextProps.payment._id._str : '';
         const isSelected = find(nextProps.selectedListId, {_str: nextPayment});
@@ -30,20 +32,6 @@ export default class PaymentTabRow extends Component {
             this.checkbox.checked = isSelected;
 
         const isEdit = (isSelected && nextProps.isEdit) ? true : false;
-
-        this.setState({dispPayment, isEdit});
-    }
-
-    componentDidMount() {
-        let dispPayment = this.props.payment;
-
-        const nextPayment =  this.props.payment ?  this.props.payment._id._str : '';
-        const isSelected = find( this.props.selectedListId, {_str: nextPayment});
-
-        if (this.checkbox)
-            this.checkbox.checked = isSelected;
-
-        const isEdit = (isSelected &&  this.props.isEdit) ? true : false;
 
         this.setState({dispPayment, isEdit});
     }

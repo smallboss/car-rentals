@@ -5,6 +5,7 @@ import { createContainer } from 'meteor/react-meteor-data'
 import { ApiCars } from '/imports/api/cars.js';
 import { ApiLines } from '/imports/api/lines.js';
 import { ApiInvoices } from '/imports/api/invoices.js';
+import { ApiRentals } from '/imports/api/rentals.js';
 import TableHeadButtons from './TableHeadButtons.js';
 import LineTabRow from './LineTabRow.js';
 
@@ -47,14 +48,22 @@ export default class LinesOnTab extends Component {
 
 // ====================== ADD = EDIT = REMOVE = SAVE ======================
     handleAddNewLine(){
+        const rentalId = new Mongo.ObjectID();
+        ApiRentals.insert({_id: rentalId});
+
+
         const lineId = new Mongo.ObjectID();
 
-        ApiLines.insert({_id: lineId, invoiceId: this.props.invoice._id, dateCreate: now(), amount: '0'});
-        ApiInvoices.update(this.props.invoice._id, {$push: { linesId: lineId }});
+        ApiLines.insert({_id: lineId, invoiceId: this.props.invoice._id, rentalId, dateCreate: now(), amount: '0'});
+        ApiInvoices.update(this.props.invoice._id, {$push: { linesId:{ $each: [lineId], $position: 0}}});
 
         let selectedListId = this.state.selectedListId;
         selectedListId.push(lineId)
 
+
+        const invoice = this.props.invoice;
+        Meteor.users.update({_id: invoice.customerId}, {$push: { rentails: rentalId }});
+        ApiInvoices.update({_id: invoice._id}, {$push: {rentals: rentalId}});
         this.setState({ selectedListId, isEdit: true });
     }
 
@@ -75,13 +84,11 @@ export default class LinesOnTab extends Component {
     }
 
     handleSaveLine(line){
-        console.log('SAVE line', line._id);
         const _id = line._id;
         delete line._id;
 
         ApiLines.update({_id: _id }, {$set: line });
-
-        // this.props.s(line);
+        ApiRentals.update({_id: line.rentalId}, {$set: {car: line.car, customerId: this.props.invoice.customerId, dateFrom: line.dateFrom, dateTo: line.dateTo}});
 
         let selectedListId = this.state.selectedListId;
         selectedListId.splice(selectedListId.indexOf(line._id), 1);
@@ -102,7 +109,7 @@ export default class LinesOnTab extends Component {
                         selectedItems={this.state.selectedListId.length}
                         onAddNew={this.handleAddNewLine}
                         onEdit={this.handleEditLines}
-                        onRemove={this.handleRemoveLines}/>
+                        onRemove={this.handleRemoveLines} />
                 )
             }
 
@@ -137,7 +144,6 @@ export default class LinesOnTab extends Component {
                                             <LineTabRow key={`line-${key}`}
                                                 onSelect={this.changeSelectedItem.bind(null,item)}
                                                 line={ApiLines.findOne({_id: item})}
-                                                numbers={ this.props.lines ? this.props.lines.length : 0}
                                                 onSave={this.handleSaveLine}
                                                 selectedListId={this.state.selectedListId}
                                                 isEdit={this.state.isEdit}
@@ -167,6 +173,7 @@ LinesOnTab.contextTypes = {
 export default createContainer(() => {
   Meteor.subscribe('lines');
   Meteor.subscribe('cars');
+  Meteor.subscribe('rentals');
 
   return {
     lines: ApiLines.find().fetch().reverse(),

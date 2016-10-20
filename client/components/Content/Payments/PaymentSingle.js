@@ -39,6 +39,7 @@ export default class PaymentSingle extends Component {
     this.onChangeStatus = this.onChangeStatus.bind(this);
     this.onChangeRef = this.onChangeRef.bind(this);
     this.handleSave = this.handleSave.bind(this);
+    this.handlePrint = this.handlePrint.bind(this);
     this.handleEdit = this.handleEdit.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
     this.handleSendByEmail = this.handleSendByEmail.bind(this);
@@ -119,6 +120,11 @@ export default class PaymentSingle extends Component {
       dispPayment: dataDispPayment,
       allowSave
     });
+  }
+
+
+  handlePrint(){
+    console.log('PRINT >>>');
   }
 
   handleSave() {
@@ -214,6 +220,7 @@ export default class PaymentSingle extends Component {
     const renderHeadSingle = () => {
       return (
         <HeadSingle onSave={this.handleSave}
+                    onPrint={this.handlePrint}
                     onEdit={this.handleEdit}
                     onDelete={this.handleDelete}
                     onSendByEmail={this.handleSendByEmail}

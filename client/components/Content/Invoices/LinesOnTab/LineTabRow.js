@@ -1,7 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import DatePicker from 'react-bootstrap-date-picker'
 import { Link } from 'react-router';
-import { ApiLines } from '/imports/api/lines.js';
 import { map, find, clone} from 'lodash';
 
 export default class LineTabRow extends Component {
@@ -15,7 +14,6 @@ export default class LineTabRow extends Component {
 
         this.onChangeCarName= this.onChangeCarName.bind(this);
         this.onChangeAmount = this.onChangeAmount.bind(this);
-        this.sendSave = this.sendSave.bind(this);
         this.onChangeDateFrom = this.onChangeDateFrom.bind(this);
         this.onChangeDateTo = this.onChangeDateTo.bind(this);
         this.onChangeDescription = this.onChangeDescription.bind(this);
@@ -23,12 +21,7 @@ export default class LineTabRow extends Component {
 
 
     componentWillReceiveProps(nextProps){
-        
-        let dispLine = (!this.state.dispLine)
-                                    ? nextProps.line 
-                                    : this.state.dispLine
-
-        dispLine = dispLine ? dispLine : nextProps.line;
+        let dispLine = nextProps.line 
 
         const nextLine = nextProps.line ? nextProps.line._id._str : '';
         const isSelected = find(nextProps.selectedListId, {_str: nextLine});
@@ -37,17 +30,12 @@ export default class LineTabRow extends Component {
 
         const isEdit = (isSelected && nextProps.isEdit) ? true : false;
 
-
         this.setState({dispLine, isEdit});
     }
 
 
     componentDidMount() {
-        let dispLine = (!this.state.dispLine)
-                                ? this.props.line 
-                                : this.state.dispLine
-
-        dispLine = dispLine ? dispLine :  this.props.line;
+        let dispLine = this.props.line;
 
         const nextLine =  this.props.line ?  this.props.line._id._str : '';
         const isSelected = find( this.props.selectedListId, {_str: nextLine});
@@ -56,33 +44,10 @@ export default class LineTabRow extends Component {
             this.checkbox.checked = isSelected;
 
         const isEdit = (isSelected &&  this.props.isEdit) ? true : false;
-
-        console.log('dispLine', dispLine);
 
         this.setState({dispLine, isEdit});
     }
 
-    componentWillUpdate(nextProps, nextState) {
-        /*
-        let dispLine = (!this.state.dispLine)
-                                ? this.props.line 
-                                : this.state.dispLine
-
-        dispLine = dispLine ? dispLine :  this.props.line;
-
-        const nextLine =  this.props.line ?  this.props.line._id._str : '';
-        const isSelected = find( this.props.selectedListId, {_str: nextLine});
-
-        if (this.checkbox)
-            this.checkbox.checked = isSelected;
-
-        const isEdit = (isSelected &&  this.props.isEdit) ? true : false;
-
-        console.log('dispLine', dispLine);
-
-        if (nextProps.line.length != this.props.line.length)
-        this.setState({dispLine, isEdit});*/
-    }
 
 // ==================== CHANGERS FIELDS =============================
     onChangeCarName(value){
@@ -119,13 +84,6 @@ export default class LineTabRow extends Component {
         this.setState({dispLine: newLine});
     }
 
-    sendSave(e) {
-        const line = clone(this.state.dispLine);
-        console.log('linelineline', line);
-
-      
-        this.props.onSave(line);
-    }
 
 // END ================ CHANGERS FIELDS =============================
 
@@ -139,7 +97,7 @@ export default class LineTabRow extends Component {
             if (this.state.isEdit) {
                 return (
                     <button
-                        onClick={this.sendSave}
+                        onClick={ () =>  this.props.onSave(this.state.dispLine) }
                         className='btn btn-danger'>
                         Save
                     </button>

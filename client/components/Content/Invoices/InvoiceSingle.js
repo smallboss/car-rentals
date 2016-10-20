@@ -43,6 +43,7 @@ export default class InvoiceSingle extends Component {
     this.onChangeDueDate = this.onChangeDueDate.bind(this);
     this.onChangeStatus = this.onChangeStatus.bind(this);
     this.handleSave = this.handleSave.bind(this);
+    this.handlePrint = this.handlePrint.bind(this);
     this.handleEdit = this.handleEdit.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
     this.handleSendByEmail = this.handleSendByEmail.bind(this);
@@ -105,6 +106,10 @@ export default class InvoiceSingle extends Component {
       dispInvoice: dataDispInvoice,
       allowSave
     });
+  }
+
+  handlePrint(){
+    console.log('PRINT >>>');
   }
 
 
@@ -224,6 +229,7 @@ export default class InvoiceSingle extends Component {
     const renderHeadSingle = () => {
       return (
         <HeadSingle onSave={this.handleSave}
+                    onPrint={this.handlePrint}
                     onEdit={this.handleEdit}
                     onDelete={this.handleDelete}
                     onSendByEmail={this.handleSendByEmail}
