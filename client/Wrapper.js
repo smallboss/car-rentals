@@ -16,19 +16,36 @@ import BackFooter from './components/ManagePanel/BackFooter'
 class Wrapper extends React.Component {
     constructor(props) {
         super(props)
-        this.state = {loginedUser: 0, adminLogin: 0}
+        this.state = {loginLevel: 0}
     }
     componentWillReceiveProps (nextProps) {
-        if(nextProps.loginedUser && (nextProps.loginedUser.profile.userType == 'admin' || nextProps.loginedUser.profile.userType == 'employee')) {
-            this.setState({loginedUser: nextProps.loginedUser, adminLogin: 1})
-        } else {
-            this.setState({loginedUser: nextProps.loginedUser})   
+        let user = nextProps.loginedUser            
+        if(user) {
+            switch (user.profile.userType) {
+                case 'customer':
+                    this.setState({loginLevel: 1})
+                    break
+                case 'employee':
+                    this.setState({loginLevel: 2})
+                    break
+                case 'admin':
+                    this.setState({loginLevel: 3})
+                    break
+                default:
+                    this.setState({loginLevel: 0})
+                    break
+            }
         }        
+    }
+    getChildContext() {
+        return {
+            loginLevel: this.state.loginLevel
+        }
     }
     render () {
         let { children } = this.props
         if(location.href.indexOf('managePanel') != -1) {
-            if(this.state.adminLogin) {
+            if(this.state.loginLevel == 2 || this.state.loginLevel == 3) {
                 return (
                     <div id='main_container'>
                         <BackHeader />
@@ -63,6 +80,10 @@ class Wrapper extends React.Component {
             </div>
         )              
     }
+}
+
+Wrapper.childContextTypes = {
+    loginLevel: React.PropTypes.number.isRequired
 }
 
 export default createContainer(({params}) => {

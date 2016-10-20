@@ -11,14 +11,15 @@ import './style.css'
 const DatePicker = require('react-bootstrap-date-picker')
 
 class Fines extends React.Component {
-    constructor (props) {
+    constructor (props, context) {
         super(props)
-        this.state = {fines: props.fines || [], showModalFines: 0, showNewField: 0, arrChecked: []}
+        this.state = {loginLevel: context.loginLevel, fines: props.fines || [], showModalFines: 0, showNewField: 0, arrChecked: []}
         this.handlerButtons = this.handlerButtons.bind(this)
         this.handlerChecker = this.handlerChecker.bind(this)
     }
-    componentWillReceiveProps(nextProps) {
-        this.setState({fines: nextProps.fines})
+    componentWillReceiveProps(nextProps, nextContext) {
+        let loginLevel = nextContext.loginLevel
+        this.setState({fines: nextProps.fines, loginLevel})
     }
     shouldComponentUpdate(nextProps, nextState) {
         if(nextState.showNewField) {
@@ -126,10 +127,10 @@ class Fines extends React.Component {
                             <span className='close close-span' onClick={() => {this.setState({showModalFines: 0, arrChecked: []}); this.forceUpdate()}}>x</span><br />
                             <div className='clearfix'></div>
                             <div className='row p-l-1 text-center'>
-                                <div className='col-xs-4'>
-                                    <input type='button' name='remove-notes' className='btn btn-danger' value='Remove notes' onClick={this.handlerButtons} />
+                                <div className='col-xs-4 text-left'>
                                     <input type='button' name='add-note' className='btn btn-success m-x-1 vis' value='Add note' onClick={() => {this.setState({showNewField: 1})}} />
                                     <input type='button' name='edit-notes' className='btn btn-primary m-x-1' value='Edit notes' onClick={this.handlerButtons} />
+                                    {(this.state.loginLevel === 3) ? <input type='button' name='remove-notes' className='btn btn-danger' value='Remove notes' onClick={this.handlerButtons} /> : ''}
                                 </div>
                                 <div className='col-xs-4 text-center'>
                                     <span className='display-inherit'><h3>Fines</h3></span>
@@ -187,6 +188,10 @@ class Fines extends React.Component {
             </div>
         )
     }
+}
+
+Fines.contextTypes = {
+    loginLevel: React.PropTypes.number.isRequired
 }
 
 export default createContainer(() => {

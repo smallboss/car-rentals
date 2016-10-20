@@ -21,6 +21,8 @@ import TableForUser from './components/Content/Users/TableForUser'
 import UserSingle from './components/Content/Users/UserSingle'
 import Registration from './components/Content/Registration'
 import CustomersList from './components/Content/Customers/CustomersList'
+import ImportsFines from './components/Content/ImportsFines'
+import ImportsTolls from './components/Content/ImportsTolls'
 import Wrapper from './Wrapper'
 
 const NotFoundPage = () => {
@@ -31,69 +33,6 @@ const NotFoundPage = () => {
   )
 };
 
-const frontRouterComponent = (children) => {
-  return (
-    <div id='main_container'>
-      <Header />
-      <Sidebar />
-
-      <div className='content'>
-        {children}
-      </div>
-      <Footer />
-    </div>
-  )
-};
-
-/*const backRouterComponent = (children) => {
- Meteor.subscribe('users', () => {
- let user = Meteor.user()
- if(user && (user.userType == 'admin' || user.userType == 'employee')) {
- return(
- <div id='main_container'>
- <BackHeader />
- <Sidebar side='backEnd' />
- <div className='content'>
- {children}
- </div>
- <BackFooter />
- </div>
- )
- } else {
- return(
- <div id='main_container'>
- <Header />
- <Sidebar />
- <div className='content'>
-
- </div>
- <Footer />
- </div>
- )
- }
- }).ready()
- };*/
-
-const backRouterComponent = (children) => {
-  return (
-    <div id='main_container'>
-      <BackHeader />
-      <Sidebar side='backEnd'/>
-
-      <div className='content'>
-        {children}
-      </div>
-      <BackFooter />
-    </div>
-  )
-}
-
-/*const wrapper = ({children}) => {
- if(location.href.indexOf('managePanel') != -1) {
- return backRouterComponent(children);
- }
- return frontRouterComponent(children);
- };*/
 
 Router.refresh = function () {
   Router.dispatch(location.getCurrentPath(), null)
@@ -123,6 +62,8 @@ export const renderRoutes = () => (
         <Route path='customer/:id' component={Customer}/>
         <Route path='users_list' component={Users}/>
         <Route path='user_single/:id' component={UserSingle}/>
+          <Route path='imports/fines' component={ImportsFines} />
+          <Route path='imports/tolls' component={ImportsTolls} />
         <Route path="*" component={NotFoundPage}/>
       </Route>
       <Route path="*" component={NotFoundPage}/>

@@ -12,14 +12,15 @@ import NumericInput from 'react-numeric-input'
 const DatePicker = require('react-bootstrap-date-picker')
 
 class CustomerPayments extends React.Component {
-    constructor (props) {
+    constructor (props, context) {
         super(props)
-        this.state = {payments: props.payments || [], showNewField: 0, arrChecked: []}
+        this.state = {loginLevel: context.loginLevel, payments: props.payments || [], showNewField: 0, arrChecked: []}
         this.handlerButtons = this.handlerButtons.bind(this)
         this.handlerChecker = this.handlerChecker.bind(this)
     }
-    componentWillReceiveProps(nextProps) {
-        this.setState({payments: nextProps.payments})
+    componentWillReceiveProps(nextProps, nextContext) {
+        let loginLevel = nextContext.loginLevel
+        this.setState({payments: nextProps.payments, loginLevel})
     }
     shouldComponentUpdate(nextProps, nextState) {
         return (nextState.arrChecked.length > 0) ? 0 : 1
@@ -100,11 +101,11 @@ class CustomerPayments extends React.Component {
         let classNewField = (this.state.showNewField) ? '' : 'hidden'            
         return (
             <div>
-                <div className='row p-l-1 text-center'>
+                <div className='row p-l-1'>
                     <div className='col-xs-5'>
-                        <input type='button' name='remove-notes' className='btn btn-danger' value='Remove notes' onClick={this.handlerButtons} />
-                        <input type='button' name='add-note' className='btn btn-success m-x-1 vis' value='Add note' onClick={() => {this.setState({showNewField: 1})}} />
+                        <input type='button' name='add-note' className='btn btn-success' value='Add note' onClick={() => {this.setState({showNewField: 1})}} />
                         <input type='button' name='edit-notes' className='btn btn-primary m-x-1' value='Edit notes' onClick={this.handlerButtons} />
+                        {(this.state.loginLevel === 3) ? <input type='button' name='remove-notes' className='btn btn-danger' value='Remove notes' onClick={this.handlerButtons} /> : ''}
                     </div>
                     <div className='col-xs-2 text-center'>
                         <span className='display-inherit'><h3></h3></span>
@@ -146,6 +147,10 @@ class CustomerPayments extends React.Component {
             </div>
         )
     }
+}
+
+CustomerPayments.contextTypes = {
+    loginLevel: React.PropTypes.number.isRequired
 }
 
 export default CustomerPayments

@@ -11,14 +11,15 @@ import './style.css'
 const DatePicker = require('react-bootstrap-date-picker')
 
 class Tolls extends React.Component {
-    constructor (props) {
+    constructor (props, context) {
         super(props)
-        this.state = {tolls: props.tolls || [], showModalTolls: 0, showNewField: 0, arrChecked: []}
+        this.state = {loginLevel: context.loginLevel, tolls: props.tolls || [], showModalTolls: 0, showNewField: 0, arrChecked: []}
         this.handlerButtons = this.handlerButtons.bind(this)
         this.handlerChecker = this.handlerChecker.bind(this)
     }
-    componentWillReceiveProps(nextProps) {
-        this.setState({tolls: nextProps.tolls})
+    componentWillReceiveProps(nextProps, nextContext) {
+        let loginLevel = nextContext.loginLevel
+        this.setState({tolls: nextProps.tolls, loginLevel})
     }
     shouldComponentUpdate(nextProps, nextState) {
         if(nextState.showNewField) {
@@ -131,9 +132,9 @@ class Tolls extends React.Component {
                             <div className='clearfix'></div>
                             <div className='row p-l-1 text-center'>
                                 <div className='col-xs-5 text-left'>
-                                    <input type='button' name='remove-notes' className='btn btn-danger' value='Remove notes' onClick={this.handlerButtons} />
                                     <input type='button' name='add-note' className='btn btn-success m-x-1 vis' value='Add note' onClick={() => {this.setState({showNewField: 1})}} />
                                     <input type='button' name='edit-notes' className='btn btn-primary m-x-1' value='Edit notes' onClick={this.handlerButtons} />
+                                    {(this.state.loginLevel === 3) ? <input type='button' name='remove-notes' className='btn btn-danger' value='Remove notes' onClick={this.handlerButtons} /> : ''}
                                 </div>
                                 <div className='col-xs-2 text-center'>
                                     <span className='display-inherit'><h3>Tolls</h3></span>
@@ -192,6 +193,10 @@ class Tolls extends React.Component {
             </div>
         )
     }
+}
+
+Tolls.contextTypes = {
+    loginLevel: React.PropTypes.number.isRequired
 }
 
 export default createContainer(() => {

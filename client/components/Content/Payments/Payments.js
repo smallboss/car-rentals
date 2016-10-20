@@ -4,7 +4,6 @@ import { browserHistory } from 'react-router'
 import { createContainer } from 'meteor/react-meteor-data';
 // import { ApiUserList } from '/imports/api/userList.js'
 import { ApiPayments } from '/imports/api/payments.js';
-import { ApiUsers } from '/imports/api/customers';
 
 import PaymentRow from './PaymentRow.js';
 import HeadList from './HeadList.js';

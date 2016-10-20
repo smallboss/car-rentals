@@ -10,9 +10,10 @@ import Pagination from '../Customers/Pagination'
 import { searcher } from '../../../helpers/searcher'
 
 class Users extends React.Component {
-    constructor(props) {
+    constructor(props, context) {
         super(props)
         this.state = {
+            loginLevel: context.loginLevel,
             users: this.props.users,
             currentPage: 1,
             elemsOnPage: 3,
@@ -27,10 +28,11 @@ class Users extends React.Component {
         let maxPage = Math.ceil(this.props.users.length / this.state.elemsOnPage)
         this.setState({users: this.props.users, maxPage})
     }
-    componentWillReceiveProps(nextProps) {
+    componentWillReceiveProps(nextProps, nextContext) {
         let _users = nextProps.users
         let maxPage = Math.ceil(_users.length / this.state.elemsOnPage)
-        this.setState({users: _users, maxPage})
+        let loginLevel = nextContext.loginLevel
+        this.setState({users: _users, maxPage, loginLevel})
     }
     shouldComponentUpdate (nextProps, nextState) {
         let _check = (nextState.stateForRemove.length > 0 ) ? 0 : 1
@@ -106,7 +108,7 @@ class Users extends React.Component {
                     })}
                     </tbody>
                 </table>
-                <input type='button' className='btn btn-danger' name='remover-users' value='Delete users' onClick={this.handlerDeleteUser} />
+                {(this.state.loginLevel === 3) ? <input type='button' className='btn btn-danger' name='remover-users' value='Delete users' onClick={this.handlerDeleteUser} /> : ''}
                 <input type='button' className='btn btn-success m-x-1' name='add-user' value='Add user' onClick={() => {let _new = 'new'; browserHistory.push(`/managePanel/customer/${_new}`)}} />
                 {(this.state.maxPage > 1) ? <div className='text-center'>
                     <Pagination num={this.state.maxPage} handlerPagination={this.handlerPagination} key={Math.random()} />
@@ -114,6 +116,10 @@ class Users extends React.Component {
             </div>
         )
     }
+}
+
+Users.contextTypes = {
+    loginLevel: React.PropTypes.number.isRequired
 }
 
 export default createContainer (() => {

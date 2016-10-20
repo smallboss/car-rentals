@@ -4,7 +4,7 @@ import { Link } from 'react-router';
 import { createContainer } from 'meteor/react-meteor-data'
 import { ApiInvoices } from '/imports/api/invoices.js'
 import { ApiPayments } from '/imports/api/payments.js'
-import { ApiUsers } from '/imports/api/customers'
+import { ApiContracts } from '/imports/api/contracts'
 import { ApiYearWrite } from '/imports/api/yearWrite'
 import HeadSingle from './HeadSingle.js';
 import { browserHistory } from 'react-router';

@@ -55,9 +55,9 @@ const _user = {
 }
 
 class Customer extends React.Component {
-    constructor (props) {
+    constructor (props, context) {
         super(props)
-        this.state = {customer: (this.props.params.id == 'new') ? _user : props.customer || _user, editAble: 0}
+        this.state = {loginLevel: context.loginLevel, customer: (this.props.params.id == 'new') ? _user : props.customer || _user, editAble: 0}
         this.handlerEditCustomer = this.handlerEditCustomer.bind(this)
         this.handlerChildState = this.handlerChildState.bind(this)
     }
@@ -77,9 +77,10 @@ class Customer extends React.Component {
             $('#button_edit').click()
         }
     }
-    componentWillReceiveProps (nextProps) {
+    componentWillReceiveProps (nextProps, nextContext) {
         let customer = nextProps.customer
-        this.setState({customer: customer})
+            loginLevel = nextContext.loginLevel
+        this.setState({customer: customer, loginLevel})
         this.forceUpdate()
     }
     componentWillUnMount () {
@@ -93,6 +94,7 @@ class Customer extends React.Component {
         $('#' + _target).show()
     }
     handlerRemoveCustomer (id) {
+        if(this.state.loginLevel !== 3) return false
         let _confirm = confirm('Are You sure to delete this customer?')
         if(_confirm) {
             Meteor.call('removeAllUserData', id, (err) => {
@@ -259,7 +261,7 @@ class Customer extends React.Component {
                     <input type='button' className='btn btn-primary p-x-1' value='Print' />
                     <input type='button' id='button_save' className='btn btn-primary p-x-1 m-x-1' value='Save' disabled={editAble} />
                     <input type='button' id='button_edit' className='btn btn-primary p-x-1' value='Edit' onClick={this.handlerEditCustomer} />
-                    <input type='button' className='btn btn-primary p-x-1 m-x-1' value='Delete' onClick={() => { this.handlerRemoveCustomer(_id) }} />
+                    {(this.state.loginLevel === 3) ? <input type='button' className='btn btn-primary p-x-1 m-x-1' value='Delete' onClick={() => { this.handlerRemoveCustomer(_id) }} /> : ''}
                 </div>
                 <div className='panel-body'>
                     <div className='row'>
@@ -353,6 +355,10 @@ class Customer extends React.Component {
             </div>
         )
     }
+}
+
+Customer.contextTypes = {
+    loginLevel: React.PropTypes.number.isRequired
 }
 
 export default createContainer(({params}) => {
