@@ -7,6 +7,7 @@ import '../imports/api/invoices.js';
 import '../imports/api/contracts.js';
 import '../imports/api/users.js';
 import '../imports/api/email.js';
+import '../imports/api/rentals.js';
 import '../imports/api/yearWrite.js';
 import '../imports/api/fines'
 import '../imports/api/tolls'

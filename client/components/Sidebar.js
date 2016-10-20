@@ -21,6 +21,7 @@ const backEndMenu = <ul className="sidebar-nav">
       <span className="caret"></span></a>
     <ul className="dropdown-menu">
       <li><Link to="/managePanel/cars_report">Cars</Link></li>
+      <li><Link to="/managePanel/rentals">Rentals</Link></li>
     </ul>
   </li>
   <li className="dropdown">

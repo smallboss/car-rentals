@@ -2,8 +2,11 @@ import { Meteor } from 'meteor/meteor'
 import { Mongo } from 'meteor/mongo'
 import { Link } from 'react-router';
 import { createContainer } from 'meteor/react-meteor-data'
+import DatePicker from 'react-bootstrap-date-picker'
 import { ApiInvoices } from '/imports/api/invoices.js'
 import { ApiPayments } from '/imports/api/payments.js'
+import { ApiLines } from '/imports/api/lines.js'
+import { ApiUsers } from '/imports/api/customers'
 import { ApiContracts } from '/imports/api/contracts'
 import { ApiYearWrite } from '/imports/api/yearWrite'
 import HeadSingle from './HeadSingle.js';
@@ -40,6 +43,7 @@ export default class InvoiceSingle extends Component {
     this.onChangeDueDate = this.onChangeDueDate.bind(this);
     this.onChangeStatus = this.onChangeStatus.bind(this);
     this.handleSave = this.handleSave.bind(this);
+    this.handlePrint = this.handlePrint.bind(this);
     this.handleEdit = this.handleEdit.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
     this.handleSendByEmail = this.handleSendByEmail.bind(this);
@@ -49,21 +53,25 @@ export default class InvoiceSingle extends Component {
   onChangeCustomer(value) {
     let newInvoice = this.state.dispInvoice;
     newInvoice.customerId = value;
-    this.setState({dispInvoice: newInvoice, allowSave: true});
+    const allowSave = this.state.dispInvoice.customerId ? true : false;
+    this.setState({ 
+        dispInvoice: newInvoice, 
+        allowSave: this.state.dispInvoice.customerId 
+    });
   }
   onChangeStatus(value) {
     let newInvoice = this.state.dispInvoice;
-    newInvoice.status = value;
+    newInvoice.status = status;
     this.setState({dispInvoice: newInvoice});
   }
   onChangeDate(value) {
     let newInvoice = this.state.dispInvoice;
-    newInvoice.date = value;
+    newInvoice.date = value.slice(0, 10);
     this.setState({dispInvoice: newInvoice});
   }
   onChangeDueDate(value) {
     let newInvoice = this.state.dispInvoice;
-    newInvoice.dueDate = value;
+    newInvoice.dueDate = value.slice(0, 10);
     this.setState({dispInvoice: newInvoice});
   }
   onChangeNotes(value) {
@@ -100,6 +108,10 @@ export default class InvoiceSingle extends Component {
     });
   }
 
+  handlePrint(){
+    console.log('PRINT >>>');
+  }
+
 
   handleSave() {
     let newInvoice = clone(this.state.dispInvoice);
@@ -109,6 +121,7 @@ export default class InvoiceSingle extends Component {
     if(this.state.isNew){
       invoiceId = new Mongo.ObjectID();
       newInvoice._id = invoiceId;
+      if (this.props.contract) newInvoice.contractId = this.props.contract._id;
       ApiInvoices.insert(newInvoice);
 
       let yearWrite = ApiYearWrite.findOne({year: '2016'});
@@ -161,6 +174,9 @@ export default class InvoiceSingle extends Component {
     }
 
 
+    if (this.props.contract) {
+      ApiContracts.update({_id: this.props.contract._id}, {$addToSet: {invoicesId: invoiceId}});
+    }
     Meteor.users.update({_id: newInvoice.customerId}, {$addToSet: { "profile.invoices": invoiceId}});
     if (this.state.isNew) browserHistory.push(`/managePanel/invoices/${invoiceId}`);
     this.setState({invoice: newInvoice, dispInvoice: newInvoice, editable: false, isNew: false});
@@ -177,14 +193,19 @@ export default class InvoiceSingle extends Component {
   handleDelete() {
     browserHistory.push('/managePanel/invoices');
 
-    map(newInvoice.paymentsId, (el) => {
-      Meteor.users.update({_id: this.state.invoice.customerId}, {$pull: { "profile.payments": el}});
+    map(this.state.invoice.paymentsId, (el) => {
+      const payment = ApiPayments.findOne({_id: el});
+      Meteor.users.update({_id: payment.customerId}, {$pull: { "profile.payments": el}});
       ApiPayments.remove({_id: el});
     })
 
+    map(this.state.invoice.linesId, (el) => {
+      ApiLines.remove({_id: el});
+    })
 
-    ApiContracts.update({_id: this.state.invoice.customerId}, {$pull: { "profile.paymentsId": this.state.invoice._id}});
-    Meteor.users.update({_id: this.state.invoice.customerId}, {$pull: { "profile.payments": this.state.invoice._id}});
+
+    ApiContracts.update({_id: this.state.invoice.contractId}, {$pull: { "profile.invoicesId": this.state.invoice._id}});
+    Meteor.users.update({_id: this.state.invoice.customerId}, {$pull: { "profile.invoices": this.state.invoice._id}});
     ApiInvoices.remove(this.state.invoice._id);
   }
 
@@ -203,12 +224,12 @@ export default class InvoiceSingle extends Component {
   }
 
 
-
   render() {
     
     const renderHeadSingle = () => {
       return (
         <HeadSingle onSave={this.handleSave}
+                    onPrint={this.handlePrint}
                     onEdit={this.handleEdit}
                     onDelete={this.handleDelete}
                     onSendByEmail={this.handleSendByEmail}
@@ -295,12 +316,7 @@ export default class InvoiceSingle extends Component {
                   if (this.state.editable) {
                     return (
                       <div className='col-xs-8 form-horizontal'>
-                        <input
-                          type="date"
-                          id="invoceDate"
-                          className="form-control "
-                          onChange={(e) => this.onChangeDate(e.target.value)}
-                          value={ this.state.dispInvoice.date }/>
+                        <DatePicker value={this.state.dispInvoice.date} onChange={this.onChangeDate} />
                       </div>
                     )
                   }
@@ -344,12 +360,7 @@ export default class InvoiceSingle extends Component {
                   if (this.state.editable) {
                     return (
                       <div className='col-xs-8 form-horizontal'>
-                        <input
-                          type="date"
-                          id="invoiceDueDate"
-                          className="form-control "
-                          onChange={(e) => this.onChangeDueDate(e.target.value)}
-                          value={ this.state.dispInvoice.dueDate }/>
+                        <DatePicker value={this.state.dispInvoice.dueDate} onChange={this.onChangeDueDate} />
                       </div>
                     )
                   }
@@ -378,11 +389,11 @@ export default class InvoiceSingle extends Component {
               {
                 <LinesOnTab 
                     invoice={cloneDeep(this.state.invoice)}
-                    linesId={ clone(this.state.invoice.linesId 
+                    linesId={cloneDeep(this.state.invoice.linesId 
                                         ? this.state.invoice.linesId 
-                                        : []).reverse() 
+                                        : [])
                             }
-                    readOnly={!this.state.invoice.customerId}/>
+                    readOnly={!this.state.invoice.customerId} />
               }
               </div>
               <div role="tabpanel" className="tab-pane p-x-1" id="payments">
@@ -427,7 +438,7 @@ export default class InvoiceSingle extends Component {
               <PaymentsOnTab 
                       invoice={cloneDeep(this.state.invoice)}
                       paymentsId={this.state.invoice.paymentsId}
-                      readOnly={true}/>
+                      readOnly={true} />
             </div>
           </div>                    
         </div>
@@ -443,14 +454,20 @@ export default createContainer(({params}) => {
   Meteor.subscribe('invoices');
   Meteor.subscribe('users');
   Meteor.subscribe('yearwrite');
+  Meteor.subscribe('contracts');
+  Meteor.subscribe('lines');
 
 
   let isNew = false;
   let invoiceId = params.invoiceId;
   let invoice = {};
+  let contract;
 
   if (params.invoiceId.indexOf('new') === 0) {
     isNew = true;
+    if (params.invoiceId.substr(3)) {
+      contract = ApiContracts.findOne(new Mongo.ObjectID(params.invoiceId.substr(3)));
+    }
   } else {
     invoice = ApiInvoices.findOne(new Mongo.ObjectID(invoiceId));
   }
@@ -458,6 +475,7 @@ export default createContainer(({params}) => {
   return {
     invoice,
     userList: Meteor.users.find({'profile.userType': 'customer'}).fetch(),
+    contract,
     isNew
   }
 

@@ -33,6 +33,7 @@ export default class CarSingle extends Component {
     this.onChangeStatus = this.onChangeStatus.bind(this);
     this.handleSave = this.handleSave.bind(this);
     this.handleEdit = this.handleEdit.bind(this);
+    this.handlePrint = this.handlePrint.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
     this.onChangeFines = this.onChangeFines.bind(this);
     this.onChangeTolls = this.onChangeTolls.bind(this);
@@ -180,6 +181,10 @@ export default class CarSingle extends Component {
     this.setState({car: newCar, dispCar: newCar, editable: false});
   }
 
+  handlePrint(){
+    console.log('PRINT >>>>');
+  }
+
   handleEdit() {
     this.setState({editable: !this.state.editable, dispCar: clone(this.state.car)});
   }
@@ -289,6 +294,7 @@ export default class CarSingle extends Component {
     const renderHeadSingle = () => {
       return (
         <HeadSingle onSave={this.handleSave}
+                    onPrint={this.handlePrint}
                     onEdit={this.handleEdit}
                     onDelete={this.handleDelete}
                     itemName={this.state.car.name}/>

@@ -8,9 +8,8 @@ export default class LineTabRow extends Component {
 
         this.state = {
             dispLine: this.props.line,
-            isEdit: this.props.isEdit
+            isEdit: false
         }
-
 
         this.onChangeCarName= this.onChangeCarName.bind(this);
         this.onChangeAmount = this.onChangeAmount.bind(this);
@@ -23,15 +22,26 @@ export default class LineTabRow extends Component {
                                     ? nextProps.line 
                                     : this.state.dispLine
 
+        dispLine = dispLine ? dispLine : nextProps.line;
+
         const nextLine = nextProps.line ? nextProps.line._id._str : '';
         const isSelected = find(nextProps.selectedListId, {_str: nextLine});
-        
         if (this.checkbox)
             this.checkbox.checked = isSelected;
 
         const isEdit = (isSelected && nextProps.isEdit) ? true : false;
 
+        if (isEdit)
+            console.log('ed', isSelected, isEdit, (this.state.dispLine ? this.state.dispLine.amount : ''));
+
         this.setState({dispLine, isEdit});
+    }
+
+    componentDidMount() {
+        if (this.state.isEdit != this.props.isEdit) {
+            // this.checkbox.checked = this.props.isEdit;
+            this.setState({isEdit: this.props.isEdit});
+        }
     }
 
 // ==================== CHANGERS FIELDS =============================
@@ -47,23 +57,32 @@ export default class LineTabRow extends Component {
     }
     onChangeDateFrom(value){
         let newLine = this.state.dispLine;
-        newLine.dateFrom = value.splice(0, 10);
+        newLine.dateFrom = value;
         this.setState({dispLine: newLine});
     }
     onChangeDateTo(value){
         let newLine = this.state.dispLine;
-        newLine.dateTo = value.splice(0, 10);
+        newLine.dateTo = value;
         this.setState({dispLine: newLine});
     }
     onChangeAmount(value){
         let newLine = this.state.dispLine;
-        newLine.amount = value;
+        value = (value!='' && isNaN(parseInt(value))) ? '0' : value;
+        let isDepr = false;
+
+        isDepr = ((parseInt(value) < 0) || 
+                  (value.indexOf('e') != -1) || 
+                  (value.indexOf('E') != -1) ||  
+                  (value.length > 5));
+
+        newLine.amount = isDepr ?  newLine.amount : value;
         this.setState({dispLine: newLine});
     }
+
 // END ================ CHANGERS FIELDS =============================
 
-
     render(){
+        console.log('line', this.props.line);
         let line = this.props.line ? this.props.line : {};
         let dispLine = this.state.dispLine;
         const cars = this.props.cars ? this.props.cars : [];
@@ -84,9 +103,38 @@ export default class LineTabRow extends Component {
         }
 
         const showItem = () => {
-            return <Link to={`/managePanel/invoices/${this.props.invId._str}`}>
-                        {this.props.codeName}
-                   </Link>
+            if (this.state.isEdit){
+                return(
+                    <select className=' form-control' onChange={(e) => this.onChangeCarName(e.target.value)}>
+                          {(() => {
+                            if (car) {
+                              
+                            return (    
+                              <option 
+                                className='' 
+                                value={car._id}>{ car.name }
+                              </option>
+                            )}
+
+                          })()}
+                          {
+                            cars.map((el, key) => {
+                                const carHelp = car ? car : {}
+                                if (el._id != carHelp._id) {
+                                  return (
+                                    <option 
+                                      key={`car-${key}`} 
+                                      value={el._id._str}>{el.name}</option>
+                                  )
+                                }
+                                return undefined;
+                              }
+                            )}
+                        </select>
+                )
+            }
+
+            return <span>{car ? car.name : ''}</span>
         }
 
         const showDescription = () => {
@@ -117,7 +165,7 @@ export default class LineTabRow extends Component {
             let carIdStr = line.car ? line.car._str : '';
 
             return (
-                <Link to={`/cars/${carIdStr}`}>
+                <Link to={`/managePanel/cars/${carIdStr}`}>
                     <span>{(line && car) ? car.plateNumber : ''}</span>
                 </Link>
             )
@@ -163,28 +211,26 @@ export default class LineTabRow extends Component {
         const showAmount = () => {
             if (this.state.isEdit){
                 return(
-                    <input  type="text"
+                    <input  type="number"
+                            min="0"
+                            max="99999"
                             value={dispLine.amount}
                             onChange={(e) => this.onChangeAmount(e.target.value)} />
                 )
             }
 
-            return <span>{line ? line.amount : ''}</span>
+            return <span>{(line && line.amount) ? line.amount : '0'}</span>
         }
 
 
         return(
             <tr className="LineTabRow">
-                {(() => {
-                    if (!this.props.readOnly) {
-                        <th>
-                            <input  type="checkbox" 
-                                onChange={() => this.props.onSelect(line._id)}
-                                ref={(ref) => this.checkbox = ref}/>
-                        </th>
-                    }
-                    return null;
-                })()}
+            {/*
+                <th>
+                    <input  type="checkbox" 
+                            onChange={() => this.props.onSelect(line._id)}
+                            ref={(ref) => this.checkbox = ref}/>
+                </th>
                 <td>
                     { buttonSave() }
                     { showItem() }
@@ -194,6 +240,22 @@ export default class LineTabRow extends Component {
                 <td>{ showDateFrom() }</td>
                 <td>{ showDateTo() }</td>
                 <td>{ showPeriod() }</td>
+                <td>{ showAmount() }</td>
+            */}
+                <th>
+                    <input  type="checkbox" 
+                            onChange={() => this.props.onSelect(line._id)}
+                            ref={(ref) => this.checkbox = ref}/>
+                </th>
+                <td>
+                    { buttonSave() }
+                    { showItem() }
+                </td>
+                <td>{  }</td>
+                <td>{  }</td>
+                <td>{  }</td>
+                <td>{  }</td>
+                <td>{  }</td>
                 <td>{ showAmount() }</td>
             </tr>
         )

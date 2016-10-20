@@ -109,10 +109,12 @@ export default class PaymentsOnTab extends Component {
         map(this.state.selectedListId, (itemId, index) => {
             invoice.paymentsId.splice(invoice.paymentsId.indexOf(itemId), 1);
             ApiInvoices.update({_id: invoice._id}, {$pull: {paymentsId: itemId}})
+            const payment = ApiPayments.findOne({_id: itemId});
+            Meteor.users.update({_id: payment.customerId}, {$pull:{"profile.payments": itemId}})
             ApiPayments.remove(itemId);
         })
 
-        this.setState({selectedListId: []});
+        this.setState({selectedListId: [], isEdit: false});
     }
 
     handleSavePayment(payment){
@@ -124,7 +126,9 @@ export default class PaymentsOnTab extends Component {
         let selectedListId = this.state.selectedListId;
         selectedListId.splice(selectedListId.indexOf(_id), 1);
 
-        this.setState({ selectedListId });
+         const isEdit = (selectedListId.length === 0) ? false : this.state.isEdit;
+
+        this.setState({ selectedListId, isEdit });
     }
 // END =================== ADD = EDIT = REMOVE = SAVE ======================
 
@@ -170,7 +174,7 @@ export default class PaymentsOnTab extends Component {
                                         return (
                                             <PaymentTabRow key={`payment-${key}`}
                                                 onSelect={this.changeSelectedItem.bind(null,item)}
-                                                payment={clone(ApiPayments.findOne({_id: item}))}
+                                                payment={ApiPayments.findOne({_id: item})}
                                                 onSave={this.handleSavePayment}
                                                 selectedListId={this.state.selectedListId}
                                                 isEdit={this.state.isEdit}

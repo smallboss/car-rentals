@@ -2,7 +2,6 @@ import React, { Component, PropTypes } from 'react';
 import { browserHistory } from 'react-router'
 
 import { createContainer } from 'meteor/react-meteor-data';
-// import { ApiUserList } from '/imports/api/userList.js'
 import { ApiPayments } from '/imports/api/payments.js';
 
 import PaymentRow from './PaymentRow.js';
@@ -60,10 +59,12 @@ class Payments extends Component {
 
 
   removePayments() {
-    
-
     this.state.selectedPaymentsID.map((paymentID) => {
+      const payment = ApiPayments.findOne(new Mongo.ObjectID(paymentID));
+      const invoice = ApiInvoices.findOne({paymentsId: this.state.payment._id});
+      if (invoice) ApiInvoices.update({_id: invoice._id}, {$pull: { paymentsId: this.state.payment._id}});
       ApiPayments.remove(new Mongo.ObjectID(paymentID));
+      Meteor.users.update({_id: payment.customerId}, {$pull: { "profile.payments": new Mongo.ObjectID(paymentID)}});   
     })
 
     this.setState({selectedPaymentsID: []});
