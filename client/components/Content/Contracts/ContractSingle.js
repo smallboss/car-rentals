@@ -395,7 +395,7 @@ export default class ContractSingle extends Component {
           )
         }
 
-        return <div className='col-xs-9 m-t-05'>{title}</div>
+        return <div className='col-xs-9 m-t-015'>{title}</div>
       }
 
       const renderStartDate = () => {
