@@ -5,7 +5,6 @@ import { createContainer } from 'meteor/react-meteor-data';
 
 import { ApiInvoices } from '/imports/api/invoices.js';
 import { ApiPayments } from '/imports/api/payments.js';
-import { ApiUsers } from '/imports/api/customers'
 import { ApiLines } from '/imports/api/lines.js';
 import InvoiceRow from './InvoiceRow.js';
 import HeadList from './HeadList.js';

@@ -65,6 +65,8 @@ export const renderRoutes = () => (
             <Route path='customer/:id' component={Customer}/>
             <Route path='users_list' component={Users}/>
             <Route path='user_single/:id' component={UserSingle}/>
+            <Route path='imports/fines' component={ImportsFines} />
+            <Route path='imports/tolls' component={ImportsTolls} />
             <Route path="*" component={NotFoundPage}/>
         </Route>
       <Route path="*" component={NotFoundPage}/>

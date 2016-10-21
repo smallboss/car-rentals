@@ -62,7 +62,7 @@ export default class LinesOnTab extends Component {
 
 
         const invoice = this.props.invoice;
-        Meteor.users.update({_id: invoice.customerId}, {$push: { rentails: rentalId }});
+        Meteor.users.update({_id: invoice.customerId}, {$push: { 'profile.rentals': rentalId }});
         ApiInvoices.update({_id: invoice._id}, {$push: {rentals: rentalId}});
         this.setState({ selectedListId, isEdit: true });
     }

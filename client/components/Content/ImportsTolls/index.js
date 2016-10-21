@@ -3,8 +3,29 @@
  */
 import React from 'react'
 import { createContainer } from 'meteor/react-meteor-data'
+import { Mongo } from 'meteor/mongo'
 import { ApiTolls } from '/imports/api/tolls'
+import '../../../helpers/simple-excel'
 import './style.css'
+
+const csvParser = new SimpleExcel.Parser.CSV()
+const Toll = function () {
+    return {
+        _id: new Mongo.ObjectID(),
+        description: '',
+        fineStatus: '',
+        amount: '',
+        fineSource: '',
+        fineTime: '',
+        fineDate: '',
+        fineId: '',
+        licenseSource: '',
+        licenseNumber: '',
+        plateSymbol: '',
+        plateType: '',
+        plateNumber: ''
+    }
+}
 
 class Tolls extends React.Component {
     constructor (props) {
@@ -14,6 +35,31 @@ class Tolls extends React.Component {
     componentWillReceiveProps(nextProps) {
         this.setState({tolls: nextProps.tolls})
     }
+    importFileHandler (e) {
+        e.preventDefault()
+        let fileToImport = e.target['fileImport'].files[0]
+        csvParser.loadFile(fileToImport, () => {
+            let csvResult = csvParser.getSheet()
+            for(let i = 1; i < (csvResult.length - 1); i++) {
+                //console.log(csvResult[i])
+                let toll = new Toll()
+                toll.description = csvResult[i][0].value
+                toll.fineStatus = csvResult[i][1].value
+                toll.amount = csvResult[i][2].value
+                toll.fineSource = csvResult[i][3].value
+                toll.fineTime = csvResult[i][4].value
+                toll.fineDate = csvResult[i][5].value
+                toll.fineId = csvResult[i][6].value
+                toll.licenseSource = csvResult[i][7].value
+                toll.licenseNumber = csvResult[i][9].value
+                toll.plateSymbol = csvResult[i][11].value
+                toll.plateType = csvResult[i][12].value
+                toll.plateNumber = csvResult[i][13].value
+                //console.log(toll)
+                ApiTolls.insert(toll)
+            }
+        })
+    }
     render () {
         let classModal = (this.state.showModalTolls) ? 'modal show' : 'modal fade'
             /*total = this.state.tolls.reduce(function(prev, cur, index, arr) {
@@ -21,8 +67,22 @@ class Tolls extends React.Component {
             }, 0)*/
         return (
             <div>
-                <input type='button' className='btn btn-large btn-default' role='button' onClick={() => this.setState({showModalTolls: 1})} value='Show Tolls' />
-                <span className='m-l-2'>{this.state.tolls.length} rows</span>
+                <div>
+                    <div className='col-xs-2'>
+                        <input type='button' className='btn btn-large btn-default' role='button' onClick={() => this.setState({showModalTolls: 1})} value='Show Tolls' />
+                        <span className='m-l-2'>{this.state.tolls.length} rows</span>
+                    </div>
+                    <div className='col-xs-10'>
+                        <form encType='multipart/form-data' method='post' onSubmit={this.importFileHandler}>
+                            <div className='col-xs-8'>
+                                <input type='file' className='form-control' name='fileImport'/>
+                            </div>
+                            <div className='col-xs-4'>
+                                <input type='submit' className='btn btn-success' value='Import'/>
+                            </div>
+                        </form>
+                    </div>
+                </div>
                 <div id='tollsModal' className={classModal}>
                     <div className='overlay'></div>
                     <div className='modal-dialog modal-lg'>

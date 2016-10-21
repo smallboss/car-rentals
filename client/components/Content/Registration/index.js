@@ -54,17 +54,8 @@ class Registration extends React.Component {
                         requestText: ''
                     }
                 ],
-                rentals: [
-                    {
-                        _id: new Mongo.ObjectID(),
-                        carId: '',
-                        dateFrom: '',
-                        dateTo: ''
-                    }
-                ],
-                payments: [],
-                fines: '',
-                tolls: '',
+                rentals: [],
+                payments: [],                
                 _images
             }            
         }

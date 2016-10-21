@@ -5,11 +5,14 @@ import { Meteor } from 'meteor/meteor'
 import { Mongo } from 'meteor/mongo'
 import { createContainer } from 'meteor/react-meteor-data'
 import { ApiPayments } from '/imports/api/payments'
+import { ApiRentals } from '/imports/api/rentals'
+import { ApiCars } from '/imports/api/cars'
 import React from 'react'
 import $ from 'jquery'
 import { browserHistory } from 'react-router'
 import { imgToBase64 } from '../../../../helpers/handlerImages'
 import Table from '../Table'
+import Rentals from '../Rentals'
 import Fines from '../../Fines'
 import Tolls from '../../Tolls'
 import CustomerPayments from '../CustomerPayments'
@@ -35,17 +38,8 @@ const _user = {
                 requestText: ''
             }
         ],
-        rentals: [
-            {
-                _id: new Mongo.ObjectID(),
-                carId: '',
-                dateFrom: '',
-                dateTo: ''
-            }
-        ],
+        rentals: [],
         payments: [],
-        fines: '',
-        tolls: '',
         _images: {
             imgId: '',
             imgLicense: '',
@@ -237,7 +231,7 @@ class Customer extends React.Component {
         let editAble = (!this.state.editAble) ? 'disabled' : false
         let { _id, username, profile } = this.state.customer
         let email = (this.state.customer.emails) ? this.state.customer.emails[0].address : this.state.customer.email 
-        let { name, birthDate, phone, address, userType, fines, tolls, carRequest, rentals, _images } = profile;
+        let { name, birthDate, phone, address, carRequest, _images } = profile;
         if(!_images) {
             _images = {
                 imgId: '',
@@ -246,14 +240,28 @@ class Customer extends React.Component {
         }
         let { imgId, imgLicense } = _images
         let paymentsIds = profile.payments,
-            payments = []
-        let paymentsProps = this.props.payments
+            rentalsIds = profile.rentals,
+            payments = [],
+            rentals = [],
+            fines = [],
+            tolls = []            
         paymentsIds.forEach(id => {
             let finder = ApiPayments.findOne({_id: new Mongo.ObjectID(id._str)})
             if (finder) {
                 payments.push(finder)
             }
         }) 
+        rentalsIds.forEach(id => {
+            let finder = ApiRentals.findOne({_id: new Mongo.ObjectID(id._str)})
+            if (finder) {
+                let car = ApiCars.findOne({_id: new Mongo.ObjectID(finder.car._str)})
+                if(car && car.status == 'rented'){
+                    fines.push(car.plateNumber)
+                    tolls.push(car.plateNumber)
+                }
+                rentals.push(finder)
+            }
+        })
         return (
             <div className='panel panel-default'>
                 <div className='panel-heading'>
@@ -338,16 +346,16 @@ class Customer extends React.Component {
                                 <Table arrToTable={carRequest} currentComponent='carRequest' handlerChildState={this.handlerChildState} />
                             </div>
                             <div id='div_rentals' className='inner-div-users-edit'>
-                                <Table arrToTable={rentals} currentComponent='rentals' handlerChildState={this.handlerChildState} />
+                                <Rentals rentals={rentals} />
                             </div>
                             <div id='div_payments' className='inner-div-users-edit'>
                                 <CustomerPayments payments={payments} customerId={_id} />
                             </div>
                             <div id='div_fines' className='inner-div-users-edit'>
-                                <Fines />
+                                <Fines customerArray={fines} />
                             </div>
                             <div id='div_tolls' className='inner-div-users-edit'>
-                                <Tolls />
+                                <Tolls customerArray={tolls} />
                             </div>
                         </div>
                     </div>
@@ -364,6 +372,8 @@ Customer.contextTypes = {
 export default createContainer(({params}) => {
     Meteor.subscribe('users')
     Meteor.subscribe('payments')
+    Meteor.subscribe('rentals')
+    Meteor.subscribe('cars')
     let _id = params.id
     if(_id === 'new') {
         return {
@@ -372,7 +382,8 @@ export default createContainer(({params}) => {
     } else {
         return {
             customer: Meteor.users.findOne({_id: _id}),
-            payments: ApiPayments.find().fetch()
+            payments: ApiPayments.find().fetch(),
+            rentals: ApiRentals.find({customerId: _id}).fetch()
         }
     }
 }, Customer)

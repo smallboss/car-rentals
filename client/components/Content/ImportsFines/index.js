@@ -3,8 +3,26 @@
  */
 import React from 'react'
 import { createContainer } from 'meteor/react-meteor-data'
+import { Mongo } from 'meteor/mongo'
 import { ApiFines } from '/imports/api/fines'
 import './style.css'
+import '../../../helpers/simple-excel'
+
+const csvParser = new SimpleExcel.Parser.CSV()
+const Fine = function () {
+    return {
+        _id: new Mongo.ObjectID(),
+        transaction: '',
+        time: '',
+        postDate: '',
+        plate: '',
+        source: '',
+        tag: '',
+        location: '',
+        direction: '',
+        amount: ''
+    }
+}
 
 class Fines extends React.Component {
     constructor (props, context) {
@@ -14,6 +32,28 @@ class Fines extends React.Component {
     componentWillReceiveProps(nextProps) {
         this.setState({fines: nextProps.fines})
     }
+    importFileHandler (e) {
+        e.preventDefault()
+        let fileToImport = e.target['fileImport'].files[0]
+        csvParser.loadFile(fileToImport, () => {
+            let csvResult = csvParser.getSheet()
+            for(let i = 1; i < (csvResult.length - 2); i++) {
+                //console.log(csvResult[i])
+                let fine = new Fine()
+                fine.transaction = csvResult[i][0].value 
+                fine.time = csvResult[i][1].value
+                fine.postDate = csvResult[i][2].value
+                fine.plate = csvResult[i][3].value
+                fine.source = csvResult[i][5].value
+                fine.tag = csvResult[i][7].value
+                fine.location = csvResult[i][8].value
+                fine.direction = csvResult[i][9].value
+                fine.amount = csvResult[i][12].value
+                //console.log(fine)
+                ApiFines.insert(fine)
+            }            
+        })        
+    }
     render () {
         let classModal = (this.state.showModalFines) ? 'modal show' : 'modal fade',
             total = +this.state.fines.reduce(function(prev, cur, index, arr) {
@@ -21,8 +61,22 @@ class Fines extends React.Component {
             }, 0).toFixed(2)
         return (
             <div>
-                <input type='button' className='btn btn-large btn-default' role='button' onClick={() => this.setState({showModalFines: 1})} value='Show Fines' />
-                <span className='m-l-2'>{this.state.fines.length} rows</span>
+                <div>
+                    <div className='col-xs-2'>
+                        <input type='button' className='btn btn-large btn-default' role='button' onClick={() => this.setState({showModalFines: 1})} value='Show Fines' /><br />
+                        <span className='m-l-2'>{this.state.fines.length} rows</span>
+                    </div>
+                    <div className='col-xs-10'>
+                        <form encType='multipart/form-data' method='post' onSubmit={this.importFileHandler}>
+                            <div className='col-xs-8'>
+                                <input type='file' className='form-control' name='fileImport'/>
+                            </div>
+                            <div className='col-xs-4'>
+                                <input type='submit' className='btn btn-success' value='Import'/>
+                            </div>
+                        </form>
+                    </div>
+                </div>
                 <div id='finesModal' className={classModal}>
                     <div className='overlay'></div>
                     <div className='modal-dialog modal-lg'>
