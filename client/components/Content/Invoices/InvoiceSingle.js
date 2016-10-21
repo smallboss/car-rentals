@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor'
 import { Mongo } from 'meteor/mongo'
 import { Link } from 'react-router';
+import { Email } from 'meteor/email'
 import { createContainer } from 'meteor/react-meteor-data'
 import DatePicker from 'react-bootstrap-date-picker'
 import { ApiInvoices } from '/imports/api/invoices.js'
@@ -12,13 +13,15 @@ import { ApiYearWrite } from '/imports/api/yearWrite'
 import HeadSingle from './HeadSingle.js';
 import { browserHistory } from 'react-router';
 import React, { Component } from 'react';
-import { clone, cloneDeep, reverse, map } from 'lodash';
+import { clone, cloneDeep, reverse, find, map } from 'lodash';
+import { getInvoiceMsg } from '/client/helpers/generatorTextMessages.js'
 
 import PaymentsOnTab from './PaymentsOnTab/PaymentsOnTab.js'
 import LinesOnTab from './LinesOnTab/LinesOnTab.js'
 
 import { invoiceStateTypes } from '/imports/startup/typesList.js';
 
+import '/imports/api/email.js';
 import './invoiceStyle.css'
 import '/client/main.css'
 
@@ -61,7 +64,7 @@ export default class InvoiceSingle extends Component {
   }
   onChangeStatus(value) {
     let newInvoice = this.state.dispInvoice;
-    newInvoice.status = status;
+    newInvoice.status = value;
     this.setState({dispInvoice: newInvoice});
   }
   onChangeDate(value) {
@@ -124,7 +127,7 @@ export default class InvoiceSingle extends Component {
       if (this.props.contract) newInvoice.contractId = this.props.contract._id;
       ApiInvoices.insert(newInvoice);
 
-      let yearWrite = ApiYearWrite.findOne({year: '2016'});
+      let yearWrite = ApiYearWrite.findOne({yearfsend: '2016'});
       let invoicesNumb = '1';
 /////
       if (yearWrite) {
@@ -166,11 +169,13 @@ export default class InvoiceSingle extends Component {
       delete newInvoice._id;
       ApiInvoices.update(invoiceId, {$set: newInvoice});
 
-      map(newInvoice.paymentsId, (el) => {
-        Meteor.users.update({_id: this.state.invoice.customerId}, {$pull: { "profile.payments": el}});
-        ApiPayments.update({_id: el}, {$set: {customerId: newInvoice.customerId}});
-        Meteor.users.update({_id: newInvoice.customerId}, {$addToSet: { "profile.payments": el}});
-      })
+      if (newInvoice.paymentsId) {
+        map(newInvoice.paymentsId, (el) => {
+          Meteor.users.update({_id: this.state.invoice.customerId}, {$pull: { "profile.payments": el}});
+          ApiPayments.update({_id: el}, {$set: {customerId: newInvoice.customerId}});
+          Meteor.users.update({_id: newInvoice.customerId}, {$addToSet: { "profile.payments": el}});
+        })
+      }
     }
 
 
@@ -210,7 +215,20 @@ export default class InvoiceSingle extends Component {
   }
 
   handleSendByEmail(){
-    console.log('SEND BY EMAIL >>>>')
+    console.log('SEND BY EMAIL >>>')
+    let text = this.state.invoice._id +' ' + this.state.invoice.customerId+' ' + this.state.invoice.status+' ' + this.state.invoice.date+' ' +
+                this.state.invoice.dueDate;
+
+    let email = find(this.props.userList, ['_id', Meteor.userId()]).emails[0];
+
+    // console.log('email', email);
+    console.log('getInvoiceMsg', getInvoiceMsg(this.state.invoice._id));
+
+    Meteor.call('sendEmail',
+            email.address,
+            'smallboss@live.ru',
+            'Invoice ' + this.state.invoice.codeName,
+            getInvoiceMsg(this.state.invoice._id));
   }
 
 
