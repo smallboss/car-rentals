@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor'
 import { Mongo } from 'meteor/mongo'
 import { Link } from 'react-router';
+import { Email } from 'meteor/email'
 import DatePicker from 'react-bootstrap-date-picker'
 import { createContainer } from 'meteor/react-meteor-data'
 import { ApiInvoices } from '/imports/api/invoices.js'
@@ -15,6 +16,7 @@ import TopDetailsTable from './TopDetailsTable.js';
 import { browserHistory } from 'react-router';
 import React, { Component } from 'react';
 import { clone, cloneDeep, reverse, concat, find } from 'lodash';
+import { getContractMsg } from '/client/helpers/generatorTextMessages.js'
 
 import { contractStateTypes } from '/imports/startup/typesList.js';
 
@@ -323,7 +325,13 @@ export default class ContractSingle extends Component {
   }
 
   handleSendByEmail(){
-    console.log('SEND BY EMAIL >>>>')
+    let email = find(this.props.customerList, ['_id', Meteor.userId()]).emails[0];
+
+    Meteor.call('sendEmail',
+            email.address,
+            'smallboss@live.ru',
+            'Contract ' + this.state.contract.codeName,
+            getContractMsg(this.state.contract._id, ));
   }
 
   handlePrint(){
@@ -387,7 +395,7 @@ export default class ContractSingle extends Component {
           )
         }
 
-        return <div className='col-xs-10 m-t-05'>{title}</div>
+        return <div className='col-xs-9 m-t-05'>{title}</div>
       }
 
       const renderStartDate = () => {
@@ -401,7 +409,7 @@ export default class ContractSingle extends Component {
           )
         }
 
-        return <div className='col-xs-8 m-t-05'>{startDate}</div>
+        return <div className='col-xs-8 m-t-015'>{startDate}</div>
       }
 
       const renderEndDate = () => {

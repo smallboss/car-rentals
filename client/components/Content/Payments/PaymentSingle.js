@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor'
 import { Mongo } from 'meteor/mongo'
 import { Link } from 'react-router';
+import { Email } from 'meteor/email'
 import DatePicker from 'react-bootstrap-date-picker'
 import { createContainer } from 'meteor/react-meteor-data'
 import { ApiPayments } from '/imports/api/payments.js'
@@ -10,7 +11,8 @@ import { ApiInvoices } from '/imports/api/invoices'
 import HeadSingle from './HeadSingle.js';
 import { browserHistory } from 'react-router';
 import React, { Component } from 'react';
-import { clone, cloneDeep, reverse } from 'lodash';
+import { clone, cloneDeep, reverse, find } from 'lodash';
+import { getPaymentMsg } from '/client/helpers/generatorTextMessages.js'
 
 import { paymentStateTypes } from '/imports/startup/typesList.js';
 
@@ -37,6 +39,7 @@ export default class PaymentSingle extends Component {
     this.onChangeAmount = this.onChangeAmount.bind(this);
     this.onChangeNotes = this.onChangeNotes.bind(this);
     this.onChangeStatus = this.onChangeStatus.bind(this);
+    this.onChangeDate = this.onChangeDate.bind(this);
     this.onChangeRef = this.onChangeRef.bind(this);
     this.handleSave = this.handleSave.bind(this);
     this.handlePrint = this.handlePrint.bind(this);
@@ -201,7 +204,17 @@ export default class PaymentSingle extends Component {
   }
 
   handleSendByEmail(){
-    console.log('SEND BY EMAIL >>>>')
+    console.log('this.props.userList', this.props.userList);
+    let email = find(this.props.userList, ['_id', Meteor.userId()]).emails[0];
+
+    // console.log('email', email);
+    // console.log('getInvoiceMsg', getInvoiceMsg(this.state.invoice._id));
+
+    Meteor.call('sendEmail',
+            email.address,
+            'smallboss@live.ru',
+            'Payment ' + this.state.payment.codeName,
+            getPaymentMsg(this.state.payment._id));
   }
 
 

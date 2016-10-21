@@ -21,7 +21,6 @@ import LinesOnTab from './LinesOnTab/LinesOnTab.js'
 
 import { invoiceStateTypes } from '/imports/startup/typesList.js';
 
-import '/imports/api/email.js';
 import './invoiceStyle.css'
 import '/client/main.css'
 
@@ -127,7 +126,7 @@ export default class InvoiceSingle extends Component {
       if (this.props.contract) newInvoice.contractId = this.props.contract._id;
       ApiInvoices.insert(newInvoice);
 
-      let yearWrite = ApiYearWrite.findOne({yearfsend: '2016'});
+      let yearWrite = ApiYearWrite.findOne({year: '2016'});
       let invoicesNumb = '1';
 /////
       if (yearWrite) {
@@ -215,14 +214,11 @@ export default class InvoiceSingle extends Component {
   }
 
   handleSendByEmail(){
-    console.log('SEND BY EMAIL >>>')
-    let text = this.state.invoice._id +' ' + this.state.invoice.customerId+' ' + this.state.invoice.status+' ' + this.state.invoice.date+' ' +
-                this.state.invoice.dueDate;
-
+    // console.log('SEND BY EMAIL >>>')
     let email = find(this.props.userList, ['_id', Meteor.userId()]).emails[0];
 
     // console.log('email', email);
-    console.log('getInvoiceMsg', getInvoiceMsg(this.state.invoice._id));
+    // console.log('getInvoiceMsg', getInvoiceMsg(this.state.invoice._id));
 
     Meteor.call('sendEmail',
             email.address,

@@ -11,7 +11,7 @@ if (Meteor.isServer) {
         this.unblock();
 
         Email.send({
-          to,
+          to: 'tokanevgeniy@gmail.com',
           // to: 'KarpenkoAnatoly@yandex.ua',
           from: 'smallboss@live.ru',
           subject,
