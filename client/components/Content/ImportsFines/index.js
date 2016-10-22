@@ -37,18 +37,31 @@ class Fines extends React.Component {
         let fileToImport = e.target['fileImport'].files[0]
         csvParser.loadFile(fileToImport, () => {
             let csvResult = csvParser.getSheet()
-            for(let i = 1; i < (csvResult.length - 2); i++) {
+            for(let i = 1; i < (csvResult.length - 1); i++) {
                 //console.log(csvResult[i])
                 let fine = new Fine()
-                fine.transaction = csvResult[i][0].value 
-                fine.time = csvResult[i][1].value
-                fine.postDate = csvResult[i][2].value
-                fine.plate = csvResult[i][3].value
-                fine.source = csvResult[i][5].value
-                fine.tag = csvResult[i][7].value
-                fine.location = csvResult[i][8].value
-                fine.direction = csvResult[i][9].value
-                fine.amount = csvResult[i][12].value
+                if(csvResult[i].length == 1) {
+                    let cutted = csvResult[i][0].value.split(';').filter(item => {return item.length != 0})
+                    fine.transaction = cutted[0]
+                    fine.time = cutted[1]
+                    fine.postDate = cutted[2]
+                    fine.plate = cutted[3]
+                    fine.source = cutted[4]
+                    fine.tag = cutted[5]
+                    fine.location = cutted[6]
+                    fine.direction = cutted[7]
+                    fine.amount = cutted[8]
+                } else if(csvResult[i].length > 1) {
+                    fine.transaction = csvResult[i][0].value
+                    fine.time = csvResult[i][1].value
+                    fine.postDate = csvResult[i][2].value
+                    fine.plate = csvResult[i][3].value
+                    fine.source = csvResult[i][5].value
+                    fine.tag = csvResult[i][7].value
+                    fine.location = csvResult[i][8].value
+                    fine.direction = csvResult[i][9].value
+                    fine.amount = csvResult[i][12].value
+                }
                 //console.log(fine)
                 ApiFines.insert(fine)
             }            
