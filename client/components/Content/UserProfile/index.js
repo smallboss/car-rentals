@@ -40,6 +40,9 @@ class UserProfile extends React.Component {
             }
             imgToBase64(file, (result) => {
                 _newFile = result
+                if(!_newUser.profile._images) {
+                    _newUser.profile._images = {}
+                }
                 _newUser.profile._images[_target] = _newFile
                 this.setState({user: _newUser})
             })
@@ -92,14 +95,14 @@ class UserProfile extends React.Component {
                             Meteor.call('setNewPassword', _objToSend, (err, result) => {
                                 if(!err) {
                                     alert('Your password has been change. Sign in again please')
-
+                                    this.setState({editAble: 0})
+                                    browserHistory.push('/')
                                 } else {
                                     console.log(err)
                                 }
                             })
                         }
-                        this.setState({editAble: 0})
-                        browserHistory.push('/')
+                        this.setState({editAble: 0})                        
                     }
                 })                
                 break
@@ -120,12 +123,12 @@ class UserProfile extends React.Component {
         let { username, emails, profile } = this.state.user || '',
             email = (emails) ? emails[0].address : '';
         let { userType, name, birthDate, phone, address, _images } = (profile) ? profile : '';
-        let { imgId, imgLicense } = _images || ''
+        let { imgId, imgLicense, imgUser } = _images || ''
         return (
             <div>
                 <div className='panel panel-default'>
                     <div className='panel-heading'>
-                        <h4>Customer / {name}</h4>
+                        <h4>Customers / {name}</h4>
                         <input type='button' name='editButton' className='btn btn-primary p-x-1' value='Edit' onClick={this.handlerButtonsEdit} />
                         <input type='button' name='saveButton' className='btn btn-primary p-x-1 m-x-1' ref={(ref) => this.refButtonSave = ref} value='Save' disabled={editAble} />
                     </div>
@@ -185,6 +188,13 @@ class UserProfile extends React.Component {
                                 <div className='col-xs-8'>
                                     <img src={imgLicense} />
                                     <input type='file' id='imgLicense' className='form-control' accept='image/*' disabled={editAble} />
+                                </div>                                
+                            </div>
+                            <div className='form-group'>
+                                <label htmlFor='imgUser' className='col-xs-4'>Image User</label>
+                                <div className='col-xs-8'>
+                                    <img src={imgUser} />
+                                    <input type='file' id='imgUser' className='form-control' accept='image/*' disabled={editAble} />
                                 </div>                                
                             </div>                            
                         </form>

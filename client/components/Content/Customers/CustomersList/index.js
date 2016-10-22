@@ -5,18 +5,18 @@ import { Meteor } from 'meteor/meteor'
 import { createContainer } from 'meteor/react-meteor-data'
 import React from 'react'
 import { browserHistory } from 'react-router'
-//import $ from 'jquery'
 import { searcher } from '../../../../helpers/searcher'
 import CustomerForTable from '../CustomerForTable'
 import Pagination from '../Pagination'
 
 class CustomersList extends React.Component {
-    constructor(props) {
+    constructor(props, context) {
         super(props)
         this.state = {
+            loginLevel: context.loginLevel,
             customers: this.props.customers,
             currentPage: 1,
-            elemsOnPage: 3,
+            elemsOnPage: 10,
             maxPage: 0,
             stateForRemove: []            
         }
@@ -28,10 +28,11 @@ class CustomersList extends React.Component {
         let maxPage = Math.ceil(this.props.customers.length / this.state.elemsOnPage)
         this.setState({customers: this.props.customers, maxPage})
     }
-    componentWillReceiveProps(nextProps) {
+    componentWillReceiveProps(nextProps, nextContext) {
         let _customers = nextProps.customers
         let maxPage = Math.ceil(_customers.length / this.state.elemsOnPage)
-        this.setState({customers: _customers, maxPage})
+        let loginLevel = nextContext.loginLevel
+        this.setState({customers: _customers, maxPage, loginLevel})
     }
     shouldComponentUpdate (nextProps, nextState) {
         let _check = (nextState.stateForRemove.length > 0 ) ? 0 : 1
@@ -57,19 +58,15 @@ class CustomersList extends React.Component {
                 this.setState({stateForRemove: arrForRemove})
                 break
             case 'remover-users':
+                if(this.state.loginLevel !== 3) return false;
                 arrForRemove.map(elem => {
                     Meteor.call('removeAllUserData', elem, (err) => {
                         if(err) {
                             console.log(err)
                         }
-                    })                    
+                    })
                 })
-                if(arrForRemove.length >= this.state.maxPage) {
-                    this.setState({stateForRemove: [], currentPage: this.state.currentPage - 1})   
-                } else {
-                    this.setState({stateForRemove: []})
-                }
-                                
+                location.reload()                
                 break
             default: break
         }
@@ -115,7 +112,7 @@ class CustomersList extends React.Component {
                         })}
                     </tbody>
                 </table>
-                <input type='button' className='btn btn-danger' name='remover-users' value='Delete users' onClick={this.handlerDeleteCustomer} />
+                {(this.state.loginLevel === 3) ? <input type='button' className='btn btn-danger' name='remover-users' value='Delete users' onClick={this.handlerDeleteCustomer} /> : ''}
                 <input type='button' className='btn btn-success m-x-1' name='add-user' value='Add user' onClick={() => {let _new = 'new'; browserHistory.push(`/managePanel/customer/${_new}`)}} />
                 {(this.state.maxPage > 1) ? <div className='text-center'>
                     <Pagination num={this.state.maxPage} handlerPagination={this.handlerPagination} key={Math.random()} />
@@ -123,6 +120,10 @@ class CustomersList extends React.Component {
             </div>
         )
     }
+}
+
+CustomersList.contextTypes = {
+    loginLevel: React.PropTypes.number.isRequired
 }
 
 export default createContainer(() => {

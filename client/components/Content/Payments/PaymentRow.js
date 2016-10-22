@@ -8,25 +8,37 @@ export default class PaymentRow extends Component {
     }
 
     componentWillReceiveProps (props) {
-        this.input.checked = false;
+        if (this.input) {
+            this.input.checked = false;
 
-        map(props.selectedPaymentsId, (item) => {
-            if(item == props.item._id)
-                this.input.checked = true;
-        })
+            map(props.selectedPaymentsId, (item) => {
+                if(item == props.item._id)
+                    this.input.checked = true;
+            })
+        }
     }
 
 
     render(){
         const { item, onHandleSelect, onClick, customerName } = this.props;
 
+        const renderCheckBox = () => {
+            if (this.props.loginLevel === 3) {
+                return (
+                    <th>
+                        <input 
+                            type="checkbox" ref={(ref) => this.input = ref} 
+                            onChange={(e) => onHandleSelect(e, item)} />
+                    </th>
+                )
+            }
+
+            return null;
+        }
+
         return (
             <tr>
-                <th>
-                    <input 
-                        type="checkbox" ref={(ref) => this.input = ref} 
-                        onChange={(e) => onHandleSelect(e, item)} />
-                </th>
+                { renderCheckBox() }
                 <td>
                     <Link to={`/managePanel/customer/${item.customerId}`}>{ customerName ? customerName.profile.name : ''}</Link>
                 </td>

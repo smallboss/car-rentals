@@ -5,13 +5,19 @@ import { Meteor } from 'meteor/meteor'
 import { Mongo } from 'meteor/mongo'
 import { createContainer } from 'meteor/react-meteor-data'
 import { ApiPayments } from '/imports/api/payments'
+import { ApiRentals } from '/imports/api/rentals'
+import { ApiCars } from '/imports/api/cars'
 import React from 'react'
 import $ from 'jquery'
 import { browserHistory } from 'react-router'
 import { imgToBase64 } from '../../../../helpers/handlerImages'
 import Table from '../Table'
+import Rentals from '../Rentals'
+import Fines from '../../Fines'
+import Tolls from '../../Tolls'
+import CustomerPayments from '../CustomerPayments'
 import './style.css'
-
+const DatePicker = require('react-bootstrap-date-picker')
 const _user = {
     id: new Mongo.ObjectID(),
     username: '',
@@ -32,28 +38,20 @@ const _user = {
                 requestText: ''
             }
         ],
-        rentals: [
-            {
-                _id: new Mongo.ObjectID(),
-                carId: '',
-                dateFrom: '',
-                dateTo: ''
-            }
-        ],
+        rentals: [],
         payments: [],
-        fines: '',
-        tolls: '',
         _images: {
             imgId: '',
-            imgLicense: ''
+            imgLicense: '',
+            imgUser: ''
         }
     }
 }
 
 class Customer extends React.Component {
-    constructor (props) {
+    constructor (props, context) {
         super(props)
-        this.state = {customer: props.customer || _user, editAble: 0}
+        this.state = {loginLevel: context.loginLevel, customer: (this.props.params.id == 'new') ? _user : props.customer || _user, editAble: 0}
         this.handlerEditCustomer = this.handlerEditCustomer.bind(this)
         this.handlerChildState = this.handlerChildState.bind(this)
     }
@@ -73,10 +71,14 @@ class Customer extends React.Component {
             $('#button_edit').click()
         }
     }
-    componentWillReceiveProps (nextProps) {
+    componentWillReceiveProps (nextProps, nextContext) {
         let customer = nextProps.customer
-        this.setState({customer: customer})
+            loginLevel = nextContext.loginLevel
+        this.setState({customer: customer, loginLevel})
         this.forceUpdate()
+    }
+    componentWillUnMount () {
+        this.setState({customer: {}})
     }
     handlerNavUserEdit (e) {
         let li_s = $('.nav-user-edit li').removeClass('active-href-nav'),
@@ -86,10 +88,11 @@ class Customer extends React.Component {
         $('#' + _target).show()
     }
     handlerRemoveCustomer (id) {
+        if(this.state.loginLevel !== 3) return false
         let _confirm = confirm('Are You sure to delete this customer?')
         if(_confirm) {
             Meteor.call('removeAllUserData', id, (err) => {
-                browserHistory.push('/managePanel/customers_list')
+                browserHistory.push('/managePanel')
             })                        
         }
     }
@@ -171,13 +174,20 @@ class Customer extends React.Component {
                     _newState._id = new Mongo.ObjectID()
                     _newState.password = '123456'
                     _newState.profile.userType = 'customer'
+                    if(!_newState.username || !_newState.email) {
+                        alert('Need Username or Email')
+                        break
+                    }
                     Meteor.call('createNewUser', _newState, (err, result) => {
                         if(err) {
                             alert(err.reason)
+                            location.reload()
                         } else {
                             alert('Default user`s password is 123456')
                             _href = '/managePanel/customer/' + result
-                            browserHistory.push(_href)   
+                            this.setState({customers: _newState, editAble: 0})
+                            browserHistory.push(_href)
+                            location.reload()
                         }                        
                     })
                     this.setState({customers: _newState, editAble: 0})
@@ -195,19 +205,21 @@ class Customer extends React.Component {
         let _state,
             _id = this.state.customer._id, 
             _idPayment
-            //currentPayments = this.state.customer.profile.payments
+        //console.log(data)
         if(target == 'payments') {
             data.forEach(item => {
                 _idPayment = new Mongo.ObjectID(item._id._str)
                 if(ApiPayments.findOne({_id: _idPayment})) {
-                    delete item._id
-                    ApiPayments.update({_id: _idPayment}, {$set: item})    
+                    if(!item._toedit) delete item._id
+
+                    ApiPayments.update({_id: _idPayment}, {$set: item})                                        
                 } else {
                     Meteor.users.update({_id: _id}, {$push: {'profile.payments': _idPayment}})
                     item.customerId = _id
                     ApiPayments.insert(item)
-                }
+                }                
             })
+            this.setState({customer: this.props.customer})
             return
         }
         _state = this.state.customer
@@ -219,7 +231,7 @@ class Customer extends React.Component {
         let editAble = (!this.state.editAble) ? 'disabled' : false
         let { _id, username, profile } = this.state.customer
         let email = (this.state.customer.emails) ? this.state.customer.emails[0].address : this.state.customer.email 
-        let { name, birthDate, phone, address, userType, fines, tolls, carRequest, rentals, _images } = profile;
+        let { name, birthDate, phone, address, carRequest, _images } = profile;
         if(!_images) {
             _images = {
                 imgId: '',
@@ -228,24 +240,28 @@ class Customer extends React.Component {
         }
         let { imgId, imgLicense } = _images
         let paymentsIds = profile.payments,
-            payments = []
-        let paymentsProps = this.props.payments
+            rentalsIds = profile.rentals,
+            payments = [],
+            rentals = [],
+            fines = [],
+            tolls = []            
         paymentsIds.forEach(id => {
             let finder = ApiPayments.findOne({_id: new Mongo.ObjectID(id._str)})
             if (finder) {
                 payments.push(finder)
             }
         }) 
-        if(payments.length == 0) {
-            payments = [ {
-                _id: new Mongo.ObjectID(),
-                amount: '',
-                customerId: _id,
-                date: '',
-                ref: '',
-                status: ''
-            }]
-        }
+        rentalsIds.forEach(id => {
+            let finder = ApiRentals.findOne({_id: new Mongo.ObjectID(id._str)})
+            if (finder) {
+                let car = ApiCars.findOne({_id: new Mongo.ObjectID(finder.car._str)})
+                if(car && car.status == 'rented'){
+                    fines.push(car.plateNumber)
+                    tolls.push(car.plateNumber)
+                }
+                rentals.push(finder)
+            }
+        })
         return (
             <div className='panel panel-default'>
                 <div className='panel-heading'>
@@ -253,7 +269,7 @@ class Customer extends React.Component {
                     <input type='button' className='btn btn-primary p-x-1' value='Print' />
                     <input type='button' id='button_save' className='btn btn-primary p-x-1 m-x-1' value='Save' disabled={editAble} />
                     <input type='button' id='button_edit' className='btn btn-primary p-x-1' value='Edit' onClick={this.handlerEditCustomer} />
-                    <input type='button' className='btn btn-primary p-x-1 m-x-1' value='Delete' onClick={() => { this.handlerRemoveCustomer(_id) }} />
+                    {(this.state.loginLevel === 3) ? <input type='button' className='btn btn-primary p-x-1 m-x-1' value='Delete' onClick={() => { this.handlerRemoveCustomer(_id) }} /> : ''}
                 </div>
                 <div className='panel-body'>
                     <div className='row'>
@@ -280,7 +296,7 @@ class Customer extends React.Component {
                         <div className='col-xs-6'>
                             <label htmlFor='phone' className='col-xs-2'>Phone</label>
                             <div className='col-xs-8 form-horizontal'>
-                                <input type='text' id='phone' className='form-control' value={phone} disabled={editAble} />
+                                <input type='text' id='phone' className='form-control' maxLength='15' value={phone} disabled={editAble} />
                             </div>
                         </div>
                     </div>
@@ -288,7 +304,11 @@ class Customer extends React.Component {
                         <div className='col-xs-6'>
                             <label htmlFor='birhdate' className='col-xs-2'>Birth Date</label>
                             <div className='col-xs-8 form-horizontal'>
-                                <input type='date' id='birthDate' className='form-control' value={birthDate} disabled={editAble}/>
+                                <DatePicker dateFormat='MM/DD/YYYY' value={birthDate} name='check-picker' onChange={(date) => {
+                                let customer = this.state.customer
+                                customer.profile['birthDate'] = date.slice(0,10) 
+                                this.setState({customer: customer})
+                                }} disabled={editAble} />
                             </div>
                         </div>
                         <div className='col-xs-6'>
@@ -326,26 +346,16 @@ class Customer extends React.Component {
                                 <Table arrToTable={carRequest} currentComponent='carRequest' handlerChildState={this.handlerChildState} />
                             </div>
                             <div id='div_rentals' className='inner-div-users-edit'>
-                                <Table arrToTable={rentals} currentComponent='rentals' handlerChildState={this.handlerChildState} />
+                                <Rentals rentals={rentals} />
                             </div>
                             <div id='div_payments' className='inner-div-users-edit'>
-                                <Table arrToTable={payments} currentComponent='payments' handlerChildState={this.handlerChildState} />
+                                <CustomerPayments payments={payments} customerId={_id} />
                             </div>
                             <div id='div_fines' className='inner-div-users-edit'>
-                                <div className='form-group'>
-                                    <label htmlFor='fines' className='col-xs-2'>Fines</label>
-                                    <div className='col-xs-7'>
-                                        <input type='text' id='fines' className='form-control' value={fines} disabled={editAble} />
-                                    </div>
-                                </div>
+                                <Fines customerArray={fines} />
                             </div>
                             <div id='div_tolls' className='inner-div-users-edit'>
-                                <div className='form-group'>
-                                    <label htmlFor='tolls' className='col-xs-2'>Tolls</label>
-                                    <div className='col-xs-7'>
-                                        <input type='text' id='tolls' className='form-control' value={tolls} disabled={editAble} />
-                                    </div>
-                                </div>
+                                <Tolls customerArray={tolls} />
                             </div>
                         </div>
                     </div>
@@ -355,9 +365,15 @@ class Customer extends React.Component {
     }
 }
 
+Customer.contextTypes = {
+    loginLevel: React.PropTypes.number.isRequired
+}
+
 export default createContainer(({params}) => {
     Meteor.subscribe('users')
     Meteor.subscribe('payments')
+    Meteor.subscribe('rentals')
+    Meteor.subscribe('cars')
     let _id = params.id
     if(_id === 'new') {
         return {
@@ -366,7 +382,12 @@ export default createContainer(({params}) => {
     } else {
         return {
             customer: Meteor.users.findOne({_id: _id}),
-            payments: ApiPayments.find().fetch()
+            payments: ApiPayments.find().fetch(),
+            rentals: ApiRentals.find({customerId: _id}).fetch()
         }
     }
 }, Customer)
+
+
+//<Table arrToTable={payments} currentComponent='payments' handlerChildState={this.handlerChildState} />
+//<input type='date' id='birthDate' className='form-control' value={birthDate} disabled={editAble}/>

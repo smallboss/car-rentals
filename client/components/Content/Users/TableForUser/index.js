@@ -38,21 +38,19 @@ class TableForUser extends React.Component {
                     <tbody>
                         {this.state.arrToTable.map((elem, i) => {
                             let _stateToTd = Object.keys(this.state.arrToTable[i], key => elem[key])
-                            if(elem[_stateToTd[1]].length > 0) {
-                                return (
-                                    <tr key={Math.random()}>
-                                        {_stateToTd.map(val => {
-                                            if(typeof elem[val] == 'string' && val != 'customerId') {
-                                                return (
-                                                    <td key={Math.random()}>
-                                                        {elem[val]}
-                                                    </td>
-                                                )                                                
-                                            }                                            
-                                        })}
-                                    </tr>
-                                )                            
-                            }
+                            return (
+                                <tr key={Math.random()}>
+                                    {_stateToTd.map(val => {
+                                        if(typeof elem[val] != 'object' && val != 'customerId') {
+                                            return (
+                                                <td key={Math.random()}>
+                                                    {elem[val]}
+                                                </td>
+                                            )
+                                        }
+                                    })}
+                                </tr>
+                            )
                         })}                        
                     </tbody>
                 </table>
@@ -63,8 +61,7 @@ class TableForUser extends React.Component {
 
 export default createContainer (({params}) => {
     let { tableTarget } = params,
-        loginId = Meteor.userId(),
-        arrToTable
+        loginId = Meteor.userId()
     if(!tableTarget || !loginId) {
         return {
             arrToTable: []

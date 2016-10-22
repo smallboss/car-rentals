@@ -6,16 +6,17 @@ import { Meteor } from 'meteor/meteor'
 import { createContainer } from 'meteor/react-meteor-data'
 
 class UserSingle extends React.Component {
-    constructor (props) {
+    constructor (props, context) {
         super(props)
-        this.state = {user: props.user, editAble: 0}
+        this.state = {loginLevel: context.loginLevel, user: props.user, editAble: 0}
         this.handlerEditUser = this.handlerEditUser.bind(this)        
     }
-    componentWillReceiveProps (nextProps) {
+    componentWillReceiveProps (nextProps, nextContext) {
         let user = nextProps.user,
-            _newStateEdit
+            loginLevel = nextContext.loginLevel,
+            _newStateEdit            
         _newStateEdit = (user.profile.userType == 'admin') ? 1 : 0
-        this.setState({user: user, editAble: _newStateEdit})
+        this.setState({user: user, editAble: _newStateEdit, loginLevel})
         this.forceUpdate()
     }
     handlerNavUserEdit (e) {
@@ -148,6 +149,7 @@ class UserSingle extends React.Component {
                                 </div>
                             </div>
                         </div>
+                        {(this.state.loginLevel === 3 ) ?
                         <div className='row m-t-1'>
                             <div className='form-group'>
                                 <label htmlFor='password' className='col-xs-2'>Password</label>
@@ -155,7 +157,8 @@ class UserSingle extends React.Component {
                                     <input type='password' id='password' className='form-control' ref={(ref) => {this.refPassword = ref}} disabled={editAble} />
                                 </div>
                             </div>
-                        </div>
+                        </div> : ''}
+                        {(this.state.loginLevel === 3 ) ?
                         <div className='row m-t-1'>
                             <div className='form-group'>
                                 <label htmlFor='repeat_password' className='col-xs-2'>Repeat Password</label>
@@ -163,7 +166,8 @@ class UserSingle extends React.Component {
                                     <input type='password' id='repeat_password' className='form-control' ref={(ref) => {this.refRepeatPassword = ref}} disabled={editAble} />
                                 </div>
                             </div>
-                        </div>
+                        </div> : ''}
+                        {(this.state.loginLevel === 3 ) ?
                         <div className='row m-t-1'>
                             <div className='form-group'>
                                 <label htmlFor='userType' className='col-xs-2'>Role</label>
@@ -175,12 +179,16 @@ class UserSingle extends React.Component {
                                     </select>
                                 </div>
                             </div>
-                        </div>
+                        </div> : ''}                            
                     </div>                    
                 </div>
             </div>
         )
     }
+}
+
+UserSingle.contextTypes = {
+    loginLevel: React.PropTypes.number.isRequired
 }
 
 export default createContainer (({params}) => {

@@ -24,7 +24,7 @@ export default class HeadList extends Component {
 
 
     componentDidUpdate() {
-        this.buttonRemove.disabled = this.state.disableRemove;
+        if (this.buttonRemove) this.buttonRemove.disabled = this.state.disableRemove;
     }
 
 
@@ -72,6 +72,22 @@ export default class HeadList extends Component {
             return rightArrow;
         }
 
+
+        const renderRemoveButton = () => {
+            if (this.props.loginLevel === 3) {
+                return (
+                    <button 
+                        onClick={this.props.onRemovePayments} 
+                        ref={(ref) => this.buttonRemove = ref}
+                        className='btn btn-danger' >
+                        Delete
+                    </button>
+                )
+            }
+
+            return null;
+        }
+
         return (
             <div className="headList">
                 <div className="col-xs-6 left-headList">
@@ -79,12 +95,7 @@ export default class HeadList extends Component {
 
                     <div className="btn-box">
                         <button onClick={this.props.onAddNew} className='btn btn-success m-x-1'>Add New</button>
-                        <button 
-                            onClick={this.props.onRemoveCars} 
-                            ref={(ref) => this.buttonRemove = ref}
-                            className='btn btn-danger' >
-                            Delete
-                        </button>
+                        { renderRemoveButton() }
                     </div>
                 </div>
 

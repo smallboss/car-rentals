@@ -4,7 +4,7 @@ import { Email } from 'meteor/email'
 import { createContainer } from 'meteor/react-meteor-data';
 
 import { ApiContracts } from '/imports/api/contracts.js';
-import { ApiUsers } from '/imports/api/customers';
+import { ApiUsers } from '/imports/api/users';
 import { ApiInvoices } from '/imports/api/invoices';
 import { ApiPayments } from '/imports/api/payments';
 import { ApiLines } from '/imports/api/lines';
@@ -20,6 +20,7 @@ class Contracts extends Component {
     super(props, context); 
 
     this.state = {
+      loginLevel: context.loginLevel,
       selectedContractsID: [],
       foundItems: [],
       searchField: '',
@@ -39,10 +40,12 @@ class Contracts extends Component {
   }
 
 
-  componentWillReceiveProps(props) {    
+  componentWillReceiveProps(props, nextContext) {    
     if (this.props.contracts != props.contracts) {
       this.handleChangeSearchField(this.state.searchField, props);
     }
+
+    this.setState({loginLevel: nextContext.loginLevel});
   }
 
   componentWillUpdate(nextProps, nextState){
@@ -186,7 +189,8 @@ class Contracts extends Component {
                       managerName={Meteor.users.findOne(item.managerId)}
                       onClick={this.handleClickOnRow.bind(null, item._id)}
                       selectedContractsId={this.state.selectedContractsID} 
-                      onHandleSelect={this.handleSelect} />
+                      onHandleSelect={this.handleSelect}
+                      loginLevel={this.state.loginLevel} />
           }
         }
       )
@@ -203,12 +207,18 @@ class Contracts extends Component {
           pageDown={this.pageDown}
           onChangeSearchField={this.handleChangeSearchField}
           onAddNew={this.addContract} 
-          onRemoveContracts={this.removeContracts} />
+          onRemoveContracts={this.removeContracts}
+          loginLevel={this.state.loginLevel} />
 
         <table className="table table-bordered table-hover">
           <thead>
             <tr>
-              <th><input type="checkbox" disabled="true"/></th>
+              {(() => {
+                return 
+                  this.state.loginLevel === 3 
+                      ? (<th><input type="checkbox" disabled="true"/></th>)
+                      : null
+              })()}
               <th>Contract title</th>
               <th>Customer</th>
               <th>Contract ID</th>
@@ -235,7 +245,8 @@ Contracts.propTypes = {
 };
 
 Contracts.contextTypes = {
-  router: React.PropTypes.object.isRequired
+  router: React.PropTypes.object.isRequired,
+  loginLevel: React.PropTypes.number.isRequired
 }
 
 

@@ -3,7 +3,6 @@ import { browserHistory } from 'react-router'
 
 import { createContainer } from 'meteor/react-meteor-data';
 import { ApiPayments } from '/imports/api/payments.js';
-import { ApiUsers } from '/imports/api/customers';
 
 import PaymentRow from './PaymentRow.js';
 import HeadList from './HeadList.js';
@@ -17,6 +16,7 @@ class Payments extends Component {
 
     this.state = {
       selectedPaymentsID: [],
+      loginLevel: context.loginLevel,
       foundItems: [],
       searchField: '',
       currentPage: 1,
@@ -35,10 +35,12 @@ class Payments extends Component {
   }
 
 
-  componentWillReceiveProps(props) {    
+  componentWillReceiveProps(props, nextContext) {    
     if (this.props.payments != props.payments) {
       this.handleChangeSearchField(this.state.searchField, props);
     }
+
+    this.setState({loginLevel: nextContext.loginLevel});
   }
 
   componentWillUpdate(nextProps, nextState){
@@ -131,6 +133,8 @@ class Payments extends Component {
 
   render() {
 
+    console.log('LOG', this.state.loginLevel);
+
     const renderPayments = () => {
       return this.state.foundItems.map((itemPayment, key) => {
         if((key >= (this.state.currentPage-1) * this.state.itemsOnPage) && 
@@ -139,6 +143,7 @@ class Payments extends Component {
           return <PaymentRow 
                       key={key} 
                       item={itemPayment} 
+                      loginLevel={this.state.loginLevel}
                       customerName={Meteor.users.findOne(itemPayment.customerId)}
                       onClick={this.handlePaymentSingleOnClick.bind(null, itemPayment._id)}
                       selectedPaymentsId={this.state.selectedPaymentsID} 
@@ -159,12 +164,18 @@ class Payments extends Component {
           pageDown={this.pageDown}
           onChangeSearchField={this.handleChangeSearchField}
           onAddNew={this.addPayment} 
-          onRemovePayments={this.removePayments} />
+          onRemovePayments={this.removePayments}
+          loginLevel={this.state.loginLevel} />
 
         <table className="table table-bordered table-hover">
           <thead>
             <tr>
-              <th><input type="checkbox" disabled="true"/></th>
+              {(() => {
+                return 
+                  this.state.loginLevel === 3 
+                      ? (<th><input type="checkbox" disabled="true"/></th>)
+                      : null
+              })()}
               <th>Customer Name</th>
               <th>Date</th>
               <th>Payment ID</th>
@@ -187,7 +198,8 @@ Payments.propTypes = {
 };
 
 Payments.contextTypes = {
-  router: React.PropTypes.object.isRequired
+  router: React.PropTypes.object.isRequired,
+  loginLevel: React.PropTypes.number.isRequired
 }
 
 

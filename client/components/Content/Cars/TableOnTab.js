@@ -10,6 +10,7 @@ export default class TableOnTab extends Component {
 
 
         this.state = {
+            loginLevel: context.loginLevel,
             maintenanceList: reverse(clone(this.props.maintenanceList)),
             selectedItems: [],
             allowEdit: false
@@ -49,7 +50,7 @@ export default class TableOnTab extends Component {
         this.setState({selectedItems: newSelectedMaintenance, allowEdit});
     }
 
-    componentWillReceiveProps(nextProps){
+    componentWillReceiveProps(nextProps, nextContext){
         let newAllowEdit = this.state.allowEdit;
 
         if (this.state.maintenanceList.length+1 == nextProps.maintenanceList.length) {
@@ -68,7 +69,8 @@ export default class TableOnTab extends Component {
 
         this.setState({
             maintenanceList: reverse(clone(nextProps.maintenanceList)),
-            allowEdit: newAllowEdit
+            allowEdit: newAllowEdit,
+
         })
     }
 
@@ -89,8 +91,8 @@ export default class TableOnTab extends Component {
 
     componentDidMount(){
         if(this.buttonEdit) {
-            this.buttonEdit.disabled =
-            this.buttonRemove.disabled = !this.state.selectedItems.length;
+            this.buttonEdit.disabled =!this.state.selectedItems.length;
+            if (this.buttonRemove) this.buttonRemove.disabled = !this.state.selectedItems.length;
         }
     }
 
@@ -116,6 +118,7 @@ export default class TableOnTab extends Component {
         console.log('newAllowEdit', newAllowEdit)
 
         this.setState({
+            loginLevel: context.loginLevel,
             selectedItems: newSelMaintenanceList, 
             allowEdit: newAllowEdit
         });
@@ -158,6 +161,22 @@ export default class TableOnTab extends Component {
         const { selectedItems, allowEdit } = this.state;
 
         
+        const renderBtnRemove = () => {
+            if (this.props.loginLevel === 3) {
+                return (
+                    <button
+                        onClick={this.onRemoveMaintenance}
+                        ref={(ref) => this.buttonRemove = ref}
+                        style={{margin: '10px'}}
+                        className=' m-1 btn btn-danger'>
+                        Delete
+                      </button>
+                )
+            }
+
+            return null;
+        }
+
 
         return (
             <div className="TableOnTab">
@@ -176,13 +195,7 @@ export default class TableOnTab extends Component {
                     onClick={this.onEdit}>
                     Edit
                   </button>
-                  <button
-                    onClick={this.onRemoveMaintenance}
-                    ref={(ref) => this.buttonRemove = ref}
-                    style={{margin: '10px'}}
-                    className=' m-1 btn btn-danger'>
-                    Delete
-                  </button>
+                  { renderBtnRemove() }
                 </div>
                 <table className="table table-bordered table-hover">
                   <thead>
@@ -239,4 +252,8 @@ export default class TableOnTab extends Component {
             </div>
         )
     }
+}
+
+TableOnTab.contextTypes = {
+  loginLevel: React.PropTypes.number.isRequired
 }

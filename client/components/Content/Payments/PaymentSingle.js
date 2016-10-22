@@ -21,10 +21,11 @@ import '/client/main.css'
 
 
 export default class PaymentSingle extends Component {
-  constructor(props) {
-    super(props);
+  constructor(props, context) {
+    super(props, context);
 
     this.state = {
+      loginLevel: context.loginLevel,
       payment: clone(this.props.payment),
       dispPayment: clone(this.props.payment),
       allowSave: false,
@@ -98,7 +99,7 @@ export default class PaymentSingle extends Component {
   }
 // END ================== ON CHANGE ======================
 
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps(nextProps, nextContext) {
     let c = nextProps.payment;
 
 
@@ -121,7 +122,8 @@ export default class PaymentSingle extends Component {
     this.setState({
       payment: clone(c),
       dispPayment: dataDispPayment,
-      allowSave
+      allowSave,
+      loginLevel: nextContext.loginLevel
     });
   }
 
@@ -234,7 +236,8 @@ export default class PaymentSingle extends Component {
                     onDelete={this.handleDelete}
                     onSendByEmail={this.handleSendByEmail}
                     allowSave={this.state.allowSave}
-                    title={this.props.payment.codeName} />
+                    title={this.props.payment.codeName}
+                    loginLevel={this.state.loginLevel} />
       )
     }
 
@@ -438,6 +441,12 @@ export default class PaymentSingle extends Component {
     }
   }
 }
+
+
+PaymentSingle.contextTypes = {
+  loginLevel: React.PropTypes.number.isRequired
+}
+
 
 
 export default createContainer(({params}) => {

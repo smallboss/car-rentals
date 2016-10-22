@@ -35,7 +35,7 @@ class Login extends React.Component {
                 <ul className='dropdown-menu pull-right'>
                     <Link className='p-a-1' to='/user_profile'>My profile</Link>
                     <li role='separator' className='divider'></li>
-                    <li className='p-a-1'><input type='button' className='btn btn-primary' value='Logout' onClick={() => {Meteor.logout(); browserHistory.push('/')}}/></li>                   
+                    <li className='p-a-1'><input type='button' className='btn btn-primary' value='Logout' onClick={() => {Meteor.logout(); browserHistory.push('/')}}/></li>
                 </ul>
             </div>
         )

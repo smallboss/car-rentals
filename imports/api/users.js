@@ -22,16 +22,17 @@ if(Meteor.isServer) {
             let contracts = ApiContracts.find({customerId: id}, {multi: true}).fetch()
             let payments = ApiPayments.find({customerId: id}, {multi: true}).fetch()
             for (let i = 0; i < lines.length; i++) {
-                if(payments[i]._id) {
+                if(lines[i]._id) {
                     ApiLines.remove({_id: new Mongo.ObjectID(lines[i]._id._str)})
                 }
-            }for (let i = 0; i < invoices.length; i++) {
-                if(payments[i]._id) {
+            }
+            for (let i = 0; i < invoices.length; i++) {
+                if(invoices[i]._id) {
                     ApiInvoices.remove({_id: new Mongo.ObjectID(invoices[i]._id._str)})
                 }
             }
             for (let i = 0; i < contracts.length; i++) {
-                if(payments[i]._id) {
+                if(contracts[i]._id) {
                     ApiContracts.remove({_id: new Mongo.ObjectID(contracts[i]._id._str)})
                 }                
             }
@@ -47,10 +48,30 @@ if(Meteor.isServer) {
         update: function (userId, doc, fields, modifier) {
             return true
         },
-        remove: function (userId, doc) {
+        insert: (userId, doc) => {
             return true
+        },
+        remove: (userId, doc) => {
+            let _type = Meteor.user().profile.userType
+            return (_type !== 'admin') ? false : true
         }
     })
+    //Meteor.users.remove({})
+    /*Create default user start*/
+    console.log('Meteor.users.find()', Meteor.users.find());
+    if(!Meteor.users.find().count()) {
+        let options = {
+            username: 'admin',
+            password: 'qqqqqq',
+            email: 'admin_rental@gmail.com',
+            profile: {
+                name: 'admin',
+                userType: 'admin'
+            }
+        }
+        Accounts.createUser(options)
+    }
+    /*Create default user end*/
     //Meteor.users.remove({})
     Meteor.publish('users', function publishUsers () {        
         return Meteor.users.find()        

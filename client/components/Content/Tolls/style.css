@@ -1,0 +1,14 @@
+.img-save:hover {
+    cursor: pointer;
+}
+
+#tollsModal .modal-content {
+    position: absolute;
+    left: -30vh;
+    top: 5vh!important;
+    padding-bottom: 264px;
+    width: 1400px;
+    height: 80vh;
+    overflow: auto;
+    overflow-x: hidden;
+}

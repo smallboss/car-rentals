@@ -5,7 +5,6 @@ import { createContainer } from 'meteor/react-meteor-data';
 
 import { ApiInvoices } from '/imports/api/invoices.js';
 import { ApiPayments } from '/imports/api/payments.js';
-import { ApiUsers } from '/imports/api/customers'
 import { ApiLines } from '/imports/api/lines.js';
 import InvoiceRow from './InvoiceRow.js';
 import HeadList from './HeadList.js';
@@ -18,6 +17,7 @@ class Invoices extends Component {
     super(props, context); 
 
     this.state = {
+      loginLevel: context.loginLevel,
       selectedInvoicesID: [],
       foundItems: [],
       searchField: '',
@@ -37,10 +37,12 @@ class Invoices extends Component {
   }
 
 
-  componentWillReceiveProps(props) {    
+  componentWillReceiveProps(props, nextContext) {    
     if (this.props.invoices != props.invoices) {
       this.handleChangeSearchField(this.state.searchField, props);
     }
+
+    this.setState({loginLevel: nextContext.loginLevel});
   }
 
   componentWillUpdate(nextProps, nextState){
@@ -153,7 +155,8 @@ class Invoices extends Component {
                       customerName={Meteor.users.findOne(itemInvoice.customerId)}
                       onClick={this.handleInvoiceSingleOnClick.bind(null, itemInvoice._id)}
                       selectedInvoicesId={this.state.selectedInvoicesID} 
-                      onHandleSelect={this.handleSelect} />
+                      onHandleSelect={this.handleSelect}
+                      loginLevel={this.state.loginLevel} />
         }
       })
     }
@@ -169,12 +172,18 @@ class Invoices extends Component {
           pageDown={this.pageDown}
           onChangeSearchField={this.handleChangeSearchField}
           onAddNew={this.addInvoice} 
-          onRemoveItems={this.removeInvoices} />
+          onRemoveItems={this.removeInvoices}
+          loginLevel={this.state.loginLevel} />
 
         <table className="table table-bordered table-hover">
           <thead>
             <tr>
-              <th><input type="checkbox" disabled="true"/></th>
+              {(() => {
+                return 
+                  this.state.loginLevel === 3 
+                      ? (<th><input type="checkbox" disabled="true"/></th>)
+                      : null
+              })()}
               <th>Customer Name</th>
               <th>Date</th>
               <th>Invoice ID</th>
@@ -198,7 +207,8 @@ Invoices.propTypes = {
 };
 
 Invoices.contextTypes = {
-  router: React.PropTypes.object.isRequired
+  router: React.PropTypes.object.isRequired,
+  loginLevel: React.PropTypes.number.isRequired
 }
 
 

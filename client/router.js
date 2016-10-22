@@ -3,9 +3,6 @@ import { Router, Route, IndexRoute, IndexRedirect, browserHistory } from 'react-
 
 // route components
 import App from './components/App.jsx';
-import Footer from './components/Footer';
-import Header from './components/Header';
-import Sidebar from './components/Sidebar.js';
 import Home from './components/Content/Home';
 import Payments from './components/Content/Payments';
 import PaymentSingle from './components/Content/Payments/PaymentSingle.js';
@@ -25,10 +22,9 @@ import TableForUser from './components/Content/Users/TableForUser'
 import UserSingle from './components/Content/Users/UserSingle'
 import Registration from './components/Content/Registration'
 import CustomersList from './components/Content/Customers/CustomersList'
-/*import back components*/
-//import BackSidebar from './components/ManagePanel/BackSidebar'
-import BackHeader from './components/ManagePanel/BackHeader'
-import BackFooter from './components/ManagePanel/BackFooter'
+import ImportsFines from './components/Content/ImportsFines'
+import ImportsTolls from './components/Content/ImportsTolls'
+import Wrapper from './Wrapper'
 
 const NotFoundPage = () => {
   return (
@@ -38,38 +34,6 @@ const NotFoundPage = () => {
   )
 };
 
-const frontRouterComponent = (children) => {
-    return (
-            <div id='main_container'>
-                <Header />
-                <Sidebar />
-                <div className='content'>
-                    {children}
-                </div>
-                <Footer />
-            </div>
-    )
-};
-
-const backRouterComponent = (children) => {
-    return (
-        <div id='main_container'>
-            <BackHeader />
-            <Sidebar side='backEnd' />
-            <div className='content'>
-                {children}
-            </div>
-            <BackFooter />
-        </div>
-    );
-};
-
-const wrapper = ({children}) => {
-    if(location.href.indexOf('managePanel') != -1) {
-        return backRouterComponent(children);
-    }
-    return frontRouterComponent(children);
-};
 
 Router.refresh = function () {
   Router.dispatch(location.getCurrentPath(), null)
@@ -77,9 +41,10 @@ Router.refresh = function () {
 
 export const renderRoutes = () => (
   <Router history={browserHistory}>
-      <Route path="/" component={wrapper}>
-        <IndexRoute component={App}/>
-        <Route path="home" component={Home}/>
+    <Route path="/" component={Wrapper}>
+      <IndexRoute component={App}/>
+      <IndexRedirect to='home'/>
+      <Route path="home" component={Home}/>
         <Route path="registration" component={Registration}/>
         <Route path="user_profile" component={UserProfile}/>
         <Route path="user_profile/:tableTarget" component={TableForUser}/>
@@ -100,9 +65,11 @@ export const renderRoutes = () => (
             <Route path='customer/:id' component={Customer}/>
             <Route path='users_list' component={Users}/>
             <Route path='user_single/:id' component={UserSingle}/>
+            <Route path='imports/fines' component={ImportsFines} />
+            <Route path='imports/tolls' component={ImportsTolls} />
             <Route path="*" component={NotFoundPage}/>
         </Route>
       <Route path="*" component={NotFoundPage}/>
-  </Route>
+    </Route>
   </Router>
 );

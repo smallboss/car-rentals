@@ -6,6 +6,20 @@ export default class HeadSingle extends Component {
     }
 
     render(){
+        
+        const renderBtnRemove = () => {
+            if (this.props.loginLevel === 3) {
+                return (
+                    <button type="button" 
+                            className="btn btn-primary p-x-1 m-x-1" 
+                            onClick={this.props.onDelete}>Delete
+                    </button>
+                )
+            }
+
+            return null;
+        }
+
         return (
             <div className="panel-heading HeadSingle">
                 <div className="buttonBox">
@@ -20,7 +34,7 @@ export default class HeadSingle extends Component {
                         return buttonSave;
                     })()}
                     <button type="button" className="btn btn-primary p-x-1 m-x-1" onClick={this.props.onEdit}>Edit</button>
-                    <button type="button" className="btn btn-primary p-x-1 m-x-1" onClick={this.props.onDelete}>Delete</button>
+                    { renderBtnRemove() }
                     {(() => {
                         if (this.props.onSendByEmail) {
                             return (

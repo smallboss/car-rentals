@@ -1,0 +1,15 @@
+.navbar-inverse {
+    border: none;
+    background: rgb(238, 238, 238);
+}
+
+.navbar-inverse .navbar-brand {
+    color: black;
+    text-shadow: none;
+}
+.nav-justified a {
+    font-size: 1.2em;
+}
+.nav-justified li a:hover {
+    background: #abb4cc;
+}

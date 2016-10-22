@@ -15,10 +15,11 @@ import './carStyle.css'
 
 
 export default class CarSingle extends Component {
-  constructor(props) {
-    super(props);
+  constructor(props, context) {
+    super(props, context);
 
     this.state = {
+      loginLevel: context.loginLevel,
       car: clone(this.props.car),
       dispCar: clone(this.props.car),
       isNew: this.props.isNew,
@@ -133,7 +134,7 @@ export default class CarSingle extends Component {
   }
 
 
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps(nextProps, nextContext) {
     let c = nextProps.car;
 
     if (this.state.car) {
@@ -160,8 +161,8 @@ export default class CarSingle extends Component {
 
     this.setState({
       car: clone(c),
-      dispCar: dataDispCar
-      // editable: this.props.isNew
+      dispCar: dataDispCar,
+      loginLevel: nextContext.loginLevel
     });
   }
 
@@ -573,6 +574,11 @@ export default class CarSingle extends Component {
       return (<div className="CarSingle"></div>)
     }
   }
+}
+
+
+CarSingle.contextTypes = {
+  loginLevel: React.PropTypes.number.isRequired
 }
 
 

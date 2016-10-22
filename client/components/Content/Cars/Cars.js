@@ -16,6 +16,7 @@ class Cars extends Component {
     super(props, context); 
 
     this.state = {
+      loginLevel: context.loginLevel,
       selectedCarsID: [],
       foundItems: [],
       searchField: '',
@@ -35,10 +36,12 @@ class Cars extends Component {
   }
   
 
-  componentWillReceiveProps(props) {    
+  componentWillReceiveProps(props, nextContext) {    
     if (this.props.cars != props.cars) {
       this.handleChangeSearchField(this.state.searchField, props);
     }
+
+    this.setState({loginLevel: nextContext.loginLevel});
   }
 
   componentWillUpdate(nextProps, nextState){
@@ -134,7 +137,8 @@ class Cars extends Component {
                     car={itemCar} 
                     onClick={this.handleCarSingleOnClick.bind(null, itemCar._id)}
                     selectedCarsId={this.state.selectedCarsID} 
-                    onHandleSelect={this.handleSelect} />
+                    onHandleSelect={this.handleSelect}
+                    loginLevel={this.state.loginLevel} />
         }
       )
     }
@@ -150,12 +154,18 @@ class Cars extends Component {
           pageDown={this.pageDown}
           onChangeSearchField={this.handleChangeSearchField}
           onAddNew={this.addCar} 
-          onRemoveCars={this.removeCars} />
+          onRemoveCars={this.removeCars}
+          loginLevel={this.state.loginLevel} />
 
         <table className="table table-bordered table-hover">
           <thead>
             <tr>
-              <th><input type="checkbox" disabled="true"/></th>
+              {(() => {
+                return 
+                  this.state.loginLevel === 3 
+                      ? (<th><input type="checkbox" disabled="true"/></th>)
+                      : null
+              })()}
               <th>Name</th>
               <th>Plate number</th>
               <th>Status</th>
@@ -176,7 +186,8 @@ Cars.propTypes = {
 };
 
 Cars.contextTypes = {
-    router: React.PropTypes.object.isRequired
+  router: React.PropTypes.object.isRequired,
+  loginLevel: React.PropTypes.number.isRequired
 }
 
 

@@ -2,7 +2,7 @@ import { ApiInvoices } from '/imports/api/invoices.js'
 import { ApiLines } from '/imports/api/lines.js'
 import { ApiPayments } from '/imports/api/payments.js'
 import { ApiContracts } from '/imports/api/contracts.js'
-import { ApiUsers } from '/imports/api/customers'
+import { ApiUsers } from '/imports/api/users'
 import { ApiCars } from '/imports/api/cars'
 
 

@@ -7,7 +7,6 @@ import DatePicker from 'react-bootstrap-date-picker'
 import { ApiInvoices } from '/imports/api/invoices.js'
 import { ApiPayments } from '/imports/api/payments.js'
 import { ApiLines } from '/imports/api/lines.js'
-import { ApiUsers } from '/imports/api/customers'
 import { ApiContracts } from '/imports/api/contracts'
 import { ApiYearWrite } from '/imports/api/yearWrite'
 import HeadSingle from './HeadSingle.js';
@@ -26,10 +25,11 @@ import '/client/main.css'
 
 
 export default class InvoiceSingle extends Component {
-  constructor(props) {
-    super(props);
+  constructor(props, context) {
+    super(props, context);
 
     this.state = {
+      loginLevel: context.loginLevel,
       invoice: clone(this.props.invoice),
       dispInvoice: clone(this.props.invoice),
       allowSave: false,
@@ -83,7 +83,7 @@ export default class InvoiceSingle extends Component {
   }
 // END ================== ON CHANGE ======================
 
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps(nextProps, nextContext) {
     let c = nextProps.invoice;
 
 
@@ -106,7 +106,8 @@ export default class InvoiceSingle extends Component {
     this.setState({
       invoice: clone(c),
       dispInvoice: dataDispInvoice,
-      allowSave
+      allowSave,
+      loginLevel: nextContext.loginLevel
     });
   }
 
@@ -244,7 +245,8 @@ export default class InvoiceSingle extends Component {
                     onDelete={this.handleDelete}
                     onSendByEmail={this.handleSendByEmail}
                     allowSave={this.state.allowSave}
-                    title={this.props.invoice.codeName} />
+                    title={this.props.invoice.codeName}
+                    loginLevel={this.state.loginLevel} />
       )
     }
 
@@ -459,6 +461,10 @@ export default class InvoiceSingle extends Component {
   }
 }
 
+
+InvoiceSingle.contextTypes = {
+  loginLevel: React.PropTypes.number.isRequired
+}
 
 export default createContainer(({params}) => {
   Meteor.subscribe('invoices');

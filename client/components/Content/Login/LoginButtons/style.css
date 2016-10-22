@@ -1,6 +1,19 @@
-.modal-sm {
-    width: 450px;
+.overlay {
+    position: absolute;
+    background: rgba(0,0,0,0.4);
+    height: 100vh;
+    width: 100vw;
 }
-.modal-sm .form-group label {
+#loginModal .modal-content {
+    position: absolute;
+    top: 30vh!important;
+    width: 400px;
+}
+#loginModal .modal-sm .form-group label {
     margin-top: 15px;
+}
+.btn-register {
+    background: #636eff;
+    text-shadow: none;
+    color: #ffffff;
 }

@@ -24,10 +24,11 @@ import '/client/main.css'
 
 
 export default class ContractSingle extends Component {
-  constructor(props) {
-    super(props);
+  constructor(props, context) {
+    super(props, context);
 
     this.state = {
+      loginLevel: context.loginLevel,
       contract: clone(this.props.contract),
       dispContract: clone(this.props.contract),
       isNew: this.props.isNew,
@@ -132,7 +133,7 @@ export default class ContractSingle extends Component {
 
 
 
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps(nextProps, nextContext) {
     let c = nextProps.contract;
 
 
@@ -216,6 +217,7 @@ export default class ContractSingle extends Component {
 
 
     this.setState({
+      loginLevel: nextContext.loginLevel,
       contract: clone(c),
       dispContract: dataDispContract,
       allowSave,
@@ -428,7 +430,8 @@ export default class ContractSingle extends Component {
                     onDelete={this.handleDelete}
                     onSendByEmail={this.handleSendByEmail}
                     allowSave={this.state.allowSave}
-                    title={this.props.contract.codeName} />
+                    title={this.props.contract.codeName}
+                    loginLevel={this.state.loginLevel} />
       )
     }
 
@@ -766,6 +769,10 @@ export default class ContractSingle extends Component {
   }
 }
 
+
+ContractSingle.contextTypes = {
+  loginLevel: React.PropTypes.number.isRequired
+}
 
 export default createContainer(({params}) => {
   Meteor.subscribe('contracts');
