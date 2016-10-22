@@ -5,7 +5,6 @@ import { Link } from 'react-router';
 
 const backEndMenu = <ul className="sidebar-nav">
   <li><Link to="/managePanel/customers_list">Customers</Link></li>
-  <li><Link to="/registration">Customer registration</Link></li>
   <li><Link to="/managePanel/cars">Cars</Link></li>
   <li className="dropdown">
     <a type="button" data-toggle="dropdown">Invoicing

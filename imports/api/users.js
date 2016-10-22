@@ -22,16 +22,17 @@ if(Meteor.isServer) {
             let contracts = ApiContracts.find({customerId: id}, {multi: true}).fetch()
             let payments = ApiPayments.find({customerId: id}, {multi: true}).fetch()
             for (let i = 0; i < lines.length; i++) {
-                if(payments[i]._id) {
+                if(lines[i]._id) {
                     ApiLines.remove({_id: new Mongo.ObjectID(lines[i]._id._str)})
                 }
-            }for (let i = 0; i < invoices.length; i++) {
-                if(payments[i]._id) {
+            }
+            for (let i = 0; i < invoices.length; i++) {
+                if(invoices[i]._id) {
                     ApiInvoices.remove({_id: new Mongo.ObjectID(invoices[i]._id._str)})
                 }
             }
             for (let i = 0; i < contracts.length; i++) {
-                if(payments[i]._id) {
+                if(contracts[i]._id) {
                     ApiContracts.remove({_id: new Mongo.ObjectID(contracts[i]._id._str)})
                 }                
             }

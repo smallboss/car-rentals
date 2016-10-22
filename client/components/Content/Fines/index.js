@@ -194,9 +194,9 @@ Fines.contextTypes = {
     loginLevel: React.PropTypes.number.isRequired
 }
 
-export default createContainer(() => {
+export default createContainer((params) => {
     Meteor.subscribe('fines')
     return {
-        fines: ApiFines.find().fetch()
+        fines: ApiFines.find({plate: {$in: params.customerArray}}).fetch()
     }
 }, Fines)

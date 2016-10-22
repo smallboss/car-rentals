@@ -5,7 +5,6 @@ import { Meteor } from 'meteor/meteor'
 import { createContainer } from 'meteor/react-meteor-data'
 import React from 'react'
 import { browserHistory } from 'react-router'
-//import $ from 'jquery'
 import { searcher } from '../../../../helpers/searcher'
 import CustomerForTable from '../CustomerForTable'
 import Pagination from '../Pagination'
@@ -17,7 +16,7 @@ class CustomersList extends React.Component {
             loginLevel: context.loginLevel,
             customers: this.props.customers,
             currentPage: 1,
-            elemsOnPage: 3,
+            elemsOnPage: 10,
             maxPage: 0,
             stateForRemove: []            
         }

@@ -167,7 +167,7 @@ class Tolls extends React.Component {
                                     <td><input type='text' name='description' className='form-control' ref={ref => {this.rNewFieldDescription = ref}} /></td>
                                     <td><input type='text' name='fineStatus' className='form-control' ref={ref => {this.rNewFieldFineStatus = ref}} /></td>
                                     <td><NumericInput className='form-control' ref={ref => {this.rNewFieldAmount = ref}} /></td>
-                                    <td><input type='text' name='fineSource' className='form-control' ref={ref => {this.rNewFieldFineSource = ref}} /></td>
+                                    <td><inpu2231t type='text' name='fineSource' className='form-control' ref={ref => {this.rNewFieldFineSource = ref}} /></td>
                                     <td><input type='text' name='fineTime' className='form-control' value={new Date().toTimeString().slice(0,8)} ref={ref => {this.rNewFieldFineTime = ref}} /></td>
                                     <td><DatePicker dateFormat='MM/DD/YYYY' value={new Date().toUTCString()} ref={ref => {this.rNewFieldFineDate = ref}} /></td>
                                     <td><input type='text' name='fineId' maxLength='15' className='form-control' ref={ref => {this.rNewFieldFineId = ref}} /></td>
@@ -199,9 +199,9 @@ Tolls.contextTypes = {
     loginLevel: React.PropTypes.number.isRequired
 }
 
-export default createContainer(() => {
+export default createContainer((params) => {
     Meteor.subscribe('tolls')
     return {
-        tolls: ApiTolls.find().fetch()
+        tolls: ApiTolls.find({plateNumber: {$in: params.customerArray}}).fetch()
     }
 }, Tolls)
