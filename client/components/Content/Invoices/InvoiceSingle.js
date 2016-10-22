@@ -214,11 +214,7 @@ export default class InvoiceSingle extends Component {
   }
 
   handleSendByEmail(){
-    // console.log('SEND BY EMAIL >>>')
     let email = find(this.props.userList, ['_id', Meteor.userId()]).emails[0];
-
-    // console.log('email', email);
-    // console.log('getInvoiceMsg', getInvoiceMsg(this.state.invoice._id));
 
     Meteor.call('sendEmail',
             email.address,

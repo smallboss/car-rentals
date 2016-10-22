@@ -35,6 +35,7 @@ export default class ContractSingle extends Component {
       customerList: this.props.customerList,
       managerList: this.props.managerList,
 
+      lines: [],
       invs: [],
       amount: 0,
       invoices: 0,
@@ -177,7 +178,6 @@ export default class ContractSingle extends Component {
         })
       }
 
-
       let lines = [];
       let amount = 0;
       let invoices = 0;
@@ -205,8 +205,6 @@ export default class ContractSingle extends Component {
               inv[0].numb--;
               if (inv[0].numb === 0) inv.splice(0, 1);
           }
-
-          console.log('line', line, status);
 
           if (status === 'paid') invoices += parseInt(line ? line.amount : 0);
           if (status === 'open' || !status) {
@@ -347,7 +345,76 @@ export default class ContractSingle extends Component {
                             ? (this.props.contract.customerId && this.props.contract.managerId)
                             : undefined;
 
-    this.setState({allowSave});
+    let linesId = [];
+    let invs = [];
+    let nextLines = [];
+    let nextTime = 0;
+
+    if (this.props.contract && this.props.contract.invoicesId) {
+      this.props.contract.invoicesId.map((el) => {
+        const invoice = find(this.props.invoices, ['_id', el]);
+        const codeName = invoice ? invoice.codeName : '';
+        const status = invoice ? invoice.status : '';
+        const length = (invoice && invoice.linesId) ? invoice.linesId.length : 0
+        invs.push({_id: el, codeName, numb: length, status});
+        linesId = linesId.concat(invoice ? invoice.linesId : []);
+
+        const date = invoice ? invoice.date : '';
+        if ((!nextTime || nextTime > new Date(date).getTime())) {
+          if (!isNaN((new Date(date)).getTime())) {
+
+            nextLines = invoice ? invoice.linesId : [];
+          }
+        }
+      })
+    }
+
+    let lines = [];
+    let amount = 0;
+    let invoices = 0;
+    let remaining = 0;
+    let toinvoice = 0;
+    
+    if (nextLines){
+      nextLines.map((el) => {
+        let line = find(this.props.lines, ['_id', el]);
+        toinvoice += parseInt(line ? line.amount : 0);
+      })
+    }
+    
+
+    let inv = cloneDeep(invs);
+
+    if (linesId.length && this.props.lines.length) {
+      linesId.map((el) => {
+        let line = find(this.props.lines, ['_id', el]);
+        amount += parseInt(line ? line.amount : 0);
+        lines.push(line);
+        let status;
+        if (inv[0]) {
+            status = inv[0].status;
+            inv[0].numb--;
+            if (inv[0].numb === 0) inv.splice(0, 1);
+        }
+
+        if (status === 'paid') invoices += parseInt(line ? line.amount : 0);
+        if (status === 'open' || !status) {
+          remaining += parseInt(line ? line.amount : 0);
+        }
+      })
+    }
+    // ================
+
+
+    this.setState({
+      amount, 
+      invoices,
+      remaining,
+      toinvoice,
+      lines, 
+      invs,
+      allowSave
+    });
   }
 
 
@@ -717,17 +784,12 @@ export default createContainer(({params}) => {
     contract = ApiContracts.findOne(new Mongo.ObjectID(contractId));
   }
 
-  const invoices = ApiInvoices.find({}).fetch();
-
-  // console.log('invoices', invoices);
-  // console.log('line', ApiLines.find({}).fetch());
-
   return {
     contract,
     customerList: Meteor.users.find({'profile.userType': 'customer'}).fetch(),
     managerList: Meteor.users.find({'profile.userType': {$in:["admin","employee"]}}).fetch(),
-    invoices,
-    lines: ApiLines.find({}).fetch(),
+    invoices: ApiInvoices.find({}).fetch(),
+    lines: ApiLines.find().fetch(),
     isNew
   }
 

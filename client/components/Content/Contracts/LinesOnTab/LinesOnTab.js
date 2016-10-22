@@ -113,13 +113,11 @@ export default class LinesOnTab extends Component {
 
                     <tbody>
                         {(() => {
-                            // console.log('this.props.lines', this.props.lines);
                             if (lines) {
                                 let inv = cloneDeep(this.props.invoices);
-                                console.log('inv======', inv);
+
                                 return (
                                     lines.map((item, key) => {
-                                        console.log(item);
                                         let codeName = '';
                                         let invId = {};
                                         if (inv[0]) {
@@ -150,10 +148,6 @@ export default class LinesOnTab extends Component {
             </div>
         )
     }
-}
-
-LinesOnTab.contextTypes = {
-  router: React.PropTypes.object.isRequired
 }
 
 

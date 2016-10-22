@@ -5,6 +5,9 @@ import { createContainer } from 'meteor/react-meteor-data';
 
 import { ApiContracts } from '/imports/api/contracts.js';
 import { ApiUsers } from '/imports/api/customers';
+import { ApiInvoices } from '/imports/api/invoices';
+import { ApiPayments } from '/imports/api/payments';
+import { ApiLines } from '/imports/api/lines';
 
 import ContractRow from './ContractRow.js';
 import HeadList from './HeadList.js';
@@ -62,11 +65,41 @@ class Contracts extends Component {
 
   removeContracts() {
     this.state.selectedContractsID.map((contractID) => {
-      console.log('contractID', contractID);
-      ApiContracts.remove(new Mongo.ObjectID(contractID));
-    })
+    
+      // =======================
+      let paymentsId = [];
+      let linesId = [];
+      let contract = ApiContracts.findOne(new Mongo.ObjectID(contractID));
+      console.log('contract', contract);
+      let invs = (contract && contract.invoicesId) ? contract.invoicesId : [];
 
-    console.log('this.state.selectedContractsID', this.state.selectedContractsID);
+
+      invs.map((el) => {
+        let inv = find(this.props.invoices, {_id: el });
+        inv = inv ? inv : {};
+        paymentsId = paymentsId.concat(inv.paymentsId);
+        linesId = linesId.concat(inv.linesId);
+        const customerId = inv.customerId;
+        Meteor.users.update({_id: customerId}, {$pull: { 'profile.invoices': el }})
+        ApiInvoices.remove({_id: el});
+      })
+
+      // REMOVE PAYMENTS ========================
+      paymentsId.map((el) => {
+        const customerId = ApiPayments.find({_id: el}).customerId;
+        Meteor.users.update({_id: customerId}, {$pull: { 'profile.payments': el }})
+        ApiPayments.remove({_id: el});
+      })
+      // REMOVE LINES ========================
+      linesId.map((el) => {
+        ApiLines.remove({_id: el});
+      })
+
+      Meteor.users.update({_id: contract.customerId}, {$pull: { "profile.contracts": contract._id}});
+      Meteor.users.update({_id: contract.managerId}, {$pull: { "profile.contracts": contract._id}});
+      ApiContracts.remove(new Mongo.ObjectID(contractID));
+      // =======================
+    })
 
     this.setState({selectedContractsID: []});
   }
@@ -147,6 +180,8 @@ class Contracts extends Component {
           return <ContractRow 
                       key={`contract-${key}`} 
                       item={item} 
+                      invoices={this.props.invoices}
+                      lines={this.props.lines}
                       customerName={Meteor.users.findOne(item.customerId)}
                       managerName={Meteor.users.findOne(item.managerId)}
                       onClick={this.handleClickOnRow.bind(null, item._id)}
@@ -208,9 +243,14 @@ export default createContainer(() => {
   Meteor.subscribe('contracts');
   Meteor.subscribe('users');
   Meteor.subscribe('yearwrite');
+  Meteor.subscribe('invoices');
+  Meteor.subscribe('lines');
+
 
   return {
     contracts: ApiContracts.find().fetch(),
-    userList: Meteor.users.find().fetch()
+    userList: Meteor.users.find().fetch(),
+    invoices: ApiInvoices.find().fetch(),
+    lines: ApiLines.find().fetch()
   };
 }, Contracts);

@@ -59,9 +59,7 @@ export const getContractMsg = (contractId) => {
 
             lines.map((el) => {
                 const line = ApiLines.findOne({_id: el});
-                console.log('line', line, ApiLines.find().fetch());
                 const car = line ? ApiCars.findOne({_id: car}) : {};
-
 
                 let carUrl = car ? `${location.host}/managePanel/car/${car._id}` : '';
 
