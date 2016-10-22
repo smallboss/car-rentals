@@ -10,7 +10,6 @@ export default class TableOnTab extends Component {
 
 
         this.state = {
-            loginLevel: context.loginLevel,
             maintenanceList: reverse(clone(this.props.maintenanceList)),
             selectedItems: [],
             allowEdit: false
@@ -50,7 +49,7 @@ export default class TableOnTab extends Component {
         this.setState({selectedItems: newSelectedMaintenance, allowEdit});
     }
 
-    componentWillReceiveProps(nextProps, nextContext){
+    componentWillReceiveProps(nextProps){
         let newAllowEdit = this.state.allowEdit;
 
         if (this.state.maintenanceList.length+1 == nextProps.maintenanceList.length) {
@@ -69,8 +68,7 @@ export default class TableOnTab extends Component {
 
         this.setState({
             maintenanceList: reverse(clone(nextProps.maintenanceList)),
-            allowEdit: newAllowEdit,
-
+            allowEdit: newAllowEdit
         })
     }
 
@@ -83,8 +81,8 @@ export default class TableOnTab extends Component {
 
     componentDidUpdate(){
         if(this.buttonEdit) {
-            this.buttonEdit.disabled =
-            this.buttonRemove.disabled = !this.state.selectedItems.length;
+            this.buttonEdit.disabled = !this.state.selectedItems.length;
+            if (this.buttonRemove) this.buttonRemove.disabled = !this.state.selectedItems.length;
         }
     }
 
@@ -97,7 +95,6 @@ export default class TableOnTab extends Component {
     }
 
     onSaveMaintenance(maintenance){
-        console.log('EDIT')
         let newSelMaintenanceList = clone(this.state.selectedItems)
 
 
@@ -114,11 +111,7 @@ export default class TableOnTab extends Component {
                                 ? this.state.allowEdit
                                 : false
 
-        console.log('newSelMaintenanceList', newSelMaintenanceList.length)
-        console.log('newAllowEdit', newAllowEdit)
-
         this.setState({
-            loginLevel: context.loginLevel,
             selectedItems: newSelMaintenanceList, 
             allowEdit: newAllowEdit
         });

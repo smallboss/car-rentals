@@ -2,6 +2,7 @@ import { Meteor } from 'meteor/meteor'
 import { Mongo } from 'meteor/mongo'
 import { Link } from 'react-router';
 import { Email } from 'meteor/email'
+import NumericInput from 'react-numeric-input';
 import DatePicker from 'react-bootstrap-date-picker'
 import { createContainer } from 'meteor/react-meteor-data'
 import { ApiPayments } from '/imports/api/payments.js'
@@ -25,9 +26,10 @@ export default class PaymentSingle extends Component {
     super(props, context);
 
     this.state = {
+      oldCustomerId: this.props.payment ? this.props.payment.customerId : undefined,
       loginLevel: context.loginLevel,
-      payment: clone(this.props.payment),
-      dispPayment: clone(this.props.payment),
+      payment: this.props.payment,
+      dispPayment: this.props.payment,
       allowSave: false,
       isNew: this.props.isNew,
       customerList: this.props.userList,
@@ -60,6 +62,7 @@ export default class PaymentSingle extends Component {
   }
   onChangeAmount(value) {
     let newPayment = this.state.dispPayment;
+
     value = (value!='' && isNaN(parseInt(value))) ? '0' : value;
     let isDepr = false;
 
@@ -69,7 +72,6 @@ export default class PaymentSingle extends Component {
               (value.length > 5));
 
     newPayment.amount = isDepr ?  newPayment.amount : value;
-
     this.setState({dispPayment: newPayment});
   }
   onChangeStatus(value) {
@@ -182,6 +184,9 @@ export default class PaymentSingle extends Component {
     }
 
     Meteor.users.update({_id: newPayment.customerId}, {$addToSet: { "profile.payments": paymentId}});
+    if (this.state.oldCustomerId != this.state.payment.customerId) {
+      Meteor.users.update({_id: this.state.oldCustomerId}, {$pull: { "profile.payments": paymentId}});
+    }
     if (this.state.isNew) browserHistory.push(`/managePanel/payments/${paymentId}`);
     this.setState({payment: newPayment, dispPayment: newPayment, editable: false, isNew: false});
   }
@@ -369,6 +374,7 @@ export default class PaymentSingle extends Component {
                           className="form-control "
                           onChange={(e) => this.onChangeAmount(e.target.value)}
                           value={ this.state.dispPayment.amount }/>
+
                       </div>
                     )
                   }

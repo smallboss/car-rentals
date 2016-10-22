@@ -161,6 +161,14 @@ class Invoices extends Component {
       })
     }
 
+
+    const renderHeadCheckBox = () => {
+      if (this.state.loginLevel === 3) 
+        return (<th><input type="checkbox" disabled="true"/></th>)
+
+      return null;
+    }
+
     return (
       <div>
         <HeadList
@@ -178,12 +186,7 @@ class Invoices extends Component {
         <table className="table table-bordered table-hover">
           <thead>
             <tr>
-              {(() => {
-                return 
-                  this.state.loginLevel === 3 
-                      ? (<th><input type="checkbox" disabled="true"/></th>)
-                      : null
-              })()}
+              { renderHeadCheckBox() }
               <th>Customer Name</th>
               <th>Date</th>
               <th>Invoice ID</th>

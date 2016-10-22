@@ -58,7 +58,6 @@ if(Meteor.isServer) {
     })
     //Meteor.users.remove({})
     /*Create default user start*/
-    console.log('Meteor.users.find()', Meteor.users.find());
     if(!Meteor.users.find().count()) {
         let options = {
             username: 'admin',

@@ -5,16 +5,16 @@ export default class TableHeadButtons extends Component {
         super(props, context); 
 
         this.state = {
-            loginLevel: context.loginLevel,
+            loginLevel: props.loginLevel,
             activeButton: this.props.selectedItems
         }
 
         this.disablingButtons = this.disablingButtons.bind(this);
     }   
 
-    componentWillReceiveProps(nextProps, nextContext) {
+    componentWillReceiveProps(nextProps) {
         this.setState({
-            loginLevel: nextContext.loginLevel,
+            loginLevel: nextProps.loginLevel,
             activeButton: nextProps.selectedItems
         })
     }
@@ -35,7 +35,7 @@ export default class TableHeadButtons extends Component {
 
 
     render(){
-        const renderBtnRemove = () => {
+        const renderBtnRemove = () => {console.log(this.props.loginLevel );
             if (this.props.loginLevel === 3) {
                 return (
                     <button
@@ -69,9 +69,4 @@ export default class TableHeadButtons extends Component {
             </div>
         )
     }
-}
-
-
-TableHeadButtons.contextTypes = {
-  loginLevel: React.PropTypes.number.isRequired
 }

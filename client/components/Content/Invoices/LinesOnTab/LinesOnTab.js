@@ -10,10 +10,11 @@ import TableHeadButtons from './TableHeadButtons.js';
 import LineTabRow from './LineTabRow.js';
 
 export default class LinesOnTab extends Component {
-    constructor(props) {
-        super(props); 
+    constructor(props, context) {
+        super(props, context); 
 
         this.state = {
+            loginLevel: context.loginLevel,
             selectedListId: [],
             isEdit: false
         }
@@ -24,6 +25,11 @@ export default class LinesOnTab extends Component {
         this.handleRemoveLines = this.handleRemoveLines.bind(this);
         this.handleSaveLine = this.handleSaveLine.bind(this);
     }   
+
+
+    componentWillReceiveProps(nextProps, nextContext) {
+        this.setState({ loginLevel: nextContext.loginLevel})
+    }
 
 
     changeSelectedItem(itemId) {
@@ -109,7 +115,8 @@ export default class LinesOnTab extends Component {
                         selectedItems={this.state.selectedListId.length}
                         onAddNew={this.handleAddNewLine}
                         onEdit={this.handleEditLines}
-                        onRemove={this.handleRemoveLines} />
+                        onRemove={this.handleRemoveLines}
+                        loginLevel={this.state.loginLevel} />
                 )
             }
 
@@ -166,7 +173,8 @@ LinesOnTab.propTypes = {
 };
 
 LinesOnTab.contextTypes = {
-  router: React.PropTypes.object.isRequired
+  router: React.PropTypes.object.isRequired,
+  loginLevel: React.PropTypes.number.isRequired
 }
 
 

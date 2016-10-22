@@ -12,9 +12,9 @@ export default class TableHeadButtons extends Component {
         this.disablingButtons = this.disablingButtons.bind(this);
     }   
 
-    componentWillReceiveProps(nextProps, nextContext) {
+    componentWillReceiveProps(nextProps) {
         this.setState({
-            loginLevel: nextContext.loginLevel,
+            loginLevel: nextProps.loginLevel,
             activeButton: nextProps.selectedItems
         })
     }

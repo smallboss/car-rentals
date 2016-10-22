@@ -67,13 +67,14 @@ class Contracts extends Component {
 
 
   removeContracts() {
+    console.log('this.state.selectedContractsID', this.state.selectedContractsID);
     this.state.selectedContractsID.map((contractID) => {
     
       // =======================
       let paymentsId = [];
       let linesId = [];
       let contract = ApiContracts.findOne(new Mongo.ObjectID(contractID));
-      console.log('contract', contract);
+
       let invs = (contract && contract.invoicesId) ? contract.invoicesId : [];
 
 
@@ -196,6 +197,7 @@ class Contracts extends Component {
       )
     }
 
+
     return (
       <div>
         <HeadList
@@ -213,12 +215,7 @@ class Contracts extends Component {
         <table className="table table-bordered table-hover">
           <thead>
             <tr>
-              {(() => {
-                return 
-                  this.state.loginLevel === 3 
-                      ? (<th><input type="checkbox" disabled="true"/></th>)
-                      : null
-              })()}
+              <th><input type="checkbox" disabled="true"/></th>
               <th>Contract title</th>
               <th>Customer</th>
               <th>Contract ID</th>

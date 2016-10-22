@@ -298,7 +298,8 @@ export default class CarSingle extends Component {
                     onPrint={this.handlePrint}
                     onEdit={this.handleEdit}
                     onDelete={this.handleDelete}
-                    itemName={this.state.car.name}/>
+                    itemName={this.state.car.name}
+                    loginLevel={this.state.loginLevel} />
       )
     }
 
@@ -465,7 +466,8 @@ export default class CarSingle extends Component {
                   maintenanceList={this.state.car.maintenance}
                   onAddNew={this.onAddNewMaintenance}
                   onSaveMaintenance={this.onSaveMaintenance}
-                  onRemove={this.onRemoveMaintenance}/>
+                  onRemove={this.onRemoveMaintenance}
+                  loginLevel={this.state.loginLevel} />
 
               </div>
               <div role="tabpanel" className="tab-pane" id="fines">

@@ -77,7 +77,7 @@ export default class HeadList extends Component {
             if (this.props.loginLevel === 3) {
                 return (
                     <button 
-                        onClick={this.props.onRemovePayments} 
+                        onClick={this.props.onRemoveCars} 
                         ref={(ref) => this.buttonRemove = ref}
                         className='btn btn-danger' >
                         Delete

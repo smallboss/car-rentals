@@ -28,6 +28,8 @@ export default class ContractSingle extends Component {
     super(props, context);
 
     this.state = {
+      oldCustomerId: this.props.contract ? this.props.contract.customerId : undefined,
+      oldManagerId: this.props.contract ? this.props.contract.managerId : undefined,
       loginLevel: context.loginLevel,
       contract: clone(this.props.contract),
       dispContract: clone(this.props.contract),
@@ -152,7 +154,6 @@ export default class ContractSingle extends Component {
                             : (c && c.customerId && c.managerId);
 
     c = nextProps.contract;
-
 
     // ================
       let linesId = [];
@@ -280,6 +281,12 @@ export default class ContractSingle extends Component {
 
     Meteor.users.update({_id: newContract.customerId}, {$addToSet: { "profile.contracts": contractId}});
     Meteor.users.update({_id: newContract.managerId}, {$addToSet: { "profile.contracts": contractId}});
+    if (this.state.oldCustomerId != this.state.payment.customerId) {
+      Meteor.users.update({_id: this.state.oldCustomerId}, {$pull: { "profile.contracts": contractId}});
+    }
+    if (this.state.oldManagerId != this.state.payment.managerId) {
+      Meteor.users.update({_id: this.state.oldManagerId}, {$pull: { "profile.contracts": contractId}});
+    }
     if (this.state.isNew) browserHistory.push(`/managePanel/contracts/${contractId}`);
     this.setState({contract: newContract, dispContract: newContract, editable: false, isNew: false});
   }
@@ -325,7 +332,10 @@ export default class ContractSingle extends Component {
   }
 
   handleSendByEmail(){
-    let email = find(this.props.customerList, ['_id', Meteor.userId()]).emails[0];
+    let email = find(this.props.managerList, ['_id', Meteor.userId()]);
+    email = email 
+              ? email.emails[0] 
+              : find(this.props.customerList, ['_id', Meteor.userId()]).emails[0];
 
     Meteor.call('sendEmail',
             email.address,

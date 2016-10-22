@@ -9,10 +9,11 @@ import TableHeadButtons from './TableHeadButtons.js';
 import PaymentTabRow from './PaymentTabRow.js';
 
 export default class PaymentsOnTab extends Component {
-    constructor(props) {
-        super(props); 
+    constructor(props, context) {
+        super(props, context); 
 
         this.state = {
+            loginLevel: context.loginLevel,
             selectedListId: [],
             isEdit: false
         }
@@ -22,7 +23,12 @@ export default class PaymentsOnTab extends Component {
         this.handleEditPayments = this.handleEditPayments.bind(this);
         this.handleRemovePayments = this.handleRemovePayments.bind(this);
         this.handleSavePayment = this.handleSavePayment.bind(this);
-    }   
+    } 
+
+
+    componentWillReceiveProps(nextProps, nextContext) {
+        this.setState({ loginLevel: nextContext.loginLevel})
+    }  
 
 
     changeSelectedItem(itemId) {
@@ -143,7 +149,8 @@ export default class PaymentsOnTab extends Component {
                         selectedItems={this.state.selectedListId.length}
                         onAddNew={this.handleAddNewPayment}
                         onEdit={this.handleEditPayments}
-                        onRemove={this.handleRemovePayments}/>
+                        onRemove={this.handleRemovePayments}
+                        loginLevel={this.state.loginLevel}/>
                 )
             }
 
@@ -196,7 +203,8 @@ PaymentsOnTab.propTypes = {
 };
 
 PaymentsOnTab.contextTypes = {
-  router: React.PropTypes.object.isRequired
+  router: React.PropTypes.object.isRequired,
+  loginLevel: React.PropTypes.number.isRequired
 }
 
 

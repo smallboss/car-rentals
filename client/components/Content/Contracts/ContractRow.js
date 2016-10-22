@@ -39,7 +39,6 @@ export default class ContractRow extends Component {
                     if (invoice) {
                         const currentInvDate = (new Date(invoice.date)).getTime();
 
-                        console.log(currentInvDate, lastInvoiceDate, Date.now(), invoice.date);
                         if (currentInvDate > lastInvoiceDate && currentInvDate < Date.now()) {
                             lastInvoiceDate = currentInvDate;
                         }
@@ -50,8 +49,6 @@ export default class ContractRow extends Component {
             const year  = (new Date(lastInvoiceDate)).getFullYear();
             const month = (new Date(lastInvoiceDate)).getMonth()+1;
             const day   = (new Date(lastInvoiceDate)).getDate();
-
-            console.log();
 
             return (lastInvoiceDate !== startDate) ? `${year}/${month}/${day}` : '';   
         }
