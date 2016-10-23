@@ -8,6 +8,7 @@ import { ApiTolls } from '/imports/api/tolls'
 import '../../../helpers/simple-excel'
 import './style.css'
 
+
 const csvParser = new SimpleExcel.Parser.CSV()
 const Toll = function () {
     return {
@@ -97,7 +98,7 @@ class Tolls extends React.Component {
                                 <input type='submit' className='btn btn-success' value='Import'/>
                             </div>
                         </form>
-                    </div>
+                    </div>                    
                 </div>
                 <div id='tollsModal' className={classModal}>
                     <div className='overlay'></div>
