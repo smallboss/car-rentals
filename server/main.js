@@ -11,6 +11,7 @@ import '../imports/api/rentals.js';
 import '../imports/api/yearWrite.js';
 import '../imports/api/fines'
 import '../imports/api/tolls'
+import '../imports/api/someApi'
 
 import './smtp.js';
 Meteor.startup(() => {

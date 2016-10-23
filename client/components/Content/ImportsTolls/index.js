@@ -8,6 +8,7 @@ import { ApiTolls } from '/imports/api/tolls'
 import '../../../helpers/simple-excel'
 import './style.css'
 
+
 const csvParser = new SimpleExcel.Parser.CSV()
 const Toll = function () {
     return {
@@ -43,18 +44,34 @@ class Tolls extends React.Component {
             for(let i = 1; i < (csvResult.length - 1); i++) {
                 //console.log(csvResult[i])
                 let toll = new Toll()
-                toll.description = csvResult[i][0].value
-                toll.fineStatus = csvResult[i][1].value
-                toll.amount = csvResult[i][2].value
-                toll.fineSource = csvResult[i][3].value
-                toll.fineTime = csvResult[i][4].value
-                toll.fineDate = csvResult[i][5].value
-                toll.fineId = csvResult[i][6].value
-                toll.licenseSource = csvResult[i][7].value
-                toll.licenseNumber = csvResult[i][9].value
-                toll.plateSymbol = csvResult[i][11].value
-                toll.plateType = csvResult[i][12].value
-                toll.plateNumber = csvResult[i][13].value
+                if(csvResult[i].length == 1) {
+                    let cutted = csvResult[i][0].value.split(';').filter(item => {return item.length != 0})
+                    toll.description = cutted[0]
+                    toll.fineStatus = cutted[1]
+                    toll.amount = cutted[2]
+                    toll.fineSource = cutted[3]
+                    toll.fineTime = cutted[4]
+                    toll.fineDate = cutted[5]
+                    toll.fineId = cutted[6]
+                    toll.licenseSource = cutted[7]
+                    toll.licenseNumber = cutted[8]
+                    toll.plateSymbol = cutted[9]
+                    toll.plateType = cutted[10]
+                    toll.plateNumber = cutted[11]
+                } else if(csvResult[i].length > 1) {
+                    toll.description = csvResult[i][0].value
+                    toll.fineStatus = csvResult[i][1].value
+                    toll.amount = csvResult[i][2].value
+                    toll.fineSource = csvResult[i][3].value
+                    toll.fineTime = csvResult[i][4].value
+                    toll.fineDate = csvResult[i][5].value
+                    toll.fineId = csvResult[i][6].value
+                    toll.licenseSource = csvResult[i][7].value
+                    toll.licenseNumber = csvResult[i][9].value
+                    toll.plateSymbol = csvResult[i][11].value
+                    toll.plateType = csvResult[i][12].value
+                    toll.plateNumber = csvResult[i][13].value
+                }
                 //console.log(toll)
                 ApiTolls.insert(toll)
             }
@@ -81,7 +98,7 @@ class Tolls extends React.Component {
                                 <input type='submit' className='btn btn-success' value='Import'/>
                             </div>
                         </form>
-                    </div>
+                    </div>                    
                 </div>
                 <div id='tollsModal' className={classModal}>
                     <div className='overlay'></div>

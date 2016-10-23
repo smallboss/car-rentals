@@ -18,7 +18,6 @@ if(Meteor.isServer) {
             return (_type !== 'admin') ? false : true            
         }
     })
-    
     Meteor.publish('fines', () => {
         return ApiFines.find()
     })    
