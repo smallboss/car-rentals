@@ -197,6 +197,13 @@ class Contracts extends Component {
       )
     }
 
+    const renderHeadCheckBox = () => {
+      if (this.state.loginLevel === 3) 
+        return (<th><input type="checkbox" disabled="true"/></th>)
+
+      return null;
+    }
+
 
     return (
       <div>
@@ -215,7 +222,7 @@ class Contracts extends Component {
         <table className="table table-bordered table-hover">
           <thead>
             <tr>
-              <th><input type="checkbox" disabled="true"/></th>
+              { renderHeadCheckBox() }
               <th>Contract title</th>
               <th>Customer</th>
               <th>Contract ID</th>

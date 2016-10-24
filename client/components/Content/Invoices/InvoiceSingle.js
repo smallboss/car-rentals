@@ -182,6 +182,9 @@ export default class InvoiceSingle extends Component {
     if (this.props.contract) {
       ApiContracts.update({_id: this.props.contract._id}, {$addToSet: {invoicesId: invoiceId}});
     }
+    if (this.state.oldCustomerId != this.state.invoice.customerId) {
+      Meteor.users.update({_id: this.state.oldCustomerId}, {$pull: { "profile.invoices": contractId}});
+    }
     Meteor.users.update({_id: newInvoice.customerId}, {$addToSet: { "profile.invoices": invoiceId}});
     if (this.state.isNew) browserHistory.push(`/managePanel/invoices/${invoiceId}`);
     this.setState({invoice: newInvoice, dispInvoice: newInvoice, editable: false, isNew: false});
@@ -215,7 +218,10 @@ export default class InvoiceSingle extends Component {
   }
 
   handleSendByEmail(){
-    let email = find(this.props.userList, ['_id', Meteor.userId()]).emails[0];
+    let email = find(this.props.managerList, ['_id', Meteor.userId()]);
+    email = email 
+              ? email.emails[0] 
+              : find(this.props.customerList, ['_id', Meteor.userId()]).emails[0];
 
     Meteor.call('sendEmail',
             email.address,
@@ -491,6 +497,7 @@ export default createContainer(({params}) => {
   return {
     invoice,
     userList: Meteor.users.find({'profile.userType': 'customer'}).fetch(),
+    managerList: Meteor.users.find({'profile.userType': {$in:["admin","employee"]}}).fetch(),
     contract,
     isNew
   }
