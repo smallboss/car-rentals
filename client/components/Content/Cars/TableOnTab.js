@@ -163,7 +163,7 @@ export default class TableOnTab extends Component {
                         style={{margin: '10px'}}
                         className=' m-1 btn btn-danger'>
                         Delete
-                      </button>
+                    </button>
                 )
             }
 
@@ -190,7 +190,7 @@ export default class TableOnTab extends Component {
                   </button>
                   { renderBtnRemove() }
                 </div>
-                <table className="table table-bordered table-hover">
+                <table className="table table-bordered table-hover vertMiddle min">
                   <thead>
                       <tr>
                         <th><input type="checkbox" disabled/></th>

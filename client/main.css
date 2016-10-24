@@ -131,6 +131,12 @@
     margin-left: 260px;
     min-height: 100vh;
 }
+
+.vertMiddle.table>tbody>tr>td{
+    vertical-align: middle;
+}
+.min.table .p0 { padding: 0 }
+.w90 { width: 90px }
 .m-x-0 {
     margin-left: 0;
     margin-right: 0;

@@ -113,13 +113,18 @@ export default class LineTabRow extends Component {
                     <select className=' form-control' onChange={(e) => this.onChangeCarName(e.target.value)}>
                           {(() => {
                             if (car) {
-                              
-                            return (    
-                              <option 
-                                className='' 
-                                value={car._id}>{ car.name }
-                              </option>
-                            )}
+                                return (    
+                                  <option
+                                    value={ car._id }>{ car.name }
+                                  </option>
+                                )
+                            } else {
+                                return ( 
+                                    <option
+                                        value={ '' }>{ '' }
+                                    </option>
+                                )
+                            }
 
                           })()}
                           {

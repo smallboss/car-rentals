@@ -8,6 +8,7 @@ import { ApiInvoices } from '/imports/api/invoices.js'
 import { ApiPayments } from '/imports/api/payments.js'
 import { ApiLines } from '/imports/api/lines.js'
 import { ApiContracts } from '/imports/api/contracts'
+import { ApiUsers } from '/imports/api/users'
 import { ApiYearWrite } from '/imports/api/yearWrite'
 import HeadSingle from './HeadSingle.js';
 import { browserHistory } from 'react-router';
@@ -322,7 +323,7 @@ export default class InvoiceSingle extends Component {
                 })()}
                 {(() => {
                   const custId = this.state.editable ? this.state.dispInvoice.customerId : customerId;
-                  const custName = Meteor.users.findOne(custId) ? (Meteor.users.findOne(custId).profile.name + ' propfile') : '';
+                  const custName = Meteor.users.findOne(custId) ? (Meteor.users.findOne(custId).profile.name + ' profile') : '';
 
                   return (<Link to={`/managePanel/customer/${custId}`} className="col-xs-12">{custName}</Link>);
                 })()}
@@ -403,8 +404,9 @@ export default class InvoiceSingle extends Component {
               <li><a href="#notes" aria-controls="messages" role="tab" data-toggle="tab">Notes</a></li>
             </ul>
             <div className="tab-content">
+            {
               <div role="tabpanel" className="tab-pane p-x-1 active" id="lines">
-              {
+              
                 <LinesOnTab 
                     invoice={cloneDeep(this.state.invoice)}
                     linesId={cloneDeep(this.state.invoice.linesId 
@@ -412,8 +414,18 @@ export default class InvoiceSingle extends Component {
                                         : [])
                             }
                     readOnly={!this.state.invoice.customerId} />
-              }
+
+                <div className="PaymentsOnTab row">
+                  <div className="col-xs-12">
+                    <h3>Payments list</h3>
+                    <PaymentsOnTab 
+                            invoice={cloneDeep(this.state.invoice)}
+                            paymentsId={this.state.invoice.paymentsId}
+                            readOnly={true} />
+                  </div>
+                </div>  
               </div>
+              }
               <div role="tabpanel" className="tab-pane p-x-1" id="payments">
                 <PaymentsOnTab 
                     invoice={cloneDeep(this.state.invoice)}
@@ -450,15 +462,6 @@ export default class InvoiceSingle extends Component {
 
             { renderTabs() }
           </div>
-          <div className="PaymentsOnTab row">
-            <div className="col-xs-12">
-              <h3>Payments list</h3>
-              <PaymentsOnTab 
-                      invoice={cloneDeep(this.state.invoice)}
-                      paymentsId={this.state.invoice.paymentsId}
-                      readOnly={true} />
-            </div>
-          </div>                    
         </div>
       )
     } else {
