@@ -167,15 +167,15 @@ class Tolls extends React.Component {
                                     <td><input type='text' name='description' className='form-control' ref={ref => {this.rNewFieldDescription = ref}} /></td>
                                     <td><input type='text' name='fineStatus' className='form-control' ref={ref => {this.rNewFieldFineStatus = ref}} /></td>
                                     <td><NumericInput className='form-control' ref={ref => {this.rNewFieldAmount = ref}} /></td>
-                                    <td><inpu2231t type='text' name='fineSource' className='form-control' ref={ref => {this.rNewFieldFineSource = ref}} /></td>
-                                    <td><input type='text' name='fineTime' className='form-control' value={new Date().toTimeString().slice(0,8)} ref={ref => {this.rNewFieldFineTime = ref}} /></td>
-                                    <td><DatePicker dateFormat='MM/DD/YYYY' value={new Date().toUTCString()} ref={ref => {this.rNewFieldFineDate = ref}} /></td>
+                                    <td><input type='text' name='fineSource' className='form-control' ref={ref => {this.rNewFieldFineSource = ref}} /></td>
+                                    <td><input type='text' name='fineTime' className='form-control' value={new Date().toUTCString()} ref={ref => {this.rNewFieldFineTime = ref}} disabled /></td>
+                                    <td><DatePicker dateFormat='MM/DD/YYYY' value={new Date().toUTCString()} ref={ref => {this.rNewFieldFineDate = ref}} disabled /></td>
                                     <td><input type='text' name='fineId' maxLength='15' className='form-control' ref={ref => {this.rNewFieldFineId = ref}} /></td>
                                     <td><input type='text' name='licenseSource' className='form-control' ref={ref => {this.rNewFieldLicenseSource = ref}} /></td>
                                     <td><input type='text' name='licenseNumber' maxLength='15' className='form-control' ref={ref => {this.rNewFieldLicenseNumber = ref}} /></td>
                                     <td><input type='text' name='plateSymbol' className='form-control' ref={ref => {this.rNewFieldPlateSymbol = ref}} /></td>
                                     <td><input type='text' name='plateType' className='form-control' ref={ref => {this.rNewFieldPlateType = ref}} /></td>
-                                    <td><input type='text' name='plateNumber' className='form-control' ref={ref => {this.rNewFieldPlateNumber = ref}} /></td>
+                                    <td><input type='text' name='plateNumber' className='form-control' ref={ref => {this.rNewFieldPlateNumber = ref}} value={this.props.plateNumber} disabled /></td>
                                 </tr>
                                 {this.state.tolls.map(elem => {
                                     return <TollsRow
@@ -202,6 +202,6 @@ Tolls.contextTypes = {
 export default createContainer((params) => {
     Meteor.subscribe('tolls')
     return {
-        tolls: ApiTolls.find({plateNumber: {$in: params.customerArray}}).fetch()
+        tolls: ApiTolls.find({plateNumber: {$in: [params.plateNumber]}}).fetch()
     }
 }, Tolls)

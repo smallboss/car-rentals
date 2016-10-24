@@ -8,13 +8,14 @@ import { ApiPayments } from '/imports/api/payments'
 import { ApiRentals } from '/imports/api/rentals'
 import { ApiCars } from '/imports/api/cars'
 import React from 'react'
+import { Link } from 'react-router'
 import $ from 'jquery'
 import { browserHistory } from 'react-router'
 import { imgToBase64 } from '../../../../helpers/handlerImages'
-import Table from '../Table'
+import CarRequests from '../CarRequests'
 import Rentals from '../Rentals'
-import Fines from '../../Fines'
-import Tolls from '../../Tolls'
+import CustomerFines from '../../Customers/CustomersFines'
+import CustomerTolls from '../../Customers/CustomersTolls'
 import CustomerPayments from '../CustomerPayments'
 import './style.css'
 const DatePicker = require('react-bootstrap-date-picker')
@@ -53,7 +54,7 @@ class Customer extends React.Component {
         super(props)
         this.state = {loginLevel: context.loginLevel, customer: (this.props.params.id == 'new') ? _user : props.customer || _user, editAble: 0}
         this.handlerEditCustomer = this.handlerEditCustomer.bind(this)
-        this.handlerChildState = this.handlerChildState.bind(this)
+        //this.handlerChildState = this.handlerChildState.bind(this)
     }
     componentWillMount () {
         let customer = this.props.customer || _user
@@ -201,32 +202,15 @@ class Customer extends React.Component {
                 break
         }
     }
+    /*
     handlerChildState(target, data) {
-        let _state,
-            _id = this.state.customer._id, 
-            _idPayment
-        //console.log(data)
-        if(target == 'payments') {
-            data.forEach(item => {
-                _idPayment = new Mongo.ObjectID(item._id._str)
-                if(ApiPayments.findOne({_id: _idPayment})) {
-                    if(!item._toedit) delete item._id
-
-                    ApiPayments.update({_id: _idPayment}, {$set: item})                                        
-                } else {
-                    Meteor.users.update({_id: _id}, {$push: {'profile.payments': _idPayment}})
-                    item.customerId = _id
-                    ApiPayments.insert(item)
-                }                
-            })
-            this.setState({customer: this.props.customer})
-            return
-        }
-        _state = this.state.customer
+        let _state = this.state.customer,
+            _id = this.state.customer._id            
         _state.profile[target] = data
         delete this.state.customer._id
         Meteor.users.update(_id, {$set: _state})
     }
+    */
     render () {
         let editAble = (!this.state.editAble) ? 'disabled' : false
         let { _id, username, profile } = this.state.customer
@@ -265,7 +249,7 @@ class Customer extends React.Component {
         return (
             <div className='panel panel-default'>
                 <div className='panel-heading'>
-                    <h4>{username} / {name}</h4>
+                    <h4><Link to='/managePanel/customers_list'>Customers</Link> / {name}</h4>
                     <input type='button' className='btn btn-primary p-x-1' value='Print' />
                     <input type='button' id='button_save' className='btn btn-primary p-x-1 m-x-1' value='Save' disabled={editAble} />
                     <input type='button' id='button_edit' className='btn btn-primary p-x-1' value='Edit' onClick={this.handlerEditCustomer} />
@@ -343,7 +327,7 @@ class Customer extends React.Component {
                                 </div>
                             </div>
                             <div id='div_car_request'  className='inner-div-users-edit'>
-                                <Table arrToTable={carRequest} currentComponent='carRequest' handlerChildState={this.handlerChildState} />
+                                <CarRequests arrToTable={carRequest} customerId={_id} />
                             </div>
                             <div id='div_rentals' className='inner-div-users-edit'>
                                 <Rentals rentals={rentals} />
@@ -352,10 +336,10 @@ class Customer extends React.Component {
                                 <CustomerPayments payments={payments} customerId={_id} />
                             </div>
                             <div id='div_fines' className='inner-div-users-edit'>
-                                <Fines customerArray={fines} />
+                                <CustomerFines customerArray={fines} />
                             </div>
                             <div id='div_tolls' className='inner-div-users-edit'>
-                                <Tolls customerArray={tolls} />
+                                <CustomerTolls customerArray={tolls} />
                             </div>
                         </div>
                     </div>
