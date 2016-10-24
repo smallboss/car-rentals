@@ -9,6 +9,8 @@ import { clone, cloneDeep, reverse } from 'lodash';
 
 import { carStateTypes } from '/imports/startup/typesList.js';
 import TableOnTab from './TableOnTab.js';
+import Fines from '../Fines'
+import Tolls from '../Tolls'
 
 
 import './carStyle.css'
@@ -471,32 +473,10 @@ export default class CarSingle extends Component {
 
               </div>
               <div role="tabpanel" className="tab-pane" id="fines">
-                {(() => {
-                  if (this.state.editable) {
-                    return (
-                      <input type="text"
-                             className='form-control'
-                             onChange={(e) => this.onChangeFines(e.target.value)}
-                             value={ this.state.dispCar.fines }/>
-                    )
-                  }
-
-                  return <div>{fines}</div>
-                })()}
+                <Fines plateNumber={plateNumber} />
               </div>
               <div role="tabpanel" className="tab-pane" id="tolls">
-                {(() => {
-                  if (this.state.editable) {
-                    return (
-                      <input type="text"
-                             className='form-control'
-                             onChange={(e) => this.onChangeTolls(e.target.value)}
-                             value={ this.state.dispCar.tolls }/>
-                    )
-                  }
-
-                  return <div>{tolls}</div>
-                })()}
+                <Tolls plateNumber={plateNumber} />
               </div>
               <div role="tabpanel" className="tab-pane" id="notes">
                 {(() => {

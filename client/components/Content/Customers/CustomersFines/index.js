@@ -3,69 +3,16 @@
  */
 import React from 'react'
 import { createContainer } from 'meteor/react-meteor-data'
-import { Mongo } from 'meteor/mongo'
 import { ApiFines } from '/imports/api/fines'
 import './style.css'
-import '../../../helpers/simple-excel'
 
-const csvParser = new SimpleExcel.Parser.CSV()
-const Fine = function () {
-    return {
-        _id: new Mongo.ObjectID(),
-        transaction: '',
-        time: '',
-        postDate: '',
-        plate: '',
-        source: '',
-        tag: '',
-        location: '',
-        direction: '',
-        amount: ''
-    }
-}
-
-class Fines extends React.Component {
+class CustomersFines extends React.Component {
     constructor (props, context) {
         super(props)
         this.state = {fines: props.fines || [], showModalFines: 0}        
     }
     componentWillReceiveProps(nextProps) {
         this.setState({fines: nextProps.fines})
-    }
-    importFileHandler (e) {
-        e.preventDefault()
-        let fileToImport = e.target['fileImport'].files[0]
-        csvParser.loadFile(fileToImport, () => {
-            let csvResult = csvParser.getSheet()
-            for(let i = 1; i < (csvResult.length - 1); i++) {
-                //console.log(csvResult[i])
-                let fine = new Fine()
-                if(csvResult[i].length == 1) {
-                    let cutted = csvResult[i][0].value.split(';').filter(item => {return item.length != 0})
-                    fine.transaction = cutted[0]
-                    fine.time = cutted[1]
-                    fine.postDate = cutted[2]
-                    fine.plate = cutted[3]
-                    fine.source = cutted[4]
-                    fine.tag = cutted[5]
-                    fine.location = cutted[6]
-                    fine.direction = cutted[7]
-                    fine.amount = cutted[8]
-                } else if(csvResult[i].length > 1) {
-                    fine.transaction = csvResult[i][0].value
-                    fine.time = csvResult[i][1].value
-                    fine.postDate = csvResult[i][2].value
-                    fine.plate = csvResult[i][3].value
-                    fine.source = csvResult[i][5].value
-                    fine.tag = csvResult[i][7].value
-                    fine.location = csvResult[i][8].value
-                    fine.direction = csvResult[i][9].value
-                    fine.amount = csvResult[i][12].value
-                }
-                //console.log(fine)
-                ApiFines.insert(fine)
-            }            
-        })        
     }
     render () {
         let classModal = (this.state.showModalFines) ? 'modal show' : 'modal fade',
@@ -78,17 +25,7 @@ class Fines extends React.Component {
                     <div className='col-xs-2'>
                         <input type='button' className='btn btn-large btn-default' role='button' onClick={() => this.setState({showModalFines: 1})} value='Show Fines' /><br />
                         <span className='m-l-2'>{this.state.fines.length} rows</span>
-                    </div>
-                    <div className='col-xs-10'>
-                        <form encType='multipart/form-data' method='post' onSubmit={this.importFileHandler}>
-                            <div className='col-xs-8'>
-                                <input type='file' className='form-control' name='fileImport'/>
-                            </div>
-                            <div className='col-xs-4'>
-                                <input type='submit' className='btn btn-success' value='Import'/>
-                            </div>
-                        </form>
-                    </div>
+                    </div>                    
                 </div>
                 <div id='finesModal' className={classModal}>
                     <div className='overlay'></div>
@@ -106,7 +43,6 @@ class Fines extends React.Component {
                             <table className='table table-hover table-bordered m-y-1'>
                                 <thead>
                                 <tr>
-                                    <th width='32'>X</th>
                                     <th className=''>Trxn</th>
                                     <th className=''>Time</th>
                                     <th className=''>Post Date</th>
@@ -120,10 +56,9 @@ class Fines extends React.Component {
                                 </thead>
                                 <tbody>
                                 {this.state.fines.map(elem => {
-                                    let { _id, transaction, time, postDate, plate, source, tag, location, direction, amount } = elem
+                                    let { transaction, time, postDate, plate, source, tag, location, direction, amount } = elem
                                     return (
                                         <tr key={Math.random()}>
-                                            <td><img src='/img/delete.png' className='delete-img' onClick={() => {ApiFines.remove({_id: _id})}} /></td>
                                             <td>{transaction}</td>
                                             <td>{time}</td>
                                             <td>{postDate}</td>
@@ -138,7 +73,7 @@ class Fines extends React.Component {
                                 })}
                                 <tr>
                                     <td><span className='font-weight-bold'>Total:</span></td>
-                                    <td colSpan='8'></td>
+                                    <td colSpan='7'></td>
                                     <td><span className='pull-right font-weight-bold'>{total}</span></td>
                                 </tr>
                                 </tbody>
@@ -151,9 +86,9 @@ class Fines extends React.Component {
     }
 }
 
-export default createContainer(() => {
+export default createContainer((params) => {
     Meteor.subscribe('fines')
     return {
-        fines: ApiFines.find().fetch()
+        fines: ApiFines.find({plate: {$in: params.customerArray}}).fetch()
     }
-}, Fines)
+}, CustomersFines)

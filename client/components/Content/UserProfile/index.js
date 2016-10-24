@@ -6,17 +6,18 @@ import { Meteor } from 'meteor/meteor'
 import { browserHistory } from 'react-router'
 import { createContainer } from 'meteor/react-meteor-data'
 import { imgToBase64 } from '../../../helpers/handlerImages'
+import LoginButtons from '../Login/LoginButtons'
 import './style.css'
 
 class UserProfile extends React.Component {
     constructor(props) {
         super(props)
-        this.state = {user: props.user, editAble: 0}
+        this.state = {user: props.user, editAble: 0, toShowLogin: (Meteor.userId()) ? 0 : 1}
         this.handlerButtonsEdit = this.handlerButtonsEdit.bind(this)
         this.handlerInputs = this.handlerInputs.bind(this)
     }
     componentWillReceiveProps (nextProps) {
-        this.setState({user: nextProps.user})
+        this.setState({user: nextProps.user, toShowLogin: (Meteor.userId()) ? 0 : 1})
     }
     handlerInputs (e) {
         let _newUser = this.state.user,
@@ -95,8 +96,7 @@ class UserProfile extends React.Component {
                             Meteor.call('setNewPassword', _objToSend, (err, result) => {
                                 if(!err) {
                                     alert('Your password has been change. Sign in again please')
-                                    this.setState({editAble: 0})
-                                    browserHistory.push('/')
+                                    this.setState({editAble: 0, toShowLogin: 1})                                    
                                 } else {
                                     console.log(err)
                                 }
@@ -112,6 +112,11 @@ class UserProfile extends React.Component {
         
     }
     render () {
+        if(this.state.toShowLogin) {
+            return (
+                <LoginButtons toShowModal={1} />
+            )
+        }
         if(!this.state.user) {
             return (
                 <div>
@@ -155,7 +160,7 @@ class UserProfile extends React.Component {
                             <div className='form-group'>
                                 <label htmlFor='phone' className='col-xs-4'>Phone Number</label>
                                 <div className='col-xs-8'>
-                                    <input type='text' id='phone' className='form-control' value={phone} disabled={editAble}  />
+                                    <input type='text' id='phone' className='form-control' value={phone} maxLength='15' disabled={editAble}  />
                                 </div>
                             </div><br />
                             <div className='form-group'>

@@ -9,8 +9,13 @@ import './style.css'
 class LoginButtons extends React.Component {
     constructor(props) {
         super(props)
-        this.state = {error: '', showModal: 0}
+        this.state = {error: '', showModal: props.toShowModal || 0}
         this.loginHandler = this.loginHandler.bind(this)
+    }
+    componentWillReceiveProps (nextProps) {
+        if(nextProps.toShowModal) {
+            this.setState({showModal: 1})
+        }
     }
     loginHandler (e) {
         e.preventDefault()
@@ -30,8 +35,8 @@ class LoginButtons extends React.Component {
         let classModal = (this.state.showModal) ? 'modal show' : 'modal fade'            
         return (
             <div>
-                <Link className='btn m-x-1 btn-register' to='/registration'>Register</Link>
-                <input type='button' className='btn btn-large btn-default' role='button' onClick={() => this.setState({showModal: 1})} value='Sign In' />
+                {(!this.props.toShowModal) ? <Link className='btn m-x-1 btn-register' to='/registration'>Register</Link> : ''}
+                {(!this.props.toShowModal) ? <input type='button' className='btn btn-large btn-default' role='button' onClick={() => this.setState({showModal: 1})} value='Login' /> : ''}
                 <div id='loginModal' className={classModal}>
                     <div className='overlay'></div>
                     <div className='modal-dialog modal-sm'>
@@ -57,7 +62,7 @@ class LoginButtons extends React.Component {
                                         </div>                                        
                                     </div>
                                 </div>
-                                <input type='submit' className='btn btn-success pull-right m-y-1' value='Sign In'/>
+                                <input type='submit' className='btn btn-success pull-right m-y-1' value='Login'/>
                             </form>
                         </div>
                     </div>                    
