@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
+import DatePicker from 'react-bootstrap-date-picker'
 import { map, clone } from 'lodash';
-
 import { maintenanceStateTypes } from '/imports/startup/typesList.js';
+
+import '/client/main.css'
 
 export default class MaintenanceRow extends Component {
     constructor(props) {
@@ -42,19 +44,25 @@ export default class MaintenanceRow extends Component {
         this.props.onEditingField(newMaintenance);
         this.setState({maintenance: newMaintenance});
     }
-
     onChangeDescription(value){
         let newMaintenance = this.state.maintenance;
         newMaintenance.description = value;
         this.setState({maintenance: newMaintenance});
     }
-
     onChangeAmount(value){
         let newMaintenance = this.state.maintenance;
-        newMaintenance.amount = value;
+
+        value = (value!='' && isNaN(parseInt(value))) ? '0' : value;
+        let isDepr = false;
+
+        isDepr = ((parseInt(value) < 0) || 
+                  (value.indexOf('e') != -1) || 
+                  (value.indexOf('E') != -1) ||  
+                  (value.length > 5));
+
+        newMaintenance.amount = isDepr ?  newMaintenance.amount : value;
         this.setState({maintenance: newMaintenance});
     }
-
     onChangeStatus(value){
         let newMaintenance = this.state.maintenance;
         newMaintenance.status = value;
@@ -104,61 +112,63 @@ export default class MaintenanceRow extends Component {
                 <th>
                     <input type="checkbox" ref={(ref) => this.inputSelect = ref} onChange={(e) => onHandleSelect(e, this.state.maintenance)}/>
                 </th>
-                <td>
+                <td className="p0">
                     {/* ================ _id ============== */}
 
                     { this.state.editable ? buttonSave() : null }
                     
-                    <span>{_id._str}</span>
+                    <span style={{fontSize: "12px"}}>{_id._str}</span>
                 </td>
-                <td>
+                <td className="p0">
                     {/* ================ jobName ============== */}
                     {(() => {
                         if(this.state.editable){
                             return (
-                                <input 
+                                <textarea
                                     type="text"
+                                    className="w90"
                                     onChange={(e) => this.onChangeJobName(e.target.value)}
                                     ref={(ref) => this.inputName = ref}
                                     value={jobName} 
-                                    autoFocus/>
+                                    autoFocus>
+                                </textarea>
                             )
                         } 
 
                         return <span>{jobName}</span>
                     })()}
                 </td>
-                <td>
+                <td className="p0">
                     {/* ================ description ============== */}
                     {(() => {
                         if(this.state.editable){
                             return (
-                                <input 
+                                <textarea 
                                     type="text"
+                                    className="w90"
                                     onChange={(e) => this.onChangeDescription(e.target.value)}
-                                    value={description} />
+                                    value={description} >
+                                </textarea>
                             )
                         } 
 
                         return <span>{description}</span>
                     })()}
                 </td>
-                <td>
+                <td className="p0">
                     {/* ================ date ============== */}
                     {(() => {
                         if(this.state.editable){
                             return (
-                                 <input 
-                                    type="date"
-                                    onChange={(e) => this.onChangeDate(e.target.value)}
-                                    value={date} />
+                                <DatePicker value={date}
+                                            onChange={ this.onChangeDate } />
                             )
                         } 
 
                         return <span>{date}</span>
                     })()}
                 </td>
-                <td>
+                <td className="p0">
                     {/* ================ status ============== */}
                     {(() => {
                         if(this.state.editable){
@@ -182,13 +192,15 @@ export default class MaintenanceRow extends Component {
                         return <span>{status}</span>
                     })()}
                 </td>
-                <td>
+                <td className="p0">
                     {/* ================ amount ============== */}
                     {(() => {
                         if(this.state.editable){
                             return (
                                 <input 
-                                    type="text"
+                                    type="number"
+                                    min="0"
+                                    max="99999"
                                     onChange={(e) => this.onChangeAmount(e.target.value)}
                                     value={amount} />
                             )
@@ -198,15 +210,13 @@ export default class MaintenanceRow extends Component {
                     })()}
                     
                 </td>
-                <td>
+                <td className="p0">
                     {/* ================ endDate ============== */}
                     {(() => {
                         if(this.state.editable){
                             return (
-                                <input 
-                                    type="date"
-                                    onChange={(e) => this.onChangeEndDate(e.target.value)}
-                                    value={endDate} />
+                                <DatePicker value={endDate}
+                                            onChange={ this.onChangeEndDate } />
                             )
                         } 
 

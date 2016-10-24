@@ -8,6 +8,7 @@ import { ApiInvoices } from '/imports/api/invoices.js'
 import { ApiPayments } from '/imports/api/payments.js'
 import { ApiLines } from '/imports/api/lines.js'
 import { ApiContracts } from '/imports/api/contracts'
+import { ApiUsers } from '/imports/api/users'
 import { ApiYearWrite } from '/imports/api/yearWrite'
 import HeadSingle from './HeadSingle.js';
 import { browserHistory } from 'react-router';
@@ -182,6 +183,9 @@ export default class InvoiceSingle extends Component {
     if (this.props.contract) {
       ApiContracts.update({_id: this.props.contract._id}, {$addToSet: {invoicesId: invoiceId}});
     }
+    if (this.state.oldCustomerId != this.state.invoice.customerId) {
+      Meteor.users.update({_id: this.state.oldCustomerId}, {$pull: { "profile.invoices": contractId}});
+    }
     Meteor.users.update({_id: newInvoice.customerId}, {$addToSet: { "profile.invoices": invoiceId}});
     if (this.state.isNew) browserHistory.push(`/managePanel/invoices/${invoiceId}`);
     this.setState({invoice: newInvoice, dispInvoice: newInvoice, editable: false, isNew: false});
@@ -215,7 +219,10 @@ export default class InvoiceSingle extends Component {
   }
 
   handleSendByEmail(){
-    let email = find(this.props.userList, ['_id', Meteor.userId()]).emails[0];
+    let email = find(this.props.managerList, ['_id', Meteor.userId()]);
+    email = email 
+              ? email.emails[0] 
+              : find(this.props.customerList, ['_id', Meteor.userId()]).emails[0];
 
     Meteor.call('sendEmail',
             email.address,
@@ -316,7 +323,7 @@ export default class InvoiceSingle extends Component {
                 })()}
                 {(() => {
                   const custId = this.state.editable ? this.state.dispInvoice.customerId : customerId;
-                  const custName = Meteor.users.findOne(custId) ? (Meteor.users.findOne(custId).profile.name + ' propfile') : '';
+                  const custName = Meteor.users.findOne(custId) ? (Meteor.users.findOne(custId).profile.name + ' profile') : '';
 
                   return (<Link to={`/managePanel/customer/${custId}`} className="col-xs-12">{custName}</Link>);
                 })()}
@@ -397,8 +404,9 @@ export default class InvoiceSingle extends Component {
               <li><a href="#notes" aria-controls="messages" role="tab" data-toggle="tab">Notes</a></li>
             </ul>
             <div className="tab-content">
+            {
               <div role="tabpanel" className="tab-pane p-x-1 active" id="lines">
-              {
+              
                 <LinesOnTab 
                     invoice={cloneDeep(this.state.invoice)}
                     linesId={cloneDeep(this.state.invoice.linesId 
@@ -406,8 +414,18 @@ export default class InvoiceSingle extends Component {
                                         : [])
                             }
                     readOnly={!this.state.invoice.customerId} />
-              }
+
+                <div className="PaymentsOnTab row">
+                  <div className="col-xs-12">
+                    <h3>Payments list</h3>
+                    <PaymentsOnTab 
+                            invoice={cloneDeep(this.state.invoice)}
+                            paymentsId={this.state.invoice.paymentsId}
+                            readOnly={true} />
+                  </div>
+                </div>  
               </div>
+              }
               <div role="tabpanel" className="tab-pane p-x-1" id="payments">
                 <PaymentsOnTab 
                     invoice={cloneDeep(this.state.invoice)}
@@ -444,15 +462,6 @@ export default class InvoiceSingle extends Component {
 
             { renderTabs() }
           </div>
-          <div className="PaymentsOnTab row">
-            <div className="col-xs-12">
-              <h3>Payments list</h3>
-              <PaymentsOnTab 
-                      invoice={cloneDeep(this.state.invoice)}
-                      paymentsId={this.state.invoice.paymentsId}
-                      readOnly={true} />
-            </div>
-          </div>                    
         </div>
       )
     } else {
@@ -491,6 +500,7 @@ export default createContainer(({params}) => {
   return {
     invoice,
     userList: Meteor.users.find({'profile.userType': 'customer'}).fetch(),
+    managerList: Meteor.users.find({'profile.userType': {$in:["admin","employee"]}}).fetch(),
     contract,
     isNew
   }

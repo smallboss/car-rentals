@@ -26,7 +26,7 @@ export default class CarRow extends Component {
                     <th>
                         <input 
                             type="checkbox" ref={(ref) => this.input = ref} 
-                            onChange={(e) => onHandleSelect(e, item)} />
+                            onChange={(e) => onHandleSelect(e, car)} />
                     </th>
                 )
             }

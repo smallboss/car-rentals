@@ -211,13 +211,18 @@ export default class PaymentSingle extends Component {
   }
 
   handleSendByEmail(){
-    let email = find(this.props.userList, ['_id', Meteor.userId()]).emails[0];
+    let email = find(this.props.managerList, ['_id', Meteor.userId()]);
+    email = email 
+              ? email.emails[0] 
+              : find(this.props.customerList, ['_id', Meteor.userId()]).emails[0];
 
-    Meteor.call('sendEmail',
-            email.address,
-            'smallboss@live.ru',
-            'Payment ' + this.state.payment.codeName,
-            getPaymentMsg(this.state.payment._id));
+    // Meteor.call('sendEmail',
+    //         email.address,
+    //         'smallboss@live.ru',
+    //         'Payment ' + this.state.payment.codeName,
+    //         getPaymentMsg(this.state.payment._id));
+    Meteor.call('export');
+
   }
 
 
@@ -474,6 +479,7 @@ export default createContainer(({params}) => {
   return {
     payment,
     userList: Meteor.users.find({'profile.userType': 'customer'}).fetch(),
+    managerList: Meteor.users.find({'profile.userType': {$in:["admin","employee"]}}).fetch(),
     isNew
   }
 

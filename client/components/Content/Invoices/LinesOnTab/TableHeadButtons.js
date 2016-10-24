@@ -35,7 +35,7 @@ export default class TableHeadButtons extends Component {
 
 
     render(){
-        const renderBtnRemove = () => {console.log(this.props.loginLevel );
+        const renderBtnRemove = () => {
             if (this.props.loginLevel === 3) {
                 return (
                     <button

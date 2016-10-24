@@ -281,10 +281,10 @@ export default class ContractSingle extends Component {
 
     Meteor.users.update({_id: newContract.customerId}, {$addToSet: { "profile.contracts": contractId}});
     Meteor.users.update({_id: newContract.managerId}, {$addToSet: { "profile.contracts": contractId}});
-    if (this.state.oldCustomerId != this.state.payment.customerId) {
+    if (this.state.oldCustomerId != this.state.contract.customerId) {
       Meteor.users.update({_id: this.state.oldCustomerId}, {$pull: { "profile.contracts": contractId}});
     }
-    if (this.state.oldManagerId != this.state.payment.managerId) {
+    if (this.state.oldManagerId != this.state.contract.managerId) {
       Meteor.users.update({_id: this.state.oldManagerId}, {$pull: { "profile.contracts": contractId}});
     }
     if (this.state.isNew) browserHistory.push(`/managePanel/contracts/${contractId}`);
@@ -417,7 +417,6 @@ export default class ContractSingle extends Component {
     }
     // ================
 
-
     this.setState({
       amount, 
       invoices,
@@ -428,7 +427,6 @@ export default class ContractSingle extends Component {
       allowSave
     });
   }
-
 
   render() {
 
