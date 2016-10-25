@@ -168,7 +168,7 @@ class Tolls extends React.Component {
                                     <td><input type='text' name='fineStatus' className='form-control' ref={ref => {this.rNewFieldFineStatus = ref}} /></td>
                                     <td><NumericInput className='form-control' ref={ref => {this.rNewFieldAmount = ref}} /></td>
                                     <td><input type='text' name='fineSource' className='form-control' ref={ref => {this.rNewFieldFineSource = ref}} /></td>
-                                    <td><input type='text' name='fineTime' className='form-control' value={new Date().toUTCString()} ref={ref => {this.rNewFieldFineTime = ref}} disabled /></td>
+                                    <td><input type='text' name='fineTime' className='form-control' value={new Date().toTimeString().slice(0, 8)} ref={ref => {this.rNewFieldFineTime = ref}} disabled /></td>
                                     <td><DatePicker dateFormat='MM/DD/YYYY' value={new Date().toUTCString()} ref={ref => {this.rNewFieldFineDate = ref}} disabled /></td>
                                     <td><input type='text' name='fineId' maxLength='15' className='form-control' ref={ref => {this.rNewFieldFineId = ref}} /></td>
                                     <td><input type='text' name='licenseSource' className='form-control' ref={ref => {this.rNewFieldLicenseSource = ref}} /></td>

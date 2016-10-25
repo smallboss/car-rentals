@@ -29,12 +29,13 @@ const Toll = function () {
 }
 
 class Tolls extends React.Component {
-    constructor (props) {
+    constructor (props, context) {
         super(props)
-        this.state = {tolls: props.tolls || [], showModalTolls: 0}        
+        this.state = {loginLevel: context.loginLevel, tolls: props.tolls || [], showModalTolls: 0}        
     }
-    componentWillReceiveProps(nextProps) {
-        this.setState({tolls: nextProps.tolls})
+    componentWillReceiveProps(nextProps, nextContext) {
+        let loginLevel = nextContext.loginLevel
+        this.setState({loginLevel, tolls: nextProps.tolls})
     }
     importFileHandler (e) {
         e.preventDefault()
@@ -116,7 +117,7 @@ class Tolls extends React.Component {
                             <table className='table table-hover table-bordered m-y-1'>
                                 <thead>
                                 <tr>
-                                    <th width='32'>X</th>
+                                    <th width='32'>#</th>
                                     <th className=''>Description</th>
                                     <th className=''>Fine Status</th>
                                     <th className=''>Amount</th>
@@ -136,7 +137,7 @@ class Tolls extends React.Component {
                                     let { _id, description, fineStatus, amount, fineSource, fineTime, fineDate, fineId, licenseSource, licenseNumber, plateSymbol, plateType, plateNumber } = elem
                                     return (
                                         <tr key={Math.random()}>
-                                            <td><img src='/img/delete.png' className='delete-img' onClick={() => {ApiTolls.remove({_id: _id})}} /></td>
+                                            <td>{(this.state.loginLevel === 3) ? <img src='/img/delete.png' className='delete-img' onClick={() => {ApiTolls.remove({_id: _id})}} /> : ''}</td>
                                             <td>{description}</td>
                                             <td>{fineStatus}</td>
                                             <td>{amount}</td>
@@ -160,6 +161,10 @@ class Tolls extends React.Component {
             </div>
         )
     }
+}
+
+Tolls.contextTypes = {
+    loginLevel: React.PropTypes.number.isRequired
 }
 
 export default createContainer(() => {
