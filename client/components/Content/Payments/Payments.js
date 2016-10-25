@@ -133,9 +133,6 @@ class Payments extends Component {
 
 
   render() {
-
-    console.log('LOG', this.state.loginLevel);
-
     const renderPayments = () => {
       return this.state.foundItems.map((itemPayment, key) => {
         if((key >= (this.state.currentPage-1) * this.state.itemsOnPage) && 

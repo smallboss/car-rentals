@@ -180,6 +180,8 @@ export default class ContractSingle extends Component {
         })
       }
 
+      console.log('---invs', invs);
+
       let lines = [];
       let amount = 0;
       let invoices = 0;
@@ -216,7 +218,7 @@ export default class ContractSingle extends Component {
       }
     // ================
 
-
+console.log('---inv', inv);
     this.setState({
       loginLevel: nextContext.loginLevel,
       contract: clone(c),
@@ -342,10 +344,12 @@ export default class ContractSingle extends Component {
             'smallboss@live.ru',
             'Contract ' + this.state.contract.codeName,
             getContractMsg(this.state.contract._id, ));
+
+    alert(`Message sent to ${email.address}`);
   }
 
   handlePrint(){
-    console.log('PRINT >>>>')
+    window.print();
   }
 
   componentDidMount() {
@@ -380,6 +384,8 @@ export default class ContractSingle extends Component {
         }
       })
     }
+    console.log('---invs', invs);
+
 
     let lines = [];
     let amount = 0;
@@ -416,6 +422,7 @@ export default class ContractSingle extends Component {
       })
     }
     // ================
+    console.log('---inv', inv);
 
     this.setState({
       amount, 

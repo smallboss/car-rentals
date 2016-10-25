@@ -58,7 +58,7 @@ export default class MaintenanceRow extends Component {
         isDepr = ((parseInt(value) < 0) || 
                   (value.indexOf('e') != -1) || 
                   (value.indexOf('E') != -1) ||  
-                  (value.length > 5));
+                  (value.length >= 10));
 
         newMaintenance.amount = isDepr ?  newMaintenance.amount : value;
         this.setState({maintenance: newMaintenance});
@@ -125,8 +125,7 @@ export default class MaintenanceRow extends Component {
                         if(this.state.editable){
                             return (
                                 <textarea
-                                    type="text"
-                                    className="w90"
+                                    className="w90h54 form-control"
                                     onChange={(e) => this.onChangeJobName(e.target.value)}
                                     ref={(ref) => this.inputName = ref}
                                     value={jobName} 
@@ -143,9 +142,8 @@ export default class MaintenanceRow extends Component {
                     {(() => {
                         if(this.state.editable){
                             return (
-                                <textarea 
-                                    type="text"
-                                    className="w90"
+                                <textarea
+                                    className="w90h54 form-control"
                                     onChange={(e) => this.onChangeDescription(e.target.value)}
                                     value={description} >
                                 </textarea>
@@ -200,7 +198,7 @@ export default class MaintenanceRow extends Component {
                                 <input 
                                     type="number"
                                     min="0"
-                                    max="99999"
+                                    max="9999999999"
                                     onChange={(e) => this.onChangeAmount(e.target.value)}
                                     value={amount} />
                             )

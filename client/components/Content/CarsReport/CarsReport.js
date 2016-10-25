@@ -73,6 +73,8 @@ class CarsReport extends Component {
 
   onReportCars(){
     console.log('CARS REPORT >>>');
+
+    Meteor.call('export1');
   }
 
 
@@ -102,11 +104,12 @@ class CarsReport extends Component {
         const carTotalIncome      = el.totalIncome ? el.totalIncome.toLowerCase() : '';
         const carProfit      = el.profit ? el.profit.toLowerCase() : '';
 
-        return (carName.indexOf(searchQuery) !== -1 || 
-                carPlateNumber.indexOf(searchQuery) !== -1 || 
-                carStatus.indexOf(searchQuery) !== -1 ||
-                carTotalExpense.indexOf(searchQuery) !== -1 ||
-                carTotalIncome.indexOf(searchQuery) !== -1)
+        return (carName.includes(searchQuery)         || 
+                carPlateNumber.includes(searchQuery)  || 
+                carStatus.includes(searchQuery)       ||
+                carTotalExpense.includes(searchQuery) ||
+                carTotalIncome.includes(searchQuery)  ||
+                carProfit.includes(searchQuery))
     });
 
 

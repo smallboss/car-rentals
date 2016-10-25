@@ -136,7 +136,7 @@
     vertical-align: middle;
 }
 .min.table .p0 { padding: 0 }
-.w90 { width: 90px }
+.w90h54 { max-width: 90px; max-height: 54px;}
 .m-x-0 {
     margin-left: 0;
     margin-right: 0;

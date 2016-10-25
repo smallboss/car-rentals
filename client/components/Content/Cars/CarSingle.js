@@ -30,7 +30,6 @@ export default class CarSingle extends Component {
 
     this.onChangeName = this.onChangeName.bind(this);
     this.onChangePlateNumber = this.onChangePlateNumber.bind(this);
-    this.onChangeProfit = this.onChangeProfit.bind(this);
     this.onChangeStatus = this.onChangeStatus.bind(this);
     this.handleSave = this.handleSave.bind(this);
     this.handleEdit = this.handleEdit.bind(this);
@@ -70,9 +69,10 @@ export default class CarSingle extends Component {
     isDepr = ((parseInt(value) < 0) || 
               (value.indexOf('e') != -1) || 
               (value.indexOf('E') != -1) ||  
-              (value.length > 5));
+              (value.length >= 10));
 
     newCar.totalExpense = isDepr ?  newCar.totalExpense : value;
+    newCar.profit = (parseInt(newCar.totalExpense) + parseInt(newCar.totalIncome))+'';
     this.setState({dispCar: newCar});
   }
 
@@ -85,9 +85,10 @@ export default class CarSingle extends Component {
     isDepr = ((parseInt(value) < 0) || 
               (value.indexOf('e') != -1) || 
               (value.indexOf('E') != -1) ||  
-              (value.length > 5));
+              (value.length >= 10));
 
     newCar.totalIncome = isDepr ?  newCar.totalIncome : value;
+    newCar.profit = (parseInt(newCar.totalExpense) + parseInt(newCar.totalIncome))+'';
     this.setState({dispCar: newCar});
   }
 
@@ -100,18 +101,6 @@ export default class CarSingle extends Component {
   onChangePlateNumber(value) {
     let newCar = this.state.dispCar;
     newCar.plateNumber = value;
-    this.setState({dispCar: newCar});
-  }
-
-  onChangeProfit(value) {
-    let newCar = this.state.dispCar;
-    let isDepr = false;
-
-    isDepr = ((value.indexOf('e') != -1) || 
-              (value.indexOf('E') != -1) ||  
-              (value.length > 5));
-
-    newCar.profit = isDepr ? newCar.profit : value;
     this.setState({dispCar: newCar});
   }
 
@@ -183,7 +172,7 @@ export default class CarSingle extends Component {
   }
 
   handlePrint(){
-    console.log('PRINT >>>>');
+    window.print();
   }
 
   handleEdit() {
@@ -318,6 +307,9 @@ export default class CarSingle extends Component {
         tolls,
         maintenance } = this.state.car;
 
+      if (true) {}
+        profit = (parseInt(totalExpense) + parseInt(totalIncome))+'';
+
       if (!maintenance) maintenance = new Array();
 
 
@@ -396,24 +388,7 @@ export default class CarSingle extends Component {
 
               <div className="form-group profit col-xs-6">
                 <label htmlFor="carprofit" className='col-xs-3'>Profit</label>
-                {(() => {
-                  if (this.state.editable) {
-                    return (
-                      <div className=' col-xs-8 form-horizontal'>
-                        <input
-                          type="number"
-                          min="-99999"
-                          max="99999"
-                          id="carProfit"
-                          className="form-control "
-                          onChange={(e) => this.onChangeProfit(e.target.value)}
-                          value={ this.state.dispCar.profit }/>
-                      </div>
-                    )
-                  }
-
-                  return <div className='col-xs-8 m-t-05'>{profit}</div>
-                })()}
+                <div className='col-xs-8 m-t-05'>{this.state.dispCar.profit}</div>
               </div>
             </div>
           </div>
@@ -432,8 +407,8 @@ export default class CarSingle extends Component {
               <li><a href="#fines" aria-controls="messages" role="tab" data-toggle="tab">Fines</a></li>
               <li><a href="#tolls" aria-controls="messages" role="tab" data-toggle="tab">Tolls</a></li>
               <li><a href="#notes" aria-controls="messages" role="tab" data-toggle="tab">Notes</a></li>
-              <li><a href="#totalExpense" aria-controls="settings" role="tab" data-toggle="tab">Total Expense</a></li>
-              <li><a href="#totalIncome" aria-controls="settings" role="tab" data-toggle="tab">Total income</a></li>
+              <li><a href="#totalExpense" aria-controls="messages" role="tab" data-toggle="tab">Total Expense</a></li>
+              <li><a href="#totalIncome" aria-controls="messages" role="tab" data-toggle="tab">Total income</a></li>
             </ul>
             <div className="tab-content">
               <div role="tabpanel" className="tab-pane p-x-1 active" id="description">
@@ -522,13 +497,13 @@ export default class CarSingle extends Component {
                     )
                 })()}
               </div>
-              <div role="tabpanel" className="tab-pane" id="totalExpense">
+              <div role="tabpanel" className="tab-pane p-a-1" id="totalExpense">
                 {(() => {
                   if (this.state.editable) {
                     return (
                       <input type="number"
-                             min="0"
-                             max="99999"
+                             min="-999999999"
+                             max="9999999999"
                              className='form-control'
                              onChange={(e) => this.onChangeExpense(e.target.value)}
                              value={ this.state.dispCar.totalExpense }/>
@@ -538,13 +513,13 @@ export default class CarSingle extends Component {
                   return <div>{totalExpense}</div>
                 })()}
               </div>
-              <div role="tabpanel" className="tab-pane" id="totalIncome">
+              <div role="tabpanel" className="tab-pane p-a-1" id="totalIncome">
                 {(() => {
                   if (this.state.editable) {
                     return (
                       <input type="number"
-                             min="0"
-                             max="99999"
+                             min="-999999999"
+                             max="9999999999"
                              className='form-control'
                              onChange={(e) => this.onChangeIncome(e.target.value)}
                              value={ this.state.dispCar.totalIncome }/>
