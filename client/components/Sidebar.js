@@ -3,51 +3,50 @@ import { Meteor } from 'meteor/meteor'
 import { createContainer } from 'meteor/react-meteor-data'
 import { Link } from 'react-router';
 
-const backEndMenu = <ul className="sidebar-nav">
-  <li><Link to="/managePanel/customers_list">Customers</Link></li>
-  <li><Link to="/managePanel/cars">Cars</Link></li>
-  <li className="dropdown">
-    <a type="button" data-toggle="dropdown">Invoicing
-      <span className="caret"></span></a>
-    <ul className="dropdown-menu">
-      <li><Link to="/managePanel/invoices">Invoices</Link></li>
-      <li><Link to="/managePanel/payments">Payments</Link></li>
-      <li><Link to="/managePanel/contracts">Contracts</Link></li>
-    </ul>
-  </li>
-  <li className="dropdown">
-    <a type="button" data-toggle="dropdown">Reports
-      <span className="caret"></span></a>
-    <ul className="dropdown-menu">
-      <li><Link to="/managePanel/cars_report">Cars</Link></li>
-      <li><Link to="/managePanel/rentals">Rentals</Link></li>
-    </ul>
-  </li>
-  <li className="dropdown">
-    <a type="button" data-toggle="dropdown">Imports
-      <span className="caret"></span></a>
-    <ul className="dropdown-menu">
-      <li><Link to="/managePanel/imports/fines">Fines</Link></li>
-      <li><Link to="/managePanel/imports/tolls">Tolls</Link></li>
-    </ul>
-  </li>
-  <li><Link to="/managePanel/users_list">All Users</Link></li>
-  <li><Link to='/user_profile'>Profile</Link></li>
-</ul>
+const backEndMenu = function (adminLogin = 0) {
+    return (
+        <ul className="sidebar-nav">
+          <li><Link to="/managePanel/customers_list">Customers</Link></li>
+          <li><Link to="/managePanel/cars">Cars</Link></li>
+          <li className="dropdown">
+            <a type="button" data-toggle="dropdown">Invoicing
+              <span className="caret"></span></a>
+            <ul className="dropdown-menu">
+              <li><Link to="/managePanel/invoices">Invoices</Link></li>
+              <li><Link to="/managePanel/payments">Payments</Link></li>
+              <li><Link to="/managePanel/contracts">Contracts</Link></li>
+            </ul>
+          </li>
+          {(adminLogin === 3) ? <li className="dropdown">
+            <a type="button" data-toggle="dropdown">Reports
+              <span className="caret"></span></a>
+            <ul className="dropdown-menu">
+              <li><Link to="/managePanel/cars_report">Cars</Link></li>
+              <li><Link to="/managePanel/rentals">Rentals</Link></li>
+            </ul>
+          </li> : ''}
+          <li className="dropdown">
+            <a type="button" data-toggle="dropdown">Imports
+              <span className="caret"></span></a>
+            <ul className="dropdown-menu">
+              <li><Link to="/managePanel/imports/fines">Fines</Link></li>
+              <li><Link to="/managePanel/imports/tolls">Tolls</Link></li>
+            </ul>
+          </li>
+          <li><Link to="/managePanel/users_list">All Users</Link></li>
+          <li><Link to='/user_profile'>Profile</Link></li>
+        </ul>
+    )
+}
 
 class Sidebar extends Component {
-  constructor() {
-    super()
-    this.state = {loginIn: 0, loginAdmin: 0} 
+  constructor(props, context) {
+    super(props)
+    this.state = {loginIn: 0, loginLevel: context.loginLevel} 
   }
-  componentWillReceiveProps(nextProps) {
-    let loginIn = nextProps.loginIn
-    if(loginIn) {
-      let loginAdmin = (loginIn.profile.userType == 'admin' || loginIn.profile.userType == 'employee') ? 1 : 0
-      this.setState({loginIn: 1, loginAdmin})
-    } else {
-      this.setState({loginIn: 0, loginAdmin: 0})
-    }
+  componentWillReceiveProps(nextProps, nextContext) {
+    let loginLevel = nextContext.loginLevel
+    this.setState({loginIn: nextProps.loginIn, loginLevel: loginLevel})
   }
   render() {
     if(!this.state.loginIn) {
@@ -55,11 +54,11 @@ class Sidebar extends Component {
           <div></div>
       )
     }
-    const adminPart = (this.state.loginAdmin) ? <li><Link to='/managePanel/' className='p-l-3'>Manage Panel</Link></li> : ''
+    const adminPart = (this.state.loginLevel > 1) ? <li><Link to='/managePanel/' className='p-l-3'>Manage Panel</Link></li> : ''
     if(this.props.side && this.props.side == 'backEnd') {
       return (
           <div id='sidebar-wrapper'>
-            {backEndMenu}
+            {backEndMenu(this.state.loginLevel)}
           </div>
       )
     } else {
@@ -81,6 +80,10 @@ class Sidebar extends Component {
     }
     
   }
+}
+
+Sidebar.contextTypes = {
+  loginLevel: React.PropTypes.number.isRequired
 }
 
 export default createContainer(() => {
