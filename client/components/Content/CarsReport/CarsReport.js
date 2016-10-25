@@ -8,7 +8,7 @@ import { ApiCars } from '/imports/api/cars.js';
 import CarRow from './CarRow.js';
 import HeadList from './HeadList.js';
 
-import { map, debounce } from 'lodash';
+import { map, debounce, find } from 'lodash';
 
 
 class CarsReport extends Component {
@@ -73,6 +73,14 @@ class CarsReport extends Component {
 
   onReportCars(){
     console.log('CARS REPORT >>>');
+
+    let selectedCars = [];
+
+    this.state.selectedCarsID.map((el) => {
+      selectedCars.push(find(this.props.cars, {_id: el}));
+    })
+
+    Meteor.call('export1', selectedCars);
   }
 
 
@@ -102,11 +110,12 @@ class CarsReport extends Component {
         const carTotalIncome      = el.totalIncome ? el.totalIncome.toLowerCase() : '';
         const carProfit      = el.profit ? el.profit.toLowerCase() : '';
 
-        return (carName.indexOf(searchQuery) !== -1 || 
-                carPlateNumber.indexOf(searchQuery) !== -1 || 
-                carStatus.indexOf(searchQuery) !== -1 ||
-                carTotalExpense.indexOf(searchQuery) !== -1 ||
-                carTotalIncome.indexOf(searchQuery) !== -1)
+        return (carName.includes(searchQuery)         || 
+                carPlateNumber.includes(searchQuery)  || 
+                carStatus.includes(searchQuery)       ||
+                carTotalExpense.includes(searchQuery) ||
+                carTotalIncome.includes(searchQuery)  ||
+                carProfit.includes(searchQuery))
     });
 
 

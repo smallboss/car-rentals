@@ -15,7 +15,7 @@ import HeadSingle from './HeadSingle.js';
 import TopDetailsTable from './TopDetailsTable.js';
 import { browserHistory } from 'react-router';
 import React, { Component } from 'react';
-import { clone, cloneDeep, reverse, concat, find } from 'lodash';
+import { clone, cloneDeep, reverse, concat, find, compact } from 'lodash';
 import { getContractMsg } from '/client/helpers/generatorTextMessages.js'
 
 import { contractStateTypes } from '/imports/startup/typesList.js';
@@ -167,18 +167,20 @@ export default class ContractSingle extends Component {
           const codeName = invoice ? invoice.codeName : '';
           const status = invoice ? invoice.status : '';
           const length = (invoice && invoice.linesId) ? invoice.linesId.length : 0
-          invs.push({_id: el, codeName, numb: length, status});
+          if (length){
+            invs.push({_id: el, codeName, numb: length, status});
+          }
           linesId = linesId.concat(invoice ? invoice.linesId : []);
 
           const date = invoice ? invoice.date : '';
-          if ((!nextTime || nextTime > new Date(date).getTime())) {
+          if ((!nextTime || nextTime > new Date(date).getTime()) && status != 'paid') {
             if (!isNaN((new Date(date)).getTime())) {
-
               nextLines = invoice ? invoice.linesId : [];
             }
           }
         })
       }
+
 
       let lines = [];
       let amount = 0;
@@ -189,6 +191,7 @@ export default class ContractSingle extends Component {
       if (nextLines){
         nextLines.map((el) => {
           let line = find(nextProps.lines, ['_id', el]);
+          if (true) {}
           toinvoice += parseInt(line ? line.amount : 0);
         })
       }
@@ -226,7 +229,7 @@ export default class ContractSingle extends Component {
       invoices,
       remaining,
       toinvoice,
-      lines, 
+      lines: compact(lines), 
       invs
     });
   }
@@ -342,10 +345,12 @@ export default class ContractSingle extends Component {
             'smallboss@live.ru',
             'Contract ' + this.state.contract.codeName,
             getContractMsg(this.state.contract._id, ));
+
+    alert(`Message sent to ${email.address}`);
   }
 
   handlePrint(){
-    console.log('PRINT >>>>')
+    window.print();
   }
 
   componentDidMount() {
@@ -368,7 +373,9 @@ export default class ContractSingle extends Component {
         const codeName = invoice ? invoice.codeName : '';
         const status = invoice ? invoice.status : '';
         const length = (invoice && invoice.linesId) ? invoice.linesId.length : 0
-        invs.push({_id: el, codeName, numb: length, status});
+        if (length){
+          invs.push({_id: el, codeName, numb: length, status});
+        }
         linesId = linesId.concat(invoice ? invoice.linesId : []);
 
         const date = invoice ? invoice.date : '';
@@ -380,6 +387,7 @@ export default class ContractSingle extends Component {
         }
       })
     }
+
 
     let lines = [];
     let amount = 0;
@@ -422,7 +430,7 @@ export default class ContractSingle extends Component {
       invoices,
       remaining,
       toinvoice,
-      lines, 
+      lines: compact(lines), 
       invs,
       allowSave
     });

@@ -64,7 +64,7 @@ export default class LinesOnTab extends Component {
         ApiInvoices.update(this.props.invoice._id, {$push: { linesId:{ $each: [lineId], $position: 0}}});
 
         let selectedListId = this.state.selectedListId;
-        selectedListId.push(lineId)
+        selectedListId.push(lineId);
 
 
         const invoice = this.props.invoice;
@@ -94,7 +94,13 @@ export default class LinesOnTab extends Component {
         delete line._id;
 
         ApiLines.update({_id: _id }, {$set: line });
-        ApiRentals.update({_id: line.rentalId}, {$set: {car: line.car, customerId: this.props.invoice.customerId, dateFrom: line.dateFrom, dateTo: line.dateTo}});
+        const car = find(this.props.cars, ['_id', line.car]);
+        ApiRentals.update({_id: line.rentalId}, {$set: {car: line.car, 
+                                                        customerId: this.props.invoice.customerId, 
+                                                        dateFrom: line.dateFrom, 
+                                                        dateTo: line.dateTo,
+                                                        plateNumber: car ? car.plateNumber : ''
+                                                    }});
 
         let selectedListId = this.state.selectedListId;
         selectedListId.splice(selectedListId.indexOf(line._id), 1);

@@ -6,6 +6,16 @@ import { ApiUsers } from '/imports/api/users'
 import { ApiCars } from '/imports/api/cars'
 
 
+const genHTMLHeader = () => {
+    return `<!DOCTYPE html>
+            <html lang="en">
+            <head>
+               <meta charset="UTF-8">
+            </head>
+            <body>`
+}
+
+
 export const getContractMsg = (contractId) => {
     const showPeriod = (dateFrom, dateTo) => {
         let period;

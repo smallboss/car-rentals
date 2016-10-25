@@ -113,7 +113,7 @@ export default class InvoiceSingle extends Component {
   }
 
   handlePrint(){
-    console.log('PRINT >>>');
+    window.print();
   }
 
 
@@ -229,6 +229,8 @@ export default class InvoiceSingle extends Component {
             'smallboss@live.ru',
             'Invoice ' + this.state.invoice.codeName,
             getInvoiceMsg(this.state.invoice._id));
+
+    alert(`Message sent to ${email.address}`);
   }
 
 

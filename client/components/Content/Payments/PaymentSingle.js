@@ -131,7 +131,7 @@ export default class PaymentSingle extends Component {
 
 
   handlePrint(){
-    console.log('PRINT >>>');
+    window.print();
   }
 
   handleSave() {
@@ -216,13 +216,13 @@ export default class PaymentSingle extends Component {
               ? email.emails[0] 
               : find(this.props.customerList, ['_id', Meteor.userId()]).emails[0];
 
-    // Meteor.call('sendEmail',
-    //         email.address,
-    //         'smallboss@live.ru',
-    //         'Payment ' + this.state.payment.codeName,
-    //         getPaymentMsg(this.state.payment._id));
-    Meteor.call('export');
+    Meteor.call('sendEmail',
+            email.address,
+            'smallboss@live.ru',
+            'Payment ' + this.state.payment.codeName,
+            getPaymentMsg(this.state.payment._id));
 
+    alert(`Message sent to ${email.address}`);
   }
 
 

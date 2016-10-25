@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import { clone, map, reverse, cloneDeep, find } from 'lodash';
+import { clone, map, reverse, cloneDeep, find, compact } from 'lodash';
 import { createContainer } from 'meteor/react-meteor-data'
 
 import { ApiCars } from '/imports/api/cars.js';
@@ -89,6 +89,7 @@ export default class LinesOnTab extends Component {
 
     render(){
         let lines = this.props.lines;
+        let inv = cloneDeep(this.props.invoices);
 
         return(
             <div>
@@ -114,12 +115,11 @@ export default class LinesOnTab extends Component {
                     <tbody>
                         {(() => {
                             if (lines) {
-                                let inv = cloneDeep(this.props.invoices);
-
                                 return (
                                     lines.map((item, key) => {
                                         let codeName = '';
                                         let invId = {};
+
                                         if (inv[0]) {
                                             invId = inv[0]._id;
                                             codeName = inv[0].codeName;
