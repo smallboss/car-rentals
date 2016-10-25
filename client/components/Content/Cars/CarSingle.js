@@ -74,7 +74,11 @@ export default class CarSingle extends Component {
               (value.length >= 10));
 
     newCar.totalExpense = isDepr ?  newCar.totalExpense : value;
-    newCar.profit = (parseInt(newCar.totalExpense) + parseInt(newCar.totalIncome))+'';
+    let expence = parseInt(newCar.totalExpense);
+    let income = parseInt(newCar.totalIncome);
+    expence = isNaN(expence) ? 0 : expence;
+    income = isNaN(income) ? 0 : income;
+    newCar.profit = expence + income+'';
     this.setState({dispCar: newCar});
   }
 
@@ -90,7 +94,11 @@ export default class CarSingle extends Component {
               (value.length >= 10));
 
     newCar.totalIncome = isDepr ?  newCar.totalIncome : value;
-    newCar.profit = (parseInt(newCar.totalExpense) + parseInt(newCar.totalIncome))+'';
+    let expence = parseInt(newCar.totalExpense);
+    let income = parseInt(newCar.totalIncome);
+    expence = isNaN(expence) ? 0 : expence;
+    income = isNaN(income) ? 0 : income;
+    newCar.profit = expence + income+'';
     this.setState({dispCar: newCar});
   }
 
