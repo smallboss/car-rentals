@@ -234,7 +234,7 @@
     left: 10vw;
     padding-bottom: 264px;
     width: 80vw;
-    height: 70vh;
+    height: 90vh;
     overflow: auto;
 }
 #tollsModal .modal-content {
@@ -243,7 +243,7 @@
     left: 5vw;
     padding-bottom: 264px;
     width: 90vw;
-    height: 80vh;
+    height: 90vh;
     overflow: auto;
 }
 .delete-img {

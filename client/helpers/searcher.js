@@ -4,10 +4,9 @@
 
 export function searcher (arrTarget, arrProps, searchValue) {
     let result = []
-    arrProps.forEach(prop => {
+    arrProps.forEach((prop, i) => {
         /*if(prop.indexOf('.') !== -1){
-            console.log(prop.split('.'))
-            searcher(arrTarget, [prop.split('.')[1]], searchValue)
+            searcher([arrTarget[i][prop.split('.')[0]]], [prop.split('.')[1]], searchValue)
             return
         }*/
         arrTarget.map(item => {
@@ -19,7 +18,7 @@ export function searcher (arrTarget, arrProps, searchValue) {
             for(let _prop in item) {
                 if(prop == _prop) {
                     if(typeof item[_prop] == 'string') {
-                        if(item[_prop].toLowerCase().indexOf(searchValue) != -1) {
+                        if(item[_prop].toLowerCase().indexOf(searchValue) !== -1) {
                             result.push(item)
                             break
                         }
