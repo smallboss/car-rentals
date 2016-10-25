@@ -5,6 +5,11 @@
 export function searcher (arrTarget, arrProps, searchValue) {
     let result = []
     arrProps.forEach(prop => {
+        /*if(prop.indexOf('.') !== -1){
+            console.log(prop.split('.'))
+            searcher(arrTarget, [prop.split('.')[1]], searchValue)
+            return
+        }*/
         arrTarget.map(item => {
             for(let i = 0; i < result.length; i++) {
                 if(result[i]._id == item._id) {
