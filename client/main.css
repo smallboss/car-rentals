@@ -233,3 +233,32 @@
 }
 
 .m-t-015 { margin-top: 15px; }
+.img-save:hover {
+    cursor: pointer;
+}
+
+#finesModal .modal-content {
+    position: fixed;
+    top: 5vh!important;
+    left: 10vw;
+    padding-bottom: 264px;
+    width: 80vw;
+    height: 90vh;
+    overflow: auto;
+}
+#tollsModal .modal-content {
+    position: fixed;
+    top: 5vh!important;
+    left: 5vw;
+    padding-bottom: 264px;
+    width: 90vw;
+    height: 90vh;
+    overflow: auto;
+}
+.delete-img {
+    width: 10px;
+}
+.delete-img:hover {
+    cursor: pointer;
+    width: 24px;
+}

@@ -27,10 +27,11 @@ const Fine = function () {
 class Fines extends React.Component {
     constructor (props, context) {
         super(props)
-        this.state = {fines: props.fines || [], showModalFines: 0}        
+        this.state = {loginLevel: context.loginLevel, fines: props.fines || [], showModalFines: 0}        
     }
-    componentWillReceiveProps(nextProps) {
-        this.setState({fines: nextProps.fines})
+    componentWillReceiveProps(nextProps, nextContext) {
+        let loginLevel = nextContext.loginLevel
+        this.setState({fines: nextProps.fines, loginLevel})
     }
     importFileHandler (e) {
         e.preventDefault()
@@ -106,7 +107,7 @@ class Fines extends React.Component {
                             <table className='table table-hover table-bordered m-y-1'>
                                 <thead>
                                 <tr>
-                                    <th width='32'>X</th>
+                                    <th width='32'>#</th>
                                     <th className=''>Trxn</th>
                                     <th className=''>Time</th>
                                     <th className=''>Post Date</th>
@@ -123,7 +124,7 @@ class Fines extends React.Component {
                                     let { _id, transaction, time, postDate, plate, source, tag, location, direction, amount } = elem
                                     return (
                                         <tr key={Math.random()}>
-                                            <td><img src='/img/delete.png' className='delete-img' onClick={() => {ApiFines.remove({_id: _id})}} /></td>
+                                            <td>{(this.state.loginLevel === 3) ? <img src='/img/delete.png' className='delete-img' onClick={() => {ApiFines.remove({_id: _id})}} /> : ''}</td>
                                             <td>{transaction}</td>
                                             <td>{time}</td>
                                             <td>{postDate}</td>
@@ -149,6 +150,10 @@ class Fines extends React.Component {
             </div>
         )
     }
+}
+
+Fines.contextTypes = {
+    loginLevel: React.PropTypes.number.isRequired
 }
 
 export default createContainer(() => {

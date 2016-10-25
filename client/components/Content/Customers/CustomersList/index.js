@@ -76,7 +76,7 @@ class CustomersList extends React.Component {
             stateFromValue = [],
             _props = this.props.customers
         if(searchValue.length > 0) {
-            let arrToFind = ['username', 'emails', 'profile.phone']
+            let arrToFind = ['username', 'emails', 'profile']
             stateFromValue = searcher(_props, arrToFind, searchValue)
         } else {
             stateFromValue = this.props.customers

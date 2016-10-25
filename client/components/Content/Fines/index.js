@@ -158,7 +158,7 @@ class Fines extends React.Component {
                                         <img className='pull-right img-save' src='/img/save.png' width='24' name='save-new-note' onClick={this.handlerButtons} />
                                     </td>
                                     <td><input type='text' name='transaction' className='form-control' ref={ref => {this.rNewFieldTransaction = ref}} /></td>
-                                    <td><input type='text' name='time' className='form-control' value={new Date().toUTCString()} ref={ref => {this.rNewFieldTime = ref}} disabled /></td>
+                                    <td><input type='text' name='time' className='form-control' value={new Date().toTimeString().slice(0,8)} ref={ref => {this.rNewFieldTime = ref}} disabled /></td>
                                     <td><DatePicker dateFormat='MM/DD/YYYY' value={new Date().toUTCString()} ref={ref => {this.rNewFieldDate = ref}} disabled /></td>
                                     <td><input type='text' name='plate' className='form-control' ref={ref => {this.rNewFieldPlate = ref}} value={this.props.plateNumber} disabled /></td>
                                     <td><input type='text' name='source' className='form-control' ref={ref => {this.rNewFieldSource = ref}} /></td>
