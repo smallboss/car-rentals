@@ -130,6 +130,7 @@
 .content {
     margin-left: 260px;
     min-height: 100vh;
+    min-width: 500px;
 }
 
 .vertMiddle.table>tbody>tr>td{

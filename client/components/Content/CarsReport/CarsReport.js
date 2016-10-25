@@ -1,10 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { browserHistory } from 'react-router'
 import export_table_to_excel from './Table2Excel.js'
-// var XLSX = require('xlsx');
-// var jszip = require('jszip');
-
-
 
 
 import { createContainer } from 'meteor/react-meteor-data';
