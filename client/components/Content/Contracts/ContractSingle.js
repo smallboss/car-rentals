@@ -744,7 +744,7 @@ export default class ContractSingle extends Component {
                       </textarea>
                     )
                   }
-                  return <textarea className="form-control" rows="3" disabled value={notes}></textarea>
+                  return <textarea className="form-control" rows="3" disabled value={termsAndConditions}></textarea>
                 })()}
               </div>
               <div role="tabpanel" className="tab-pane p-x-1" id="notes">

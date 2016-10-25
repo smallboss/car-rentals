@@ -184,7 +184,7 @@ export default class InvoiceSingle extends Component {
       ApiContracts.update({_id: this.props.contract._id}, {$addToSet: {invoicesId: invoiceId}});
     }
     if (this.state.oldCustomerId != this.state.invoice.customerId) {
-      Meteor.users.update({_id: this.state.oldCustomerId}, {$pull: { "profile.invoices": contractId}});
+      Meteor.users.update({_id: this.state.oldCustomerId}, {$pull: { "profile.invoices": invoiceId}});
     }
     Meteor.users.update({_id: newInvoice.customerId}, {$addToSet: { "profile.invoices": invoiceId}});
     if (this.state.isNew) browserHistory.push(`/managePanel/invoices/${invoiceId}`);

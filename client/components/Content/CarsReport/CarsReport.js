@@ -1,5 +1,11 @@
 import React, { Component, PropTypes } from 'react';
 import { browserHistory } from 'react-router'
+import export_table_to_excel from './Table2Excel.js'
+// var XLSX = require('xlsx');
+// var jszip = require('jszip');
+
+
+
 
 import { createContainer } from 'meteor/react-meteor-data';
 
@@ -65,22 +71,13 @@ class CarsReport extends Component {
   removeCars() {
     this.state.selectedCarsID.map((carID) => {
       ApiCars.remove(new Mongo.ObjectID(carID));
-
     })
 
     this.setState({selectedCarsID: []});
   }
 
   onReportCars(){
-    console.log('CARS REPORT >>>');
-
-    let selectedCars = [];
-
-    this.state.selectedCarsID.map((el) => {
-      selectedCars.push(find(this.props.cars, {_id: el}));
-    })
-
-    Meteor.call('export1', selectedCars);
+    export_table_to_excel('tableToExcel');
   }
 
 
@@ -93,7 +90,6 @@ class CarsReport extends Component {
       newSelectedCarsID.push(CarID);
     else 
       newSelectedCarsID.splice(index, 1);
-    
 
     this.setState({selectedCarsID: newSelectedCarsID});
   }
@@ -158,8 +154,42 @@ class CarsReport extends Component {
       )
     }
 
+
+    const renderCarsForPrint = () => {
+      return (
+        <table id="tableToExcel" className="hide">
+          <tbody>
+            <tr>
+              <td>Name</td>
+              <td>Plate number</td>
+              <td>Status</td>
+              <td>Expenses</td>
+              <td>Income</td>
+              <td>Profit</td>
+            </tr>
+           { 
+              this.state.selectedCarsID.map((el, key) => {
+                const currentCar = find(this.props.cars, {_id: new Mongo.ObjectID(el)});
+
+                return (
+                  <tr key={`tr-${key}`}>
+                    <td>{ currentCar.name+'' }</td>
+                    <td>{ currentCar.plateNumber+'' }</td>
+                    <td>{ currentCar.status+'' }</td>
+                    <td>{ currentCar.totalExpense }</td>
+                    <td>{ currentCar.totalIncome }</td>
+                    <td>{ currentCar.profit }</td>
+                  </tr>
+                )
+              })
+           }
+          </tbody>
+        </table>)
+    }
+
     return (
       <div>
+
         <HeadList
           currentPage={this.state.currentPage}
           itemsOnPage={this.state.itemsOnPage}
@@ -187,9 +217,11 @@ class CarsReport extends Component {
           </thead>
 
           <tbody>
-           {renderCars()}
+           { renderCars() }
           </tbody>
         </table>
+
+        { renderCarsForPrint() } 
       </div>
     )
   }
