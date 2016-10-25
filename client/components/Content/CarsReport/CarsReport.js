@@ -8,7 +8,7 @@ import { ApiCars } from '/imports/api/cars.js';
 import CarRow from './CarRow.js';
 import HeadList from './HeadList.js';
 
-import { map, debounce } from 'lodash';
+import { map, debounce, find } from 'lodash';
 
 
 class CarsReport extends Component {
@@ -74,7 +74,13 @@ class CarsReport extends Component {
   onReportCars(){
     console.log('CARS REPORT >>>');
 
-    Meteor.call('export1');
+    let selectedCars = [];
+
+    this.state.selectedCarsID.map((el) => {
+      selectedCars.push(find(this.props.cars, {_id: el}));
+    })
+
+    Meteor.call('export1', selectedCars);
   }
 
 

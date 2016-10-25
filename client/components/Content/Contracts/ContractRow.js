@@ -91,7 +91,6 @@ export default class ContractRow extends Component {
 
 
         const renderCheckBox = () => {
-            console.log('this.props.loginLevel', this.props.loginLevel);
             if (this.props.loginLevel === 3) {
                 return (
                     <th>

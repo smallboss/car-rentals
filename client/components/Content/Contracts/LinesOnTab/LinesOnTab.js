@@ -88,9 +88,8 @@ export default class LinesOnTab extends Component {
 // END =================== ADD = EDIT = REMOVE = SAVE ======================
 
     render(){
-        let lines = compact(this.props.lines);
-
-        console.log('this.props.lines', this.props.lines);
+        let lines = this.props.lines;
+        let inv = cloneDeep(this.props.invoices);
 
         return(
             <div>
@@ -116,8 +115,6 @@ export default class LinesOnTab extends Component {
                     <tbody>
                         {(() => {
                             if (lines) {
-                                let inv = cloneDeep(this.props.invoices);
-                                console.log('inv', this.props.invoices);
                                 return (
                                     lines.map((item, key) => {
                                         let codeName = '';

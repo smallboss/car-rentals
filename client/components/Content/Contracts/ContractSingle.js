@@ -15,7 +15,7 @@ import HeadSingle from './HeadSingle.js';
 import TopDetailsTable from './TopDetailsTable.js';
 import { browserHistory } from 'react-router';
 import React, { Component } from 'react';
-import { clone, cloneDeep, reverse, concat, find } from 'lodash';
+import { clone, cloneDeep, reverse, concat, find, compact } from 'lodash';
 import { getContractMsg } from '/client/helpers/generatorTextMessages.js'
 
 import { contractStateTypes } from '/imports/startup/typesList.js';
@@ -167,20 +167,20 @@ export default class ContractSingle extends Component {
           const codeName = invoice ? invoice.codeName : '';
           const status = invoice ? invoice.status : '';
           const length = (invoice && invoice.linesId) ? invoice.linesId.length : 0
-          invs.push({_id: el, codeName, numb: length, status});
+          if (length){
+            invs.push({_id: el, codeName, numb: length, status});
+          }
           linesId = linesId.concat(invoice ? invoice.linesId : []);
 
           const date = invoice ? invoice.date : '';
-          if ((!nextTime || nextTime > new Date(date).getTime())) {
+          if ((!nextTime || nextTime > new Date(date).getTime()) && status != 'paid') {
             if (!isNaN((new Date(date)).getTime())) {
-
               nextLines = invoice ? invoice.linesId : [];
             }
           }
         })
       }
 
-      console.log('---invs', invs);
 
       let lines = [];
       let amount = 0;
@@ -191,6 +191,7 @@ export default class ContractSingle extends Component {
       if (nextLines){
         nextLines.map((el) => {
           let line = find(nextProps.lines, ['_id', el]);
+          if (true) {}
           toinvoice += parseInt(line ? line.amount : 0);
         })
       }
@@ -218,7 +219,7 @@ export default class ContractSingle extends Component {
       }
     // ================
 
-console.log('---inv', inv);
+
     this.setState({
       loginLevel: nextContext.loginLevel,
       contract: clone(c),
@@ -228,7 +229,7 @@ console.log('---inv', inv);
       invoices,
       remaining,
       toinvoice,
-      lines, 
+      lines: compact(lines), 
       invs
     });
   }
@@ -372,7 +373,9 @@ console.log('---inv', inv);
         const codeName = invoice ? invoice.codeName : '';
         const status = invoice ? invoice.status : '';
         const length = (invoice && invoice.linesId) ? invoice.linesId.length : 0
-        invs.push({_id: el, codeName, numb: length, status});
+        if (length){
+          invs.push({_id: el, codeName, numb: length, status});
+        }
         linesId = linesId.concat(invoice ? invoice.linesId : []);
 
         const date = invoice ? invoice.date : '';
@@ -384,7 +387,6 @@ console.log('---inv', inv);
         }
       })
     }
-    console.log('---invs', invs);
 
 
     let lines = [];
@@ -422,14 +424,13 @@ console.log('---inv', inv);
       })
     }
     // ================
-    console.log('---inv', inv);
 
     this.setState({
       amount, 
       invoices,
       remaining,
       toinvoice,
-      lines, 
+      lines: compact(lines), 
       invs,
       allowSave
     });

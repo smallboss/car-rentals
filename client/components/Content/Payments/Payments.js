@@ -64,8 +64,8 @@ class Payments extends Component {
 
   removePayments() {
     this.state.selectedPaymentsID.map((paymentID) => {
-      const payment = ApiPayments.findOne(new Mongo.ObjectID(paymentID));
-      const invoice = ApiInvoices.findOne({paymentsId: this.state.payment._id});
+      const payment = find(this.props.payments, {'_id': new Mongo.ObjectID(paymentID)});
+      const invoice = ApiInvoices.findOne({paymentsId: payment._id});
       if (invoice) ApiInvoices.update({_id: invoice._id}, {$pull: { paymentsId: this.state.payment._id}});
       ApiPayments.remove(new Mongo.ObjectID(paymentID));
       Meteor.users.update({_id: payment.customerId}, {$pull: { "profile.payments": new Mongo.ObjectID(paymentID)}});   

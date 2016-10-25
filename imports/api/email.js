@@ -1,6 +1,6 @@
 import { Meteor } from 'meteor/meteor';
 import { Email } from 'meteor/email';
-import { ApiPayments } from './payments'
+import { ApiCars } from './cars'
 var mongoXlsx = require('mongo-xlsx');
 
 var fs = Npm.require('fs');
@@ -13,7 +13,8 @@ if (Meteor.isServer) {
       sendEmail: function (to, from, subject, text) {
 	    this.unblock();
         let objToSend = {
-          to: 'bobnyuk.andrei@yandex.ru',
+          // to: 'tokanevgeniy@gmail.com',
+          to,
           from,
           subject,
           text
@@ -22,15 +23,18 @@ if (Meteor.isServer) {
         Email.send(objToSend);
       },
 
-      export1: function () {
+      export1: function (selectedCars) {
       // this.unblock();
-       const data = ApiPayments.find({}).fetch()
+       // const data = ApiCars.find({}).fetch()
+
+       console.log('selectedCars', selectedCars);
        //Generate automatic model for processing (A static model should be used)
-       var model = mongoXlsx.buildDynamicModel(data);
+       // var model = mongoXlsx.buildDynamicModel(data);
+
        // Generate Excel
-       mongoXlsx.mongoData2Xlsx(data, model, function (err, data) {
-           console.log('File saved at:', data.fullPath);
-       });
+       // mongoXlsx.mongoData2Xlsx(data, model, function (err, data) {
+       //     console.log('File saved at:', data.fullPath);
+       // });
 
        // var fd = fs.openSync(__dirname, 'w');
 
