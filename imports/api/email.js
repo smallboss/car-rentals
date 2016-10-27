@@ -1,26 +1,24 @@
 import { Meteor } from 'meteor/meteor';
 import { Email } from 'meteor/email';
 import { ApiPayments } from './payments'
-import mongoXlsx  from  'mongo-xlsx';
-
-var fs = Npm.require('fs');
-var path = Npm.require('path');
-var basePath = __dirname + '/';
 
 
 if (Meteor.isServer) {
     Meteor.methods({
       sendEmail: function (to, from, subject, text) {
-	    this.unblock();
-        let objToSend = {
-          // to: 'tokanevgeniy@gmail.com',
+        // check([to, from, subject, text], [String]);
+        // Let other method calls from the same client start running,
+        // without waiting for the email sending to complete.
+        console.log('SEND EMAIL', to);
+        this.unblock();
+
+        Email.send({
           to,
-          from,
+          // to: 'tokanevgeniy@gmail.com',
+          from: 'smallboss@live.ru',
           subject,
-          text
-        }
-        console.log(`SEND EMAIL to ${to}`);
-        Email.send(objToSend);
+          html: text
+        });
       }
-    })
+    });
 }
