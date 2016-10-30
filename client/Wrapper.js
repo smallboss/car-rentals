@@ -16,26 +16,29 @@ import BackFooter from './components/ManagePanel/BackFooter'
 class Wrapper extends React.Component {
     constructor(props) {
         super(props)
-        this.state = {loginLevel: 0}
+        this.state = {loginLevel: 0, showSideBar: 0}
     }
     componentWillReceiveProps (nextProps) {
-        let user = nextProps.loginedUser            
+        let user = nextProps.loginedUser,
+            loginLevel = 0,
+            showSideBar = (location.href.indexOf('home') !== -1) ? 0 : 1
         if(user) {
             switch (user.profile.userType) {
                 case 'customer':
-                    this.setState({loginLevel: 1})
+                    loginLevel = 1
                     break
                 case 'employee':
-                    this.setState({loginLevel: 2})
+                    loginLevel = 2
                     break
                 case 'admin':
-                    this.setState({loginLevel: 3})
+                    loginLevel = 3
                     break
                 default:
-                    this.setState({loginLevel: 0})
+                    loginLevel = 0
                     break
             }
-        }        
+        }
+        this.setState({loginLevel, showSideBar})
     }
     getChildContext() {
         return {
@@ -44,15 +47,19 @@ class Wrapper extends React.Component {
     }
     render () {
         let { children } = this.props
-        if(location.href.indexOf('managePanel') != -1) {
+        if(location.href.indexOf('managePanel') !== -1) {
             if(this.state.loginLevel == 2 || this.state.loginLevel == 3) {
                 return (
                     <div id='main_container'>
                         <BackHeader />
-                        <Sidebar side='backEnd' />
-                        <div className='content'>
-                            {children}
+                        <div className='col-xs-3'>
+                            <Sidebar side='backEnd' />
                         </div>
+                        <div className='col-xs-9'>
+                            <div className='content'>
+                                {children}
+                            </div>
+                        </div>                        
                         <BackFooter />
                     </div>
                 )
@@ -60,7 +67,7 @@ class Wrapper extends React.Component {
                 return (
                     <div id='main_container'>
                         <Header />
-                        <Sidebar />
+                        
                         <div className='content'>
                             Must login as admin or employee
                         </div>
@@ -69,16 +76,31 @@ class Wrapper extends React.Component {
                 )
             }
         }
-        return (
+        return (this.state.showSideBar) ?
             <div id='main_container'>
                 <Header />
-                <Sidebar />
-                <div className='content'>
-                    {children}
+                <div>
+                    <div className='col-xs-3'>
+                        <Sidebar />
+                    </div>
+                    <div className='col-xs-9'>
+                        <div className='content'>
+                            {children}
+                        </div>
+                    </div>
+                </div>
+                <Footer />
+            </div> :
+            <div id='main_container'>
+                <Header />
+                <div className='col-xs-12'>
+                    <div className='content'>
+                        {children}
+                    </div>
                 </div>
                 <Footer />
             </div>
-        )              
+                      
     }
 }
 

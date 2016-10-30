@@ -42,13 +42,13 @@ const backEndMenu = function (adminLogin = 0) {
 class Sidebar extends Component {
   constructor(props, context) {
     super(props)
-    this.state = {loginIn: 0, loginLevel: context.loginLevel} 
-  }
-  componentWillReceiveProps(nextProps, nextContext) {
+    this.state = {loginIn: props.loginIn || {}, loginLevel: context.loginLevel}
+  }    
+  componentWillReceiveProps(nextProps, nextContext) {      
     let loginLevel = nextContext.loginLevel
     this.setState({loginIn: nextProps.loginIn, loginLevel: loginLevel})
   }
-  render() {
+  render() {      
     if(!this.state.loginIn) {
       return (
           <div></div>
@@ -72,7 +72,7 @@ class Sidebar extends Component {
               <li><Link to='/user_profile/payments' className='p-l-3'>Payments</Link></li>
               <li><Link to='/user_profile/contracts' className='p-l-3'>Contracts</Link></li>
               <li><Link to='/user_profile/invoices' className='p-l-3'>Invoices</Link></li>
-              <li><Link to='/user_profile/car_requests' className='p-l-3'>Car Requests</Link></li>
+                {(this.state.loginLevel === 1) ? <li><Link to='/user_profile/car_requests' className='p-l-3'>Car Requests</Link></li> : ''}
               {adminPart}
             </ul>
           </div>
@@ -94,17 +94,3 @@ export default createContainer(() => {
 }, Sidebar)
 
 
-/*
-
- <li className='dropdown'>
- <a type='button' data-toggle='dropdown'>Admin part
- <span className='caret m-l-3'></span></a>
- <ul className='dropdown-menu' id='admin_part'>
- <li><Link to='/customers_list'>Customers</Link></li>
- <li><Link to='/cars'>Cars</Link></li>
- <li><a href='#'>Fines</a></li>
- <li><a href='#'>Tolls</a></li>
- <li><Link to='/users_list'>All Users</Link></li>
- </ul>
- </li>
- */

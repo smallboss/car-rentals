@@ -7,7 +7,7 @@ import { browserHistory } from 'react-router'
 class Home extends React.Component {
     handlerContact (e) {
         e.preventDefault()
-        let to = 'paradoxkb@gmail.com',
+        let to = 'alshaheen016@gmail.com',
             from = e.target['email'].value,
             subject = 'Cars Rental',
             text = 'From ' + e.target['firstName'].value + ' ' + e.target['lastName'].value + '\n Phone: ' + e.target['phone'].value + '\n Email: ' + e.target['email'].value + ' \n ' + e.target['textContact'].value

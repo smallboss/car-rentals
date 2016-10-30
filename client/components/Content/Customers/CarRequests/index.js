@@ -2,7 +2,6 @@
  * Created by watcher on 10/8/16.
  */
 import React from 'react'
-//import { Link } from 'react-router'
 import { Meteor } from 'meteor/meteor'
 import { Mongo } from 'meteor/mongo'
 
@@ -75,6 +74,17 @@ class CarRequests extends React.Component {
                 }
                 currentArray.unshift(objToAdd)
                 this.saveDataHandler(currentArray)
+                _arrNew = Meteor.users.find({'profile.userType': {$in: ['employee', 'admin']}}).fetch()
+                for(let i = 0; i < _arrNew.length; i++) {
+                    Meteor.call('sendEmail', _arrNew[i].emails[0].address, 'Car@Rentals', 'New Car Request', 'New Car Request from user ' + location.origin + '/managePanel/customer/' + this.props.customerId, (err, result) => {
+                        if(err) {
+                            alert(err)
+                        } else {
+                            //alert('Email was sent. Our manager will be connect with You soon')
+                            location.reload()
+                        }
+                    })
+                }
                 this.setState({arrToTable: currentArray, addNewField: 0})
                 this.forceUpdate()
                 break
