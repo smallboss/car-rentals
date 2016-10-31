@@ -113,6 +113,7 @@ export default class LinesOnTab extends Component {
 
     render(){
         let lineListId = this.props.linesId;
+        let totalAmount = 0;
 
         const RenderTableHeadButtons = () => {
             if (!this.props.readOnly) {
@@ -137,7 +138,7 @@ export default class LinesOnTab extends Component {
                 <table className="table table-bordered table-hover">
                     <thead>
                         <tr>
-                            { !this.props.readOnly ? (<th><input type="checkbox" disabled/></th>) : null }
+                            { !this.props.readOnly ? (<th className="noPrint"><input type="checkbox" disabled/></th>) : null }
                             <th>Item</th>
                             <th>Description</th>
                             <th>Car plate#</th>
@@ -153,10 +154,12 @@ export default class LinesOnTab extends Component {
                             if (lineListId) {
                                 return (
                                     lineListId.map((item, key) => {
+                                        const line = ApiLines.findOne({_id: item});
+                                        totalAmount += parseInt(line.amount);
                                         return (
                                             <LineTabRow key={`line-${key}`}
                                                 onSelect={this.changeSelectedItem.bind(null,item)}
-                                                line={ApiLines.findOne({_id: item})}
+                                                line={ line }
                                                 onSave={this.handleSaveLine}
                                                 selectedListId={this.state.selectedListId}
                                                 isEdit={this.state.isEdit}
@@ -167,6 +170,16 @@ export default class LinesOnTab extends Component {
                             }
                             return undefined
                         })()}
+                        <tr style={{border: '1px solid white', backgroundColor: 'white'}}>
+                            <td style={{border: '1px solid white'}} className="noPrint"></td>
+                            <td style={{border: '1px solid white'}}></td>
+                            <td style={{border: '1px solid white'}}></td>
+                            <td style={{border: '1px solid white'}}></td>
+                            <td style={{border: '1px solid white'}}></td>
+                            <td style={{border: '1px solid white'}}></td>
+                            <td style={{border: '1px solid white'}}><b>Total amount:</b></td>
+                            <td style={{border: '1px solid white'}}><b>{ totalAmount }</b></td>
+                        </tr>
                     </tbody>
                 </table>
             </div>

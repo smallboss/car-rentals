@@ -3,6 +3,25 @@
     position: relative;
 }
 
+.onlyPrint {
+    display: none;
+}
+
+@media print {
+    button { display: none !important; }
+    .noPrint { display: none !important; }
+    .print { 
+        display: block !important; 
+        opacity: 1 !important;
+    }
+    .onlyPrint { display: block; }
+    .content { margin-left: 0 !important; }
+
+    a[href]:after {
+        content: none !important;
+    }
+}
+
 #wrapper {
     padding-left: 0;
     -webkit-transition: all 0.5s ease;

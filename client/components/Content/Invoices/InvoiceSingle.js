@@ -219,10 +219,7 @@ export default class InvoiceSingle extends Component {
   }
 
   handleSendByEmail(){
-    let email = find(this.props.managerList, ['_id', Meteor.userId()]);
-    email = email 
-              ? email.emails[0] 
-              : find(this.props.customerList, ['_id', Meteor.userId()]).emails[0];
+    const email = find(this.props.userList, {_id: this.state.invoice.customerId}).emails[0];
 
     Meteor.call('sendEmail',
             email.address,
@@ -327,7 +324,7 @@ export default class InvoiceSingle extends Component {
                   const custId = this.state.editable ? this.state.dispInvoice.customerId : customerId;
                   const custName = Meteor.users.findOne(custId) ? (Meteor.users.findOne(custId).profile.name + ' profile') : '';
 
-                  return (<Link to={`/managePanel/customer/${custId}`} className="col-xs-12">{custName}</Link>);
+                  return (<Link to={`/managePanel/customer/${custId}`} className="col-xs-12 noPrint">{custName}</Link>);
                 })()}
               </div>
               { /* END ============================= DROPDOWN CUSTOMERS ============================== */}
@@ -348,7 +345,7 @@ export default class InvoiceSingle extends Component {
             </div>
 
             <div className="row">
-              <div className="form-group profit col-xs-6">
+              <div className="form-group profit col-xs-6 noPrint">
                 <label htmlFor="invoiceStatus" className='col-xs-3'>Status</label>
                 {(() => {
                   if (this.state.editable) {
@@ -375,7 +372,7 @@ export default class InvoiceSingle extends Component {
                 })()}
               </div>
               
-              <div className="form-group name col-xs-6">
+              <div className="form-group name col-xs-6 noPrint">
                 <label htmlFor="invoiceDueDate" className='col-xs-3'>Invoice Due date</label>
                 {(() => {
                   if (this.state.editable) {
@@ -395,9 +392,29 @@ export default class InvoiceSingle extends Component {
       }
 
 
+      const renderInsteadTabs = () => {
+        return (
+          <div className="row onlyPrint">
+            <div className='col-xs-12'>
+              <h3>Invoice lines</h3>
+              <LinesOnTab 
+                    invoice={cloneDeep(this.state.invoice)}
+                    linesId={cloneDeep(this.state.invoice.linesId 
+                                        ? this.state.invoice.linesId 
+                                        : [])
+                            }
+                    readOnly={true} />
+
+
+            </div>
+          </div>
+        )
+      }
+
+
       const renderTabs = () => {
         return (
-          <div className="row">
+          <div className="row noPrint">
             <ul className="nav nav-tabs" role="tablist">
               <li className="active">
                 <a href="#lines" aria-controls="home" role="tab" data-toggle="tab">Lines</a>
@@ -416,16 +433,20 @@ export default class InvoiceSingle extends Component {
                                         : [])
                             }
                     readOnly={!this.state.invoice.customerId} />
-
-                <div className="PaymentsOnTab row">
-                  <div className="col-xs-12">
-                    <h3>Payments list</h3>
-                    <PaymentsOnTab 
-                            invoice={cloneDeep(this.state.invoice)}
-                            paymentsId={this.state.invoice.paymentsId}
-                            readOnly={true} />
+                {
+                  //invoice single: remove payment list from invoice lines tab
+                  /*
+                  <div className="PaymentsOnTab row">
+                    <div className="col-xs-12">
+                      <h3>Payments list</h3>
+                      <PaymentsOnTab 
+                              invoice={cloneDeep(this.state.invoice)}
+                              paymentsId={this.state.invoice.paymentsId}
+                              readOnly={true} />
+                    </div>
                   </div>
-                </div>  
+                  */ 
+                }
               </div>
               }
               <div role="tabpanel" className="tab-pane p-x-1" id="payments">
@@ -463,6 +484,7 @@ export default class InvoiceSingle extends Component {
             { renderTopFields() }
 
             { renderTabs() }
+            { renderInsteadTabs() }
           </div>
         </div>
       )

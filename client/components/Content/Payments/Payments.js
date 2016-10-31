@@ -21,10 +21,12 @@ class Payments extends Component {
       foundItems: [],
       searchField: '',
       currentPage: 1,
-      itemsOnPage: 10
+      itemsOnPage: 10,
+      selectedAll: false
     }
 
     this.handleSelect = this.handleSelect.bind(this);
+    this.handleSelectAll = this.handleSelectAll.bind(this);
     this.handleChangeSearchField = debounce(this.handleChangeSearchField.bind(this), 350);
     this.removePayments = this.removePayments.bind(this);
     this.addPayment = this.addPayment.bind(this);
@@ -75,19 +77,45 @@ class Payments extends Component {
   }
 
 
+  handleSelectAll(){
+    const { selectedPaymentsID, itemsOnPage, foundItems, selectedAll } = this.state;
+    let newSelectedPaymentsID = [];
+
+    if (!selectedAll) {
+      foundItems.map((itemPayment, key) => {
+          if((key >= (this.state.currentPage-1) * this.state.itemsOnPage) && 
+             (key <   this.state.currentPage    * this.state.itemsOnPage)){
+
+            if (!newSelectedPaymentsID.includes(itemPayment._id._str)) {
+              newSelectedPaymentsID.push(itemPayment._id._str);
+            }
+          }
+      });
+    }
+
+    this.selectAll.checked = !selectedAll;
+    
+    this.setState({selectedPaymentsID: newSelectedPaymentsID, selectedAll: !selectedAll});
+  }
+
+
   handleSelect(e, Payment){
     let newSelectedPaymentsID = this.state.selectedPaymentsID;
     const PaymentID = ""+Payment._id;
     const index = newSelectedPaymentsID.indexOf(PaymentID)
-
+    let currentSelectedAll = this.state.selectedAll;
 
     if (index === -1 ) 
       newSelectedPaymentsID.push(PaymentID);
     else 
       newSelectedPaymentsID.splice(index, 1);
-    
 
-    this.setState({selectedPaymentsID: newSelectedPaymentsID});
+    if (currentSelectedAll || !newSelectedPaymentsID.length) {
+      currentSelectedAll = false;
+      this.selectAll.checked = currentSelectedAll;
+    }
+    
+    this.setState({selectedPaymentsID: newSelectedPaymentsID, electedAll: currentSelectedAll});
   }
 
 
@@ -154,7 +182,13 @@ class Payments extends Component {
 
     const renderHeadCheckBox = () => {
       if (this.state.loginLevel === 3) 
-        return (<th><input type="checkbox" disabled="true"/></th>)
+        return (
+          <th>
+            <input type="checkbox" 
+                   ref={(ref) => this.selectAll = ref}
+                   onChange={this.handleSelectAll} />
+          </th>
+        )
 
       return null;
     }

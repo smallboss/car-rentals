@@ -231,10 +231,10 @@ export default class LineTabRow extends Component {
 
         return(
             <tr className="LineTabRow">
-                <th>
+                <th className="noPrint">
                     <input  type="checkbox" 
                             onChange={() => this.props.onSelect(line._id)}
-                            ref={(ref) => this.checkbox = ref}/>
+                            ref={(ref) => this.checkbox = ref} />
                 </th>
                 <td>
                     { buttonSave() }

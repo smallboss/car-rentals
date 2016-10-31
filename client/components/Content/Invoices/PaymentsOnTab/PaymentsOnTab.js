@@ -165,7 +165,7 @@ export default class PaymentsOnTab extends Component {
                 <table className="table table-bordered table-hover">
                     <thead>
                         <tr>
-                            { !this.props.readOnly ? (<th><input type="checkbox" disabled/></th>) : null }
+                            { !this.props.readOnly ? (<th className="noPrint"><input type="checkbox" disabled/></th>) : null }
                             <th>Payment ID</th>
                             <th>Date</th>
                             <th>Amount</th>

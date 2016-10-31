@@ -25,10 +25,12 @@ class Contracts extends Component {
       foundItems: [],
       searchField: '',
       currentPage: 1,
-      itemsOnPage: 10
+      itemsOnPage: 10,
+      selectedAll: false
     }
 
     this.handleSelect = this.handleSelect.bind(this);
+    this.handleSelectAll = this.handleSelectAll.bind(this);
     this.handleChangeSearchField = debounce(this.handleChangeSearchField.bind(this), 350);
     this.removeContracts = this.removeContracts.bind(this);
     this.addContract = this.addContract.bind(this);
@@ -108,11 +110,33 @@ class Contracts extends Component {
     this.setState({selectedContractsID: []});
   }
 
+  handleSelectAll(){
+    const { selectedContractsID, itemsOnPage, foundItems, selectedAll } = this.state;
+    let newSelectedContractsID = [];
+
+    if (!selectedAll) {
+      foundItems.map((itemContract, key) => {
+          if((key >= (this.state.currentPage-1) * this.state.itemsOnPage) && 
+             (key <   this.state.currentPage    * this.state.itemsOnPage)){
+
+            if (!newSelectedContractsID.includes(itemContract._id._str)) {
+              newSelectedContractsID.push(itemContract._id._str);
+            }
+          }
+      });
+    }
+
+    this.selectAll.checked = !selectedAll;
+    
+    this.setState({selectedContractsID: newSelectedContractsID, selectedAll: !selectedAll});
+  }
+
 
   handleSelect(e, Contract){
     let newSelectedContractsID = this.state.selectedContractsID;
     const ContractID = ""+Contract._id;
     const index = newSelectedContractsID.indexOf(ContractID)
+    let currentSelectedAll = this.state.selectedAll;
 
 
     if (index === -1 ) 
@@ -120,8 +144,12 @@ class Contracts extends Component {
     else 
       newSelectedContractsID.splice(index, 1);
     
+    if (currentSelectedAll || !newSelectedContractsID.length) {
+      currentSelectedAll = false;
+      this.selectAll.checked = currentSelectedAll;
+    }
 
-    this.setState({selectedContractsID: newSelectedContractsID});
+    this.setState({selectedContractsID: newSelectedContractsID, electedAll: currentSelectedAll});
   }
 
 
@@ -199,7 +227,13 @@ class Contracts extends Component {
 
     const renderHeadCheckBox = () => {
       if (this.state.loginLevel === 3) 
-        return (<th><input type="checkbox" disabled="true"/></th>)
+        return (
+          <th>
+            <input type="checkbox" 
+                   ref={(ref) => this.selectAll = ref}
+                   onChange={this.handleSelectAll}/>
+          </th>
+        )
 
       return null;
     }

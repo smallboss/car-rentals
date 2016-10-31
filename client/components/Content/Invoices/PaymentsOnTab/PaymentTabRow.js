@@ -156,7 +156,7 @@ export default class PaymentTabRow extends Component {
                 {(() => {
                     if (!this.props.readOnly) {
                         return (
-                            <th>
+                            <th className="noPrint">
                                 <input  type="checkbox" 
                                         onChange={() => this.props.onSelect(payment._id)}
                                         ref={(ref) => this.checkbox = ref}/>

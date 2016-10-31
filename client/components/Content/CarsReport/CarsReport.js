@@ -22,10 +22,12 @@ class CarsReport extends Component {
       foundItems: [],
       searchField: '',
       currentPage: 1,
-      itemsOnPage: 10
+      itemsOnPage: 10,
+      electedAll: false
     }
 
     this.handleSelect = this.handleSelect.bind(this);
+    this.handleSelectAll = this.handleSelectAll.bind(this);
     this.handleChangeSearchField = debounce(this.handleChangeSearchField.bind(this), 350);
     this.removeCars = this.removeCars.bind(this);
     this.addCar = this.addCar.bind(this);
@@ -77,17 +79,47 @@ class CarsReport extends Component {
   }
 
 
+  handleSelectAll(){
+    const { selectedCarsID, itemsOnPage, foundItems, selectedAll } = this.state;
+    let newSelectedCarsID = [];
+
+    if (!selectedAll) {
+      foundItems.map((itemCar, key) => {
+          if((key >= (this.state.currentPage-1) * this.state.itemsOnPage) && 
+             (key <   this.state.currentPage    * this.state.itemsOnPage)){
+
+            if (!newSelectedCarsID.includes(itemCar._id._str)) {
+              newSelectedCarsID.push(itemCar._id._str);
+            }
+          }
+      });
+    }
+
+    this.selectAll.checked = !selectedAll;
+    
+    this.setState({selectedCarsID: newSelectedCarsID, selectedAll: !selectedAll});
+  }
+
+
   handleSelect(e, Car){
     let newSelectedCarsID = this.state.selectedCarsID;
     const CarID = ""+Car._id;
-    const index = newSelectedCarsID.indexOf(CarID)
+    const index = newSelectedCarsID.indexOf(CarID);
+    let currentSelectedAll = this.state.selectedAll;
 
     if (index === -1 ) 
       newSelectedCarsID.push(CarID);
     else 
       newSelectedCarsID.splice(index, 1);
 
-    this.setState({selectedCarsID: newSelectedCarsID});
+    if (currentSelectedAll || !newSelectedCarsID.length) {
+      currentSelectedAll = false;
+      this.selectAll.checked = currentSelectedAll;
+    }
+
+    
+
+    this.setState({selectedCarsID: newSelectedCarsID, electedAll: currentSelectedAll});
   }
 
 
@@ -202,7 +234,11 @@ class CarsReport extends Component {
         <table className="table table-bordered table-hover">
           <thead>
             <tr>
-              <th><input type="checkbox" disabled="true"/></th>
+              <th>
+                <input type="checkbox" 
+                       ref={(ref) => this.selectAll = ref}
+                       onChange={this.handleSelectAll} />
+              </th>
               <th>Name</th>
               <th>Plate number</th>
               <th>Status</th>

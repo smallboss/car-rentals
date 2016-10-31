@@ -211,10 +211,7 @@ export default class PaymentSingle extends Component {
   }
 
   handleSendByEmail(){
-    let email = find(this.props.managerList, ['_id', Meteor.userId()]);
-    email = email 
-              ? email.emails[0] 
-              : find(this.props.customerList, ['_id', Meteor.userId()]).emails[0];
+    const email = find(this.props.userList, {_id: this.state.payment.customerId}).emails[0];
 
     Meteor.call('sendEmail',
             email.address,
@@ -338,7 +335,7 @@ export default class PaymentSingle extends Component {
             </div>
 
             <div className="row">
-              <div className="form-group profit col-xs-6">
+              <div className="form-group profit col-xs-6 noPrint">
                 <label htmlFor="paymentStatus" className='col-xs-3'>Status</label>
                 {(() => {
                   if (this.state.editable) {
@@ -389,7 +386,7 @@ export default class PaymentSingle extends Component {
               </div>
             </div>
             <div className="row">
-              <div className="form-group profit col-xs-6">
+              <div className="form-group profit col-xs-6 noPrint">
                 <label htmlFor="paymentRef" className='col-xs-3'>Ref.</label>
                 {(() => {
                   const custId = this.state.editable ? this.state.dispPayment.customerId : customerId;
@@ -407,7 +404,7 @@ export default class PaymentSingle extends Component {
 
       const renderTabs = () => {
         return (
-          <div className="row">
+          <div className="row noPrint">
             <ul className="nav nav-tabs" role="tablist">
               <li className="active">
                 <a href="#description" aria-controls="home" role="tab" data-toggle="tab">Notes</a>

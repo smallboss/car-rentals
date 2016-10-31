@@ -22,10 +22,12 @@ class Invoices extends Component {
       foundItems: [],
       searchField: '',
       currentPage: 1,
-      itemsOnPage: 10
+      itemsOnPage: 10,
+      selectedAll: false
     }
 
     this.handleSelect = this.handleSelect.bind(this);
+    this.handleSelectAll = this.handleSelectAll.bind(this);
     this.handleChangeSearchField = debounce(this.handleChangeSearchField.bind(this), 350);
     this.removeInvoices = this.removeInvoices.bind(this);
     this.addInvoice = this.addInvoice.bind(this);
@@ -85,19 +87,45 @@ class Invoices extends Component {
   }
 
 
+  handleSelectAll(){
+    const { selectedInvoicesID, itemsOnPage, foundItems, selectedAll } = this.state;
+    let newSelectedInvoicesID = [];
+
+    if (!selectedAll) {
+      foundItems.map((itemInvoice, key) => {
+          if((key >= (this.state.currentPage-1) * this.state.itemsOnPage) && 
+             (key <   this.state.currentPage    * this.state.itemsOnPage)){
+
+            if (!newSelectedInvoicesID.includes(itemInvoice._id._str)) {
+              newSelectedInvoicesID.push(itemInvoice._id._str);
+            }
+          }
+      });
+    }
+
+    this.selectAll.checked = !selectedAll;
+    
+    this.setState({selectedInvoicesID: newSelectedInvoicesID, selectedAll: !selectedAll});
+  }
+
+
   handleSelect(e, Invoice){
     let newSelectedInvoicesID = this.state.selectedInvoicesID;
     const InvoiceID = ""+Invoice._id;
     const index = newSelectedInvoicesID.indexOf(InvoiceID)
-
+    let currentSelectedAll = this.state.selectedAll;
 
     if (index === -1 ) 
       newSelectedInvoicesID.push(InvoiceID);
     else 
       newSelectedInvoicesID.splice(index, 1);
-    
 
-    this.setState({selectedInvoicesID: newSelectedInvoicesID});
+    if (currentSelectedAll || !newSelectedInvoicesID.length) {
+      currentSelectedAll = false;
+      this.selectAll.checked = currentSelectedAll;
+    }
+    
+    this.setState({selectedInvoicesID: newSelectedInvoicesID, selectedAll: currentSelectedAll});
   }
 
 
@@ -164,7 +192,13 @@ class Invoices extends Component {
 
     const renderHeadCheckBox = () => {
       if (this.state.loginLevel === 3) 
-        return (<th><input type="checkbox" disabled="true"/></th>)
+        return (
+          <th>
+            <input type="checkbox"
+                   ref={(ref) => this.selectAll = ref}
+                   onChange={this.handleSelectAll} />
+          </th>
+        )
 
       return null;
     }
