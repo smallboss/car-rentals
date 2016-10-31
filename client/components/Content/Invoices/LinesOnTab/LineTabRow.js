@@ -1,14 +1,14 @@
 import React, { Component, PropTypes } from 'react';
 import DatePicker from 'react-bootstrap-date-picker'
 import { Link } from 'react-router';
-import { map, find, clone} from 'lodash';
+import { map, find, clonem, cloneDeep } from 'lodash';
 
 export default class LineTabRow extends Component {
     constructor(props) {
         super(props); 
 
         this.state = {
-            dispLine: this.props.line,
+            dispLine: cloneDeep(this.props.line),
             isEdit: false
         }
 
@@ -21,7 +21,7 @@ export default class LineTabRow extends Component {
 
 
     componentWillReceiveProps(nextProps){
-        let dispLine = nextProps.line 
+        let dispLine = cloneDeep(nextProps.line);
 
         const nextLine = nextProps.line ? nextProps.line._id._str : '';
         const isSelected = find(nextProps.selectedListId, {_str: nextLine});
@@ -35,7 +35,7 @@ export default class LineTabRow extends Component {
 
 
     componentDidMount() {
-        let dispLine = this.props.line;
+        let dispLine = cloneDeep(this.props.line);
 
         const nextLine =  this.props.line ?  this.props.line._id._str : '';
         const isSelected = find( this.props.selectedListId, {_str: nextLine});

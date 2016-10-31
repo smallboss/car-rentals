@@ -21,7 +21,7 @@ export default class InvSettings extends Component {
 
     render(){
 
-      const { amount, invoices, remaining, toinvoice, isEditing, dispAmount } = this.props;
+      const { amount, invoices, remaining, toinvoice, isEditing, dispAmount, invoicedPaid } = this.props;
 
       const currentAmount = dispAmount ? dispAmount : amount;
 
@@ -56,15 +56,13 @@ export default class InvSettings extends Component {
                 <th>Amount</th>
                 <th>Invoiced</th>
                 <th>Remaining</th>
-                <th>To invoice</th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 { renderAmount() }
-                <td>{ invoices }</td>
+                <td>{ invoicedPaid }</td>
                 <td>{ currentAmount - invoices }</td>
-                <td>{ toinvoice }</td>
               </tr>
             </tbody>
           </table>

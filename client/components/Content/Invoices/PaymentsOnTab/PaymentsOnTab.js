@@ -15,7 +15,8 @@ export default class PaymentsOnTab extends Component {
         this.state = {
             loginLevel: context.loginLevel,
             selectedListId: [],
-            isEdit: false
+            isEdit: false,
+            selectedAll: false
         }
 
         this.changeSelectedItem = this.changeSelectedItem.bind(this);
@@ -23,6 +24,7 @@ export default class PaymentsOnTab extends Component {
         this.handleEditPayments = this.handleEditPayments.bind(this);
         this.handleRemovePayments = this.handleRemovePayments.bind(this);
         this.handleSavePayment = this.handleSavePayment.bind(this);
+        this.handleSelectAll = this.handleSelectAll.bind(this);
     } 
 
 
@@ -105,6 +107,16 @@ export default class PaymentsOnTab extends Component {
         this.setState({ selectedListId, isEdit: true });
     }
 
+
+    handleSelectAll(){
+        let { selectedAll } = this.state;
+        const selectedListId  = selectedAll ? [] : cloneDeep(this.props.paymentsId);
+
+        this.selectAll.checked = !selectedAll;
+        this.setState({selectedListId, selectedAll: !selectedAll});
+    }
+
+
     handleEditPayments(){
         this.setState({isEdit: !this.state.isEdit})
     }
@@ -158,6 +170,21 @@ export default class PaymentsOnTab extends Component {
         }
 
 
+        const renderHeadCheckBox = () => {
+            if (!this.props.readOnly ){
+                return (
+                  <th className="noPrint">
+                    <input type="checkbox" 
+                           ref={(ref) => this.selectAll = ref}
+                           onChange={this.handleSelectAll} />
+                  </th>
+                )
+            }
+
+            return null;
+        }
+
+
         return(
             <div>
                 { RenderTableHeadButtons() }
@@ -165,7 +192,7 @@ export default class PaymentsOnTab extends Component {
                 <table className="table table-bordered table-hover">
                     <thead>
                         <tr>
-                            { !this.props.readOnly ? (<th className="noPrint"><input type="checkbox" disabled/></th>) : null }
+                            { renderHeadCheckBox() }
                             <th>Payment ID</th>
                             <th>Date</th>
                             <th>Amount</th>

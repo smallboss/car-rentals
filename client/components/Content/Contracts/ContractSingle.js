@@ -44,6 +44,7 @@ export default class ContractSingle extends Component {
       invoices: 0,
       remaining: 0,
       toinvoice: 0,
+      invoicedPaid: 0,
 
       editable: this.props.isNew
     }
@@ -174,6 +175,7 @@ export default class ContractSingle extends Component {
       let invs = [];
       let nextLines = [];
       let nextTime = 0;
+      let invoicedPaid = 0;
 
       if (nextProps.contract && nextProps.contract.invoicesId) {
         nextProps.contract.invoicesId.map((el) => {
@@ -185,6 +187,8 @@ export default class ContractSingle extends Component {
             invs.push({_id: el, codeName, numb: length, status});
           }
           linesId = linesId.concat(invoice ? invoice.linesId : []);
+
+          if (status == 'paid') invoicedPaid++;
 
           const date = invoice ? invoice.date : '';
           if ((!nextTime || nextTime > new Date(date).getTime()) && status != 'paid') {
@@ -243,6 +247,7 @@ export default class ContractSingle extends Component {
       invoices,
       remaining,
       toinvoice,
+      invoicedPaid,
       lines: compact(lines), 
       invs
     });
@@ -377,6 +382,7 @@ export default class ContractSingle extends Component {
     let invs = [];
     let nextLines = [];
     let nextTime = 0;
+    let invoicedPaid = 0;
 
     if (this.props.contract && this.props.contract.invoicesId) {
       this.props.contract.invoicesId.map((el) => {
@@ -389,8 +395,10 @@ export default class ContractSingle extends Component {
         }
         linesId = linesId.concat(invoice ? invoice.linesId : []);
 
+        if (status == 'paid') invoicedPaid++;
+
         const date = invoice ? invoice.date : '';
-        if ((!nextTime || nextTime > new Date(date).getTime())) {
+        if ((!nextTime || nextTime > new Date(date).getTime()) && status != 'paid') {
           if (!isNaN((new Date(date)).getTime())) {
 
             nextLines = invoice ? invoice.linesId : [];
@@ -441,6 +449,7 @@ export default class ContractSingle extends Component {
       invoices,
       remaining,
       toinvoice,
+      invoicedPaid,
       lines: compact(lines), 
       invs,
       allowSave
@@ -744,6 +753,7 @@ export default class ContractSingle extends Component {
               <div role="tabpanel" className="tab-pane p-x-1 active" id="details">
                 <TopDetailsTable 
                     amount={this.state.amount}
+                    invoicedPaid={this.state.invoicedPaid}
                     invoices={this.state.invoices}
                     remaining={this.state.remaining}
                     toinvoice={this.state.toinvoice}
