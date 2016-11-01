@@ -40,13 +40,14 @@ export default class LinesOnTab extends Component {
 
         if (this.props.isNew) {
             this.props.storageLines.map((el) => {
-                linesId.push(el._id);
+                linesId.push(el);
             })
         } else {
             linesId = this.props.linesId;
         }
 
         const selectedListId  = selectedAll ? [] : cloneDeep(linesId);
+
 
         this.selectAll.checked = !selectedAll;
         this.setState({selectedListId, selectedAll: !selectedAll});
@@ -56,6 +57,7 @@ export default class LinesOnTab extends Component {
     changeSelectedItem(itemId) {
         let selectedListId = this.state.selectedListId;
         let index = -1;
+        let currentSelectedAll = this.state.selectedAll;
 
         map(selectedListId, (item, key) => {
             if (item._str == itemId._str) {
@@ -70,7 +72,12 @@ export default class LinesOnTab extends Component {
         let isEdit = this.state.isEdit;
         isEdit = !selectedListId.length ? false : isEdit;
 
-        this.setState({selectedListId, isEdit});
+        if (currentSelectedAll || !selectedListId.length) {
+          currentSelectedAll = false;
+          this.selectAll.checked = currentSelectedAll;
+        }
+
+        this.setState({selectedListId, isEdit, electedAll: currentSelectedAll});
     }
 
 // ====================== ADD = EDIT = REMOVE = SAVE ======================
@@ -170,10 +177,12 @@ export default class LinesOnTab extends Component {
 
 
         const renderRows = () => {
-            if (lineListId && !this.props.isNew) {
+            if (lineListId && this.props.isNew === false) {
                 return (
                     lineListId.map((item, key) => {
-                        const line = ApiLines.findOne({_id: item});
+                        // const line = ApiLines.findOne({_id: item});
+                        const line = find(this.props.lines, {_id: item});
+                        if (!line) {return null}
                         totalAmount += parseInt(line.amount);
                         return (
                             <LineTabRow key={`line-${key}`}
@@ -213,13 +222,25 @@ export default class LinesOnTab extends Component {
 
         const renderHeadCheckBox = () => {
             if (!this.props.readOnly ){
-                return (
-                  <th className="noPrint">
-                    <input type="checkbox" 
-                           ref={(ref) => this.selectAll = ref}
-                           onChange={this.handleSelectAll} />
-                  </th>
-                )
+                if (this.props.storageLines.length || lineListId.length) {
+                    return (
+                      <th className="noPrint">
+                        <input type="checkbox" 
+                               ref={(ref) => this.selectAll = ref}
+                               onChange={this.handleSelectAll} />
+                      </th>
+                    )
+                }
+                else {
+                    return (
+                      <th className="noPrint">
+                        <input type="checkbox" 
+                               ref={(ref) => this.selectAll = ref}
+                               onChange={this.handleSelectAll}
+                               disabled />
+                      </th>
+                    )
+                }
             }
 
           return null;

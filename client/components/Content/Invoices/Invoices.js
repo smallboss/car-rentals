@@ -83,7 +83,11 @@ class Invoices extends Component {
       })
     })
 
-    this.setState({selectedInvoicesID: []});
+
+    const selectedAll = false;
+    this.selectAll.checked = selectedAll;
+
+    this.setState({selectedInvoicesID: [], selectedAll});
   }
 
 
@@ -191,14 +195,26 @@ class Invoices extends Component {
 
 
     const renderHeadCheckBox = () => {
-      if (this.state.loginLevel === 3) 
-        return (
-          <th>
-            <input type="checkbox"
-                   ref={(ref) => this.selectAll = ref}
-                   onChange={this.handleSelectAll} />
-          </th>
-        )
+      if (this.state.loginLevel === 3) {
+        if (this.state.foundItems.length) {
+          return (
+            <th>
+              <input type="checkbox"
+                     ref={(ref) => this.selectAll = ref}
+                     onChange={this.handleSelectAll} />
+            </th>
+          )
+        } else {
+          return (
+            <th>
+              <input type="checkbox"
+                     ref={(ref) => this.selectAll = ref}
+                     onChange={this.handleSelectAll}
+                     disabled />
+            </th>
+          )
+        }
+      }
 
       return null;
     }

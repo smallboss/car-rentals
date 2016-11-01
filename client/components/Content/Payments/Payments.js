@@ -73,7 +73,11 @@ class Payments extends Component {
       Meteor.users.update({_id: payment.customerId}, {$pull: { "profile.payments": new Mongo.ObjectID(paymentID)}});   
     })
 
-    this.setState({selectedPaymentsID: []});
+
+    const selectedAll = false;
+    this.selectAll.checked = selectedAll;
+
+    this.setState({selectedPaymentsID: [], selectedAll});
   }
 
 
@@ -126,7 +130,7 @@ class Payments extends Component {
         const paymentAmount = el.amount ? el.amount.toLowerCase()   : '';
         const paymentStatus = el.status ? el.status.toLowerCase()   : '';
         const paymentDate   = el.date   ? el.date.toLowerCase()     : '';
-        const paymentCodeName     = el.codeName    ? el.codeName.toLowerCase() : '';
+        const paymentCodeName = el.codeName ? el.codeName.toLowerCase() : '';
         let paymentCustomerName = find(props.userList , {_id: el.customerId});
         paymentCustomerName = paymentCustomerName ? paymentCustomerName.profile.name : '';
 
@@ -161,6 +165,7 @@ class Payments extends Component {
 
 
   render() {
+
     const renderPayments = () => {
       return this.state.foundItems.map((itemPayment, key) => {
         if((key >= (this.state.currentPage-1) * this.state.itemsOnPage) && 
@@ -182,13 +187,24 @@ class Payments extends Component {
 
     const renderHeadCheckBox = () => {
       if (this.state.loginLevel === 3) 
-        return (
-          <th>
-            <input type="checkbox" 
-                   ref={(ref) => this.selectAll = ref}
-                   onChange={this.handleSelectAll} />
-          </th>
-        )
+        if (this.state.foundItems.length) {
+          return (
+            <th>
+              <input type="checkbox" 
+                     ref={(ref) => this.selectAll = ref}
+                     onChange={this.handleSelectAll}/>
+            </th>
+          )
+        } else {
+          return (
+            <th>
+              <input type="checkbox" 
+                     ref={(ref) => this.selectAll = ref}
+                     onChange={this.handleSelectAll}
+                     disabled />
+            </th>
+          )
+        }
 
       return null;
     }

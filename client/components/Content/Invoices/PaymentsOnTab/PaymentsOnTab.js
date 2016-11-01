@@ -35,6 +35,7 @@ export default class PaymentsOnTab extends Component {
 
     changeSelectedItem(itemId) {
         let selectedListId = this.state.selectedListId;
+        let currentSelectedAll = this.state.selectedAll;
         let index = -1;
 
         map(selectedListId, (item, key) => {
@@ -50,7 +51,14 @@ export default class PaymentsOnTab extends Component {
         let isEdit = this.state.isEdit;
         isEdit = !selectedListId.length ? false : isEdit;
 
-        this.setState({selectedListId, isEdit});
+
+        if (currentSelectedAll || !selectedListId.length) {
+          currentSelectedAll = false;
+          this.selectAll.checked = currentSelectedAll;
+        }
+
+
+        this.setState({selectedListId, isEdit, electedAll: currentSelectedAll});
     }
 
 // ====================== ADD = EDIT = REMOVE = SAVE ======================

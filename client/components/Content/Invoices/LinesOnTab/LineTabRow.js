@@ -37,7 +37,7 @@ export default class LineTabRow extends Component {
     componentDidMount() {
         let dispLine = cloneDeep(this.props.line);
 
-        const nextLine =  this.props.line ?  this.props.line._id._str : '';
+        const nextLine =  this.props.line ? this.props.line._id._str : '';
         const isSelected = find( this.props.selectedListId, {_str: nextLine});
 
         if (this.checkbox)

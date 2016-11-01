@@ -107,7 +107,11 @@ class Contracts extends Component {
       // =======================
     })
 
-    this.setState({selectedContractsID: []});
+
+    const selectedAll = false;
+    this.selectAll.checked = selectedAll;
+
+    this.setState({selectedContractsID: [], selectedAll});
   }
 
   handleSelectAll(){
@@ -227,13 +231,24 @@ class Contracts extends Component {
 
     const renderHeadCheckBox = () => {
       if (this.state.loginLevel === 3) 
-        return (
-          <th>
-            <input type="checkbox" 
-                   ref={(ref) => this.selectAll = ref}
-                   onChange={this.handleSelectAll}/>
-          </th>
-        )
+        if (this.state.foundItems.length) {
+          return (
+            <th>
+              <input type="checkbox" 
+                     ref={(ref) => this.selectAll = ref}
+                     onChange={this.handleSelectAll}/>
+            </th>
+          )
+        } else {
+          return (
+            <th>
+              <input type="checkbox" 
+                     ref={(ref) => this.selectAll = ref}
+                     onChange={this.handleSelectAll}
+                     disabled />
+            </th>
+          )
+        }
 
       return null;
     }
