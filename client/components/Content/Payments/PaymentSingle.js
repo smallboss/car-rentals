@@ -62,14 +62,17 @@ export default class PaymentSingle extends Component {
   }
   onChangeAmount(value) {
     let newPayment = this.state.dispPayment;
-
     value = (value!='' && isNaN(parseInt(value))) ? '0' : value;
     let isDepr = false;
 
     isDepr = ((parseInt(value) < 0) || 
-              (value.indexOf('e') != -1) || 
-              (value.indexOf('E') != -1) ||  
-              (value.length > 5));
+              (value.includes('e')) || 
+              (value.includes('E')) ||
+              (value.length >= 10));
+
+    value = isNaN(parseInt(value)) ? '0' : parseInt(value)+'';
+
+    console.log('value', value);
 
     newPayment.amount = isDepr ?  newPayment.amount : value;
     this.setState({dispPayment: newPayment});

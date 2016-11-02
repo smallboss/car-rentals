@@ -51,15 +51,16 @@ export default class MaintenanceRow extends Component {
     }
     onChangeAmount(value){
         let newMaintenance = this.state.maintenance;
-
         value = (value!='' && isNaN(parseInt(value))) ? '0' : value;
         let isDepr = false;
 
         isDepr = ((parseInt(value) < 0) || 
-                  (value.indexOf('e') != -1) || 
-                  (value.indexOf('E') != -1) ||  
+                  (value.includes('e')) || 
+                  (value.includes('E')) ||  
                   (value.length >= 10));
 
+        value = isNaN(parseInt(value)) ? '0' : parseInt(value)+'';
+        
         newMaintenance.amount = isDepr ?  newMaintenance.amount : value;
         this.setState({maintenance: newMaintenance});
     }
@@ -70,12 +71,12 @@ export default class MaintenanceRow extends Component {
     }
     onChangeDate(value){
         let newMaintenance = this.state.maintenance;
-        newMaintenance.date = value;
+        newMaintenance.date = value.slice(0, 10);
         this.setState({maintenance: newMaintenance});
     }
     onChangeEndDate(value){
         let newMaintenance = this.state.maintenance;
-        newMaintenance.endDate = value;
+        newMaintenance.endDate = value.slice(0, 10);
         this.setState({maintenance: newMaintenance});
     }
 // END ============== CHANGERS FIELDS ============================

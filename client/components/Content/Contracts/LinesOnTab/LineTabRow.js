@@ -117,8 +117,11 @@ export default class LineTabRow extends Component {
             let carIdStr = line.car ? line.car._str : '';
 
             return (
-                <Link to={`/cars/${carIdStr}`}>
-                    <span>{(line && car) ? car.plateNumber : ''}</span>
+                <Link to={`/managePanel/cars/${carIdStr}`}>
+                    <span>{(line && car) 
+                            ? car.plateNumber ? car.plateNumber : 'car profile'
+                            : ''}
+                    </span>
                 </Link>
             )
         }

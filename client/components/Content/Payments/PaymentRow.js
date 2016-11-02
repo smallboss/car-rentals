@@ -40,7 +40,11 @@ export default class PaymentRow extends Component {
             <tr>
                 { renderCheckBox() }
                 <td>
-                    <Link to={`/managePanel/customer/${item.customerId}`}>{ customerName ? customerName.profile.name : ''}</Link>
+                    <Link to={`/managePanel/customer/${item.customerId}`}>{ (customerName && customerName.profile.name) 
+                                                                                    ? customerName.profile.name 
+                                                                                    : 'profile' 
+                                                                           }
+                    </Link>
                 </td>
                 <td onClick={onClick} >{ item.date }</td>
                 <td onClick={onClick} >{ item.codeName }</td>
