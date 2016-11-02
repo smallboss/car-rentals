@@ -18,7 +18,6 @@ class Registration extends React.Component {
     addUserHandler (e) {
         e.preventDefault()
         /*Check passwords start*/
-        //console.log(e.target)
         let formTarget = e.target
         if(formTarget['password'].value.length < 6) {
             alert('Password must be large then 6 symbols')
@@ -144,6 +143,8 @@ class Registration extends React.Component {
                 <LoginButtons toShowModal={1} />
             )
         }
+        let dateForPicker = new Date()
+        dateForPicker.setFullYear(dateForPicker.getFullYear() - 18)
         return (
             <div className='text-center'>
                 <form className='form-horizontal text-left add-user-form' onSubmit={this.addUserHandler} encType='multipart/form-data'>
@@ -171,7 +172,7 @@ class Registration extends React.Component {
                     <div className='form-group'>
                         <label htmlFor='birth_date' className='control-label col-xs-2'>Birth Date</label>
                         <div className='col-xs-10'>
-                            <DatePicker dateFormat='MM/DD/YYYY' value={new Date().toUTCString()} ref={ref => {this.rNewFieldBirthDate = ref}} />
+                            <DatePicker dateFormat='MM/DD/YYYY' value={dateForPicker} ref={ref => {this.rNewFieldBirthDate = ref}} />
                         </div>
                     </div><br />
                     <div className='form-group'>

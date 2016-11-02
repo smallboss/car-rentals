@@ -27,7 +27,7 @@ const _user = {
     profile: {
         userType: 'customer',
         name: '',
-        birthDate: '',
+        birthDate: new Date().setFullYear(new Date().getFullYear() - 18),
         phone: '',
         address: '',
         carRequest: [
