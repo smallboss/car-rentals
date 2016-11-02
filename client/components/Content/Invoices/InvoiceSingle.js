@@ -6,7 +6,9 @@ import { createContainer } from 'meteor/react-meteor-data'
 import DatePicker from 'react-bootstrap-date-picker'
 import { ApiInvoices } from '/imports/api/invoices.js'
 import { ApiPayments } from '/imports/api/payments.js'
+import { ApiCars } from '/imports/api/cars.js'
 import { ApiLines } from '/imports/api/lines.js'
+import { ApiRentals } from '/imports/api/rentals.js'
 import { ApiContracts } from '/imports/api/contracts'
 import { ApiUsers } from '/imports/api/users'
 import { ApiYearWrite } from '/imports/api/yearWrite'
@@ -36,6 +38,7 @@ export default class InvoiceSingle extends Component {
       allowSave: false,
       isNew: this.props.isNew,
       customerList: this.props.userList,
+      storageLines: [],
 
       editable: this.props.isNew
     }
@@ -45,6 +48,9 @@ export default class InvoiceSingle extends Component {
     this.onChangeDate = this.onChangeDate.bind(this);
     this.onChangeDueDate = this.onChangeDueDate.bind(this);
     this.onChangeStatus = this.onChangeStatus.bind(this);
+    this.handleSaveLine = this.handleSaveLine.bind(this);
+    this.handleAddNewLine = this.handleAddNewLine.bind(this);
+    this.handleDeleteLines = this.handleDeleteLines.bind(this);
     this.handleSave = this.handleSave.bind(this);
     this.handlePrint = this.handlePrint.bind(this);
     this.handleEdit = this.handleEdit.bind(this);
@@ -112,8 +118,42 @@ export default class InvoiceSingle extends Component {
     });
   }
 
+
   handlePrint(){
     window.print();
+  }
+
+  handleSaveLine(line){
+    let { storageLines } = this.state;
+    let index = -1;
+
+    storageLines.map((item, key) => {
+      if (line._id._str == item._id._str) 
+        index = key;
+    })
+
+    storageLines[index] = clone(line);
+
+    this.setState({ storageLines });
+  }
+
+  handleAddNewLine(newLine){
+    let { storageLines } = this.state;
+    storageLines.push(newLine);
+    this.setState({ storageLines });
+  }
+
+  handleDeleteLines(linesId){
+    let { storageLines } = this.state;
+
+    linesId.map((lineId) => {
+      storageLines.map((line, key) => {
+        if (lineId == line._id) 
+          storageLines.splice(key, 1);
+      })
+    })
+
+    this.setState({ storageLines });
   }
 
 
@@ -165,6 +205,33 @@ export default class InvoiceSingle extends Component {
 
       invoicesNumb = ''+parseInt(invoicesNumb);
       ApiYearWrite.update({_id: yearWrite._id }, {$set: { invoicesNumb }});
+
+      this.state.storageLines.map((line) => {
+        const car = ApiCars.findOne({_id: line.car});
+
+        console.log('car', car, line.car);
+
+        ApiRentals.insert({
+            _id: line.rentalId,
+            car: line.car, 
+            customerId: this.props.invoice.customerId, 
+            dateFrom: line.dateFrom, 
+            dateTo: line.dateTo,
+            plateNumber: car ? car.plateNumber : ''
+        });
+
+        ApiLines.insert({
+            _id: line._id, 
+            invoiceId,
+            description: line.description,
+            rentalId: line.rentalId, 
+            amount: line.amount,
+            car: line.car,
+            dateFrom: line.dateFrom, 
+            dateTo: line.dateTo
+        });
+        ApiInvoices.update({_id: invoiceId}, {$push: { linesId: line._id }});
+      })
     } else {
       invoiceId = newInvoice._id;
       delete newInvoice._id;
@@ -219,10 +286,7 @@ export default class InvoiceSingle extends Component {
   }
 
   handleSendByEmail(){
-    let email = find(this.props.managerList, ['_id', Meteor.userId()]);
-    email = email 
-              ? email.emails[0] 
-              : find(this.props.customerList, ['_id', Meteor.userId()]).emails[0];
+    const email = find(this.props.userList, {_id: this.state.invoice.customerId}).emails[0];
 
     Meteor.call('sendEmail',
             email.address,
@@ -327,7 +391,7 @@ export default class InvoiceSingle extends Component {
                   const custId = this.state.editable ? this.state.dispInvoice.customerId : customerId;
                   const custName = Meteor.users.findOne(custId) ? (Meteor.users.findOne(custId).profile.name + ' profile') : '';
 
-                  return (<Link to={`/managePanel/customer/${custId}`} className="col-xs-12">{custName}</Link>);
+                  return (<Link to={`/managePanel/customer/${custId}`} className="col-xs-12 noPrint">{custName}</Link>);
                 })()}
               </div>
               { /* END ============================= DROPDOWN CUSTOMERS ============================== */}
@@ -348,7 +412,7 @@ export default class InvoiceSingle extends Component {
             </div>
 
             <div className="row">
-              <div className="form-group profit col-xs-6">
+              <div className="form-group profit col-xs-6 noPrint">
                 <label htmlFor="invoiceStatus" className='col-xs-3'>Status</label>
                 {(() => {
                   if (this.state.editable) {
@@ -375,7 +439,7 @@ export default class InvoiceSingle extends Component {
                 })()}
               </div>
               
-              <div className="form-group name col-xs-6">
+              <div className="form-group name col-xs-6 noPrint">
                 <label htmlFor="invoiceDueDate" className='col-xs-3'>Invoice Due date</label>
                 {(() => {
                   if (this.state.editable) {
@@ -395,9 +459,30 @@ export default class InvoiceSingle extends Component {
       }
 
 
-      const renderTabs = () => {
+      const renderInsteadTabs = () => {
         return (
-          <div className="row">
+          <div className="row onlyPrint">
+            <div className='col-xs-12'>
+              <h3>Invoice lines</h3>
+              <LinesOnTab 
+                    invoice={cloneDeep(this.state.invoice)}
+                    linesId={cloneDeep(this.state.invoice.linesId 
+                                        ? this.state.invoice.linesId 
+                                        : [])
+                            }
+                    readOnly={true} />
+
+
+            </div>
+          </div>
+        )
+      }
+
+
+      const renderTabs = () => {
+        console.log('this.state.storageLines', this.state.storageLines);
+        return (
+          <div className="row noPrint">
             <ul className="nav nav-tabs" role="tablist">
               <li className="active">
                 <a href="#lines" aria-controls="home" role="tab" data-toggle="tab">Lines</a>
@@ -415,17 +500,26 @@ export default class InvoiceSingle extends Component {
                                         ? this.state.invoice.linesId 
                                         : [])
                             }
-                    readOnly={!this.state.invoice.customerId} />
-
-                <div className="PaymentsOnTab row">
-                  <div className="col-xs-12">
-                    <h3>Payments list</h3>
-                    <PaymentsOnTab 
-                            invoice={cloneDeep(this.state.invoice)}
-                            paymentsId={this.state.invoice.paymentsId}
-                            readOnly={true} />
+                    storageLines={this.state.storageLines}
+                    onSaveLine={this.handleSaveLine}
+                    onAddNewLine={this.handleAddNewLine}
+                    onDeleteLines={this.handleDeleteLines}
+                    isNew={this.state.isNew}
+                    readOnly={false} />
+                {
+                  //invoice single: remove payment list from invoice lines tab
+                  /*
+                  <div className="PaymentsOnTab row">
+                    <div className="col-xs-12">
+                      <h3>Payments list</h3>
+                      <PaymentsOnTab 
+                              invoice={cloneDeep(this.state.invoice)}
+                              paymentsId={this.state.invoice.paymentsId}
+                              readOnly={true} />
+                    </div>
                   </div>
-                </div>  
+                  */ 
+                }
               </div>
               }
               <div role="tabpanel" className="tab-pane p-x-1" id="payments">
@@ -463,6 +557,7 @@ export default class InvoiceSingle extends Component {
             { renderTopFields() }
 
             { renderTabs() }
+            { renderInsteadTabs() }
           </div>
         </div>
       )
@@ -482,7 +577,9 @@ export default createContainer(({params}) => {
   Meteor.subscribe('users');
   Meteor.subscribe('yearwrite');
   Meteor.subscribe('contracts');
+  Meteor.subscribe('cars');
   Meteor.subscribe('lines');
+  Meteor.subscribe('rentals');
 
 
   let isNew = false;

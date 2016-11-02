@@ -21,29 +21,52 @@ export default class InvSettings extends Component {
 
     render(){
 
-      const { amount, invoices, remaining, toinvoice } = this.props;
+      const { amount, invoices, remaining, toinvoice, isEditing, dispAmount, invoicedPaid } = this.props;
 
+      const currentAmount = dispAmount ? dispAmount : amount;
+
+      if (!dispAmount) {}
+
+      const renderAmount = () => {
         return (
-          <div className="TopDetailsTable">
-            <table className="table table-bordered table-hover">
-              <thead>
-                <tr>
-                  <th>Amount</th>
-                  <th>Invoices</th>
-                  <th>Remaining</th>
-                  <th>To invoice</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>{ amount }</td>
-                  <td>{ invoices }</td>
-                  <td>{ remaining }</td>
-                  <td>{ toinvoice }</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <td>
+            {(() => {
+              if (isEditing) {
+                return (
+                  <input type="number"
+                         min="0"
+                         max="99999"
+                         value={ dispAmount }
+                         onChange={ (e) => this.props.onChangeAmount(e.target.value) } />
+                )
+              } else {
+                return <span>{ dispAmount ? dispAmount : amount }</span>   
+              }
+              
+            })()}
+          </td>
         )
+      }
+
+      return (
+        <div className="TopDetailsTable m-t-1">
+          <table className="table table-bordered table-hover">
+            <thead>
+              <tr>
+                <th>Amount</th>
+                <th>Invoiced</th>
+                <th>Remaining</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                { renderAmount() }
+                <td>{ invoicedPaid }</td>
+                <td>{ currentAmount - invoices }</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      )
     }
 }

@@ -44,7 +44,8 @@ export default class InvoiceRow extends Component {
                 return (
                     <th>
                         <input 
-                            type="checkbox" ref={(ref) => this.input = ref} 
+                            type="checkbox" 
+                            ref={(ref) => this.input = ref} 
                             onChange={(e) => onHandleSelect(e, item)} />
                     </th>
                 )

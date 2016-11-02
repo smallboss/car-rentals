@@ -36,11 +36,11 @@ export default class InvSettings extends Component {
                   <select className=' form-control' onChange={(e) => this.props.onChangeRepeatNumb(e.target.value)}>
                     <option className='' value={this.props.contract.repeatNumb}>{this.props.contract.repeatNumb}</option>
                     {
-                        repeatNumbs.map((el, key) => {
-                            return (
-                              <option key={`repetNumb-${key}`} value={el}>{el}</option>
-                            )
-                        })
+                      repeatNumbs.map((el, key) => {
+                        return (
+                          <option key={`repetNumb-${key}`} value={el}>{el}</option>
+                        )
+                      })
                     }
                   </select>
                 </div>
@@ -60,9 +60,9 @@ export default class InvSettings extends Component {
                     {
                       repeatPeriods.map((el, key) => {
                         if (el != this.props.contract.repeatPeriod) {
-                            return (
-                              <option key={`repetPariod-${key}`} value={el}>{el}</option>
-                            )
+                          return (
+                            <option key={`repetPariod-${key}`} value={el}>{el}</option>
+                          )
                         }
                         return undefined;
                       })
@@ -109,11 +109,13 @@ export default class InvSettings extends Component {
                 return <div className="col-xs-12">Create invoices</div>
               })()}
               </div>
+              {/*
               <div className="form-group profit col-xs-12">
                 <label htmlFor="generateAuto" className="col-xs-2">Repeat every</label>
                 { renderRepeatNumb() }    
                 { renderRepeatReriod() }
               </div>
+              */}
               <div className="form-group profit col-xs-12">
                 
                 {

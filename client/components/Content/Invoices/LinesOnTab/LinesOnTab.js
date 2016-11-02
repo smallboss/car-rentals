@@ -16,7 +16,8 @@ export default class LinesOnTab extends Component {
         this.state = {
             loginLevel: context.loginLevel,
             selectedListId: [],
-            isEdit: false
+            isEdit: false,
+            selectedAll: false
         }
 
         this.changeSelectedItem = this.changeSelectedItem.bind(this);
@@ -24,6 +25,7 @@ export default class LinesOnTab extends Component {
         this.handleEditLines = this.handleEditLines.bind(this);
         this.handleRemoveLines = this.handleRemoveLines.bind(this);
         this.handleSaveLine = this.handleSaveLine.bind(this);
+        this.handleSelectAll = this.handleSelectAll.bind(this);
     }   
 
 
@@ -32,9 +34,30 @@ export default class LinesOnTab extends Component {
     }
 
 
+    handleSelectAll(){
+        let { selectedAll } = this.state;
+        let linesId = this.props.isNew ? this.props.storageLines : this.props.linesId
+
+        if (this.props.isNew) {
+            this.props.storageLines.map((el) => {
+                linesId.push(el);
+            })
+        } else {
+            linesId = this.props.linesId;
+        }
+
+        const selectedListId  = selectedAll ? [] : cloneDeep(linesId);
+
+
+        this.selectAll.checked = !selectedAll;
+        this.setState({selectedListId, selectedAll: !selectedAll});
+    }
+
+
     changeSelectedItem(itemId) {
         let selectedListId = this.state.selectedListId;
         let index = -1;
+        let currentSelectedAll = this.state.selectedAll;
 
         map(selectedListId, (item, key) => {
             if (item._str == itemId._str) {
@@ -49,27 +72,41 @@ export default class LinesOnTab extends Component {
         let isEdit = this.state.isEdit;
         isEdit = !selectedListId.length ? false : isEdit;
 
-        this.setState({selectedListId, isEdit});
+        if (currentSelectedAll || !selectedListId.length) {
+          currentSelectedAll = false;
+          this.selectAll.checked = currentSelectedAll;
+        }
+
+        this.setState({selectedListId, isEdit, electedAll: currentSelectedAll});
     }
 
 // ====================== ADD = EDIT = REMOVE = SAVE ======================
     handleAddNewLine(){
         const rentalId = new Mongo.ObjectID();
-        ApiRentals.insert({_id: rentalId});
-
-
         const lineId = new Mongo.ObjectID();
 
-        ApiLines.insert({_id: lineId, invoiceId: this.props.invoice._id, rentalId, dateCreate: now(), amount: '0'});
-        ApiInvoices.update(this.props.invoice._id, {$push: { linesId:{ $each: [lineId], $position: 0}}});
+        if (this.props.isNew) {
+            const newLine = {
+                _id: lineId,
+                rentalId,
+                amount: '0'
+            }
+
+            this.props.onAddNewLine(newLine);
+        } else {
+
+            ApiRentals.insert({_id: rentalId});
+            ApiLines.insert({_id: lineId, invoiceId: this.props.invoice._id, rentalId, amount: '0'});
+            ApiInvoices.update(this.props.invoice._id, {$push: { linesId: lineId }});
+
+            const invoice = this.props.invoice;
+            Meteor.users.update({_id: invoice.customerId}, {$push: { 'profile.rentals': rentalId }});
+            ApiInvoices.update({_id: invoice._id}, {$push: {rentals: rentalId}});
+        }
 
         let selectedListId = this.state.selectedListId;
-        selectedListId.push(lineId);
+            selectedListId.push(lineId);
 
-
-        const invoice = this.props.invoice;
-        Meteor.users.update({_id: invoice.customerId}, {$push: { 'profile.rentals': rentalId }});
-        ApiInvoices.update({_id: invoice._id}, {$push: {rentals: rentalId}});
         this.setState({ selectedListId, isEdit: true });
     }
 
@@ -78,29 +115,37 @@ export default class LinesOnTab extends Component {
     }
 
     handleRemoveLines(){
-        const invoice = this.props.invoice;
+        if (this.props.isNew) {
+            this.props.onDeleteLines(this.state.selectedListId);
+        } else {
+            const invoice = this.props.invoice;
         
-        map(this.state.selectedListId, (itemId, index) => {
-            invoice.linesId.splice(invoice.linesId.indexOf(itemId), 1);
-            ApiInvoices.update({_id: invoice._id}, {$pull: {linesId: itemId}})
-            ApiLines.remove(itemId);
-        })
+            map(this.state.selectedListId, (itemId, index) => {
+                invoice.linesId.splice(invoice.linesId.indexOf(itemId), 1);
+                ApiInvoices.update({_id: invoice._id}, {$pull: {linesId: itemId}})
+                ApiLines.remove(itemId);
+            })
+        }
 
         this.setState({selectedListId: [], isEdit: false});
     }
 
     handleSaveLine(line){
-        const _id = line._id;
-        delete line._id;
+        if (this.props.isNew) {
+            this.props.onSaveLine(line)
+        } else {
+            const _id = line._id;
+            delete line._id;
 
-        ApiLines.update({_id: _id }, {$set: line });
-        const car = find(this.props.cars, ['_id', line.car]);
-        ApiRentals.update({_id: line.rentalId}, {$set: {car: line.car, 
-                                                        customerId: this.props.invoice.customerId, 
-                                                        dateFrom: line.dateFrom, 
-                                                        dateTo: line.dateTo,
-                                                        plateNumber: car ? car.plateNumber : ''
-                                                    }});
+            ApiLines.update({_id: _id }, {$set: line });
+            const car = find(this.props.cars, ['_id', line.car]);
+            ApiRentals.update({_id: line.rentalId}, {$set: {car: line.car, 
+                                                            customerId: this.props.invoice.customerId, 
+                                                            dateFrom: line.dateFrom, 
+                                                            dateTo: line.dateTo,
+                                                            plateNumber: car ? car.plateNumber : ''
+                                                        }});
+        }
 
         let selectedListId = this.state.selectedListId;
         selectedListId.splice(selectedListId.indexOf(line._id), 1);
@@ -113,6 +158,7 @@ export default class LinesOnTab extends Component {
 
     render(){
         let lineListId = this.props.linesId;
+        let totalAmount = 0;
 
         const RenderTableHeadButtons = () => {
             if (!this.props.readOnly) {
@@ -130,6 +176,77 @@ export default class LinesOnTab extends Component {
         }
 
 
+        const renderRows = () => {
+            if (lineListId && this.props.isNew === false) {
+                return (
+                    lineListId.map((item, key) => {
+                        // const line = ApiLines.findOne({_id: item});
+                        const line = find(this.props.lines, {_id: item});
+                        if (!line) {return null}
+                        totalAmount += parseInt(line.amount);
+                        return (
+                            <LineTabRow key={`line-${key}`}
+                                onSelect={this.changeSelectedItem.bind(null,item)}
+                                line={ line }
+                                onSave={this.handleSaveLine}
+                                selectedListId={this.state.selectedListId}
+                                isEdit={this.state.isEdit}
+                                cars={this.props.cars}
+                                readOnly={this.props.readOnly} />
+                        )
+                    })
+                )
+            }
+
+            if (this.props.isNew) {
+                return (
+                    this.props.storageLines.map((line, key) => {
+                        totalAmount += parseInt(line.amount);
+                        return (
+                            <LineTabRow key={`line-${key}`}
+                                onSelect={this.changeSelectedItem.bind(null,line._id)}
+                                line={ line }
+                                onSave={this.handleSaveLine}
+                                selectedListId={this.state.selectedListId}
+                                isEdit={this.state.isEdit}
+                                cars={this.props.cars}
+                                readOnly={this.props.readOnly} />
+                        )
+                    })
+                )
+            }
+
+            return undefined
+        }
+
+
+        const renderHeadCheckBox = () => {
+            if (!this.props.readOnly ){
+                if (this.props.storageLines.length || lineListId.length) {
+                    return (
+                      <th className="noPrint">
+                        <input type="checkbox" 
+                               ref={(ref) => this.selectAll = ref}
+                               onChange={this.handleSelectAll} />
+                      </th>
+                    )
+                }
+                else {
+                    return (
+                      <th className="noPrint">
+                        <input type="checkbox" 
+                               ref={(ref) => this.selectAll = ref}
+                               onChange={this.handleSelectAll}
+                               disabled />
+                      </th>
+                    )
+                }
+            }
+
+          return null;
+        }
+
+
         return(
             <div>
                 { RenderTableHeadButtons() }
@@ -137,7 +254,7 @@ export default class LinesOnTab extends Component {
                 <table className="table table-bordered table-hover">
                     <thead>
                         <tr>
-                            { !this.props.readOnly ? (<th><input type="checkbox" disabled/></th>) : null }
+                            { renderHeadCheckBox() }
                             <th>Item</th>
                             <th>Description</th>
                             <th>Car plate#</th>
@@ -149,24 +266,19 @@ export default class LinesOnTab extends Component {
                     </thead>
 
                     <tbody>
-                        {(() => {
-                            if (lineListId) {
-                                return (
-                                    lineListId.map((item, key) => {
-                                        return (
-                                            <LineTabRow key={`line-${key}`}
-                                                onSelect={this.changeSelectedItem.bind(null,item)}
-                                                line={ApiLines.findOne({_id: item})}
-                                                onSave={this.handleSaveLine}
-                                                selectedListId={this.state.selectedListId}
-                                                isEdit={this.state.isEdit}
-                                                cars={this.props.cars}
-                                                readOnly={this.props.readOnly}/>
-                                        )
-                                }))
-                            }
-                            return undefined
-                        })()}
+
+                        { renderRows() }
+
+                        <tr style={{border: '1px solid white', backgroundColor: 'white'}}>
+                            <td style={{border: '1px solid white'}} className="noPrint"></td>
+                            <td style={{border: '1px solid white'}}></td>
+                            <td style={{border: '1px solid white'}}></td>
+                            <td style={{border: '1px solid white'}}></td>
+                            <td style={{border: '1px solid white'}}></td>
+                            <td style={{border: '1px solid white'}}></td>
+                            <td style={{border: '1px solid white'}}><b>Total amount:</b></td>
+                            <td style={{border: '1px solid white'}}><b>{ totalAmount }</b></td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -190,7 +302,7 @@ export default createContainer(() => {
   Meteor.subscribe('rentals');
 
   return {
-    lines: ApiLines.find().fetch().reverse(),
+    lines: ApiLines.find().fetch(),
     cars: ApiCars.find().fetch()
   };
 }, LinesOnTab);

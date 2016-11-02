@@ -108,7 +108,7 @@ export default class MaintenanceRow extends Component {
         }
 
         return (
-            <tr>
+            <tr style={{textAlign: 'center'}}>
                 <th>
                     <input type="checkbox" ref={(ref) => this.inputSelect = ref} onChange={(e) => onHandleSelect(e, this.state.maintenance)}/>
                 </th>

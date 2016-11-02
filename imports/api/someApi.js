@@ -5,7 +5,6 @@
  path: path.resolve('../../../../../') + '/public/fromBase/', it must be at 81 string in node_modules/mongo-xlsx/lib/xlsx-rw.js
  */
 
-// import { ApiPayments } from '/imports/api/payments'
 var mongoXlsx = require('mongo-xlsx');
 
 Meteor.methods({

@@ -2,6 +2,7 @@ import { Meteor } from 'meteor/meteor'
 import { Mongo } from 'meteor/mongo'
 import { createContainer } from 'meteor/react-meteor-data'
 import { ApiCars } from '/imports/api/cars.js'
+import { ApiLines } from '/imports/api/lines.js'
 import HeadSingle from './HeadSingle.js';
 import { browserHistory } from 'react-router';
 import React, { Component } from 'react';
@@ -39,8 +40,6 @@ export default class CarSingle extends Component {
     this.handleDelete = this.handleDelete.bind(this);
     this.onChangeFines = this.onChangeFines.bind(this);
     this.onChangeTolls = this.onChangeTolls.bind(this);
-    this.onChangeExpense = this.onChangeExpense.bind(this)
-    this.onChangeIncome = this.onChangeIncome.bind(this);
     this.onChangeDescription = this.onChangeDescription.bind(this);
     this.onChangeNotes = this.onChangeNotes.bind(this);
     this.handleSelect = this.handleSelect.bind(this);
@@ -59,46 +58,6 @@ export default class CarSingle extends Component {
   onChangeTolls(value) {
     let newCar = this.state.car;
     newCar.tolls = value;
-    this.setState({dispCar: newCar});
-  }
-
-  onChangeExpense(value) {
-    let newCar = this.state.dispCar;
-
-    value = (value!='' && isNaN(parseInt(value))) ? '0' : value;
-    let isDepr = false;
-
-    isDepr = ((parseInt(value) < 0) || 
-              (value.indexOf('e') != -1) || 
-              (value.indexOf('E') != -1) ||  
-              (value.length >= 10));
-
-    newCar.totalExpense = isDepr ?  newCar.totalExpense : value;
-    let expence = parseInt(newCar.totalExpense);
-    let income = parseInt(newCar.totalIncome);
-    expence = isNaN(expence) ? 0 : expence;
-    income = isNaN(income) ? 0 : income;
-    newCar.profit = expence + income+'';
-    this.setState({dispCar: newCar});
-  }
-
-  onChangeIncome(value) {
-    let newCar = this.state.dispCar;
-
-    value = (value!='' && isNaN(parseInt(value))) ? '0' : value;
-    let isDepr = false;
-
-    isDepr = ((parseInt(value) < 0) || 
-              (value.indexOf('e') != -1) || 
-              (value.indexOf('E') != -1) ||  
-              (value.length >= 10));
-
-    newCar.totalIncome = isDepr ?  newCar.totalIncome : value;
-    let expence = parseInt(newCar.totalExpense);
-    let income = parseInt(newCar.totalIncome);
-    expence = isNaN(expence) ? 0 : expence;
-    income = isNaN(income) ? 0 : income;
-    newCar.profit = expence + income+'';
     this.setState({dispCar: newCar});
   }
 
@@ -305,23 +264,31 @@ export default class CarSingle extends Component {
     if (this.state.car) {
 
       let {
+        _id,
         name,
         status,
         plateNumber,
-        profit,
         notes,
         description,
-        totalExpense,
-        totalIncome,
         fines,
         tolls,
         maintenance } = this.state.car;
 
-      if (true) {}
-        profit = (parseInt(totalExpense) + parseInt(totalIncome))+'';
+      
+      let totalExpense = 0,
+          totalIncome = 0;
+
+      maintenance.map((el) => {
+        totalExpense += parseInt(el.amount ? el.amount : 0);
+      })
+
+      this.props.carLines.map((el) => {
+        totalIncome += parseInt(el.amount ? el.amount : 0);
+      })
+
+      const profit = (parseInt(totalIncome) - parseInt(totalExpense))+'';
 
       if (!maintenance) maintenance = new Array();
-
 
       const renderTopFields = () => {
         return (
@@ -398,7 +365,7 @@ export default class CarSingle extends Component {
 
               <div className="form-group profit col-xs-6">
                 <label htmlFor="carprofit" className='col-xs-3'>Profit</label>
-                <div className='col-xs-8 m-t-05'>{this.state.dispCar.profit}</div>
+                <div className='col-xs-8 m-t-05'>{profit}</div>
               </div>
             </div>
           </div>
@@ -486,36 +453,10 @@ export default class CarSingle extends Component {
                 })()}
               </div>
               <div role="tabpanel" className="tab-pane p-a-1" id="totalExpense">
-                {(() => {
-                  if (this.state.editable) {
-                    return (
-                      <input type="number"
-                             min="-999999999"
-                             max="9999999999"
-                             className='form-control'
-                             onChange={(e) => this.onChangeExpense(e.target.value)}
-                             value={ this.state.dispCar.totalExpense }/>
-                    )
-                  }
-
-                  return <div>{totalExpense}</div>
-                })()}
+                <div>{ totalExpense }</div>
               </div>
               <div role="tabpanel" className="tab-pane p-a-1" id="totalIncome">
-                {(() => {
-                  if (this.state.editable) {
-                    return (
-                      <input type="number"
-                             min="-999999999"
-                             max="9999999999"
-                             className='form-control'
-                             onChange={(e) => this.onChangeIncome(e.target.value)}
-                             value={ this.state.dispCar.totalIncome }/>
-                    )
-                  }
-
-                  return <div>{totalIncome}</div>
-                })()}
+                <div>{ totalIncome }</div>
               </div>
             </div>
           </div>
@@ -549,6 +490,7 @@ CarSingle.contextTypes = {
 
 export default createContainer(({params}) => {
   Meteor.subscribe('cars');
+  Meteor.subscribe('lines');
 
   let isNew = false;
   let carId = params.carId;
@@ -567,8 +509,13 @@ export default createContainer(({params}) => {
     browserHistory.push('/managePanel/cars');
   }
 
+  let car = ApiCars.findOne(idForQuery);
+
+  const carIdLines = (car != 'new') ? new Mongo.ObjectID(carId) : '';
+
   return {
-    car: ApiCars.findOne(idForQuery),
+    car,
+    carLines: ApiLines.find({car: carIdLines}).fetch(),
     isNew: isNew
   }
 

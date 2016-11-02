@@ -44,6 +44,7 @@ export default class ContractSingle extends Component {
       invoices: 0,
       remaining: 0,
       toinvoice: 0,
+      invoicedPaid: 0,
 
       editable: this.props.isNew
     }
@@ -57,6 +58,7 @@ export default class ContractSingle extends Component {
     this.onChangeTermsAndConditions = this.onChangeTermsAndConditions.bind(this);
     this.onChangeNotes = this.onChangeNotes.bind(this);
     this.onChangeStatus = this.onChangeStatus.bind(this);
+    this.onChangeAmount = this.onChangeAmount.bind(this);
     this.handleSave = this.handleSave.bind(this);
     this.handlePrint = this.handlePrint.bind(this);
     this.handleEdit = this.handleEdit.bind(this);
@@ -131,6 +133,19 @@ export default class ContractSingle extends Component {
     newContract.notes = value;
     this.setState({dispContract: newContract});
   }
+  onChangeAmount(value){
+    let newContract = this.state.dispContract;
+    value = (value!='' && isNaN(parseInt(value))) ? '0' : value;
+    let isDepr = false;
+
+    isDepr = ((parseInt(value) < 0) || 
+              (value.indexOf('e') != -1) || 
+              (value.indexOf('E') != -1) ||  
+              (value.length > 5));
+
+    newContract.amount = isDepr ?  newContract.amount : value;
+    this.setState({dispContract: newContract});
+  }
 // END ================== ON CHANGE ======================
 
 
@@ -160,6 +175,7 @@ export default class ContractSingle extends Component {
       let invs = [];
       let nextLines = [];
       let nextTime = 0;
+      let invoicedPaid = 0;
 
       if (nextProps.contract && nextProps.contract.invoicesId) {
         nextProps.contract.invoicesId.map((el) => {
@@ -171,6 +187,8 @@ export default class ContractSingle extends Component {
             invs.push({_id: el, codeName, numb: length, status});
           }
           linesId = linesId.concat(invoice ? invoice.linesId : []);
+
+          if (status == 'paid') invoicedPaid++;
 
           const date = invoice ? invoice.date : '';
           if ((!nextTime || nextTime > new Date(date).getTime()) && status != 'paid') {
@@ -229,6 +247,7 @@ export default class ContractSingle extends Component {
       invoices,
       remaining,
       toinvoice,
+      invoicedPaid,
       lines: compact(lines), 
       invs
     });
@@ -335,10 +354,7 @@ export default class ContractSingle extends Component {
   }
 
   handleSendByEmail(){
-    let email = find(this.props.managerList, ['_id', Meteor.userId()]);
-    email = email 
-              ? email.emails[0] 
-              : find(this.props.customerList, ['_id', Meteor.userId()]).emails[0];
+    const email = find(this.props.customerList, {_id: this.state.contract.customerId}).emails[0];
 
     Meteor.call('sendEmail',
             email.address,
@@ -366,6 +382,7 @@ export default class ContractSingle extends Component {
     let invs = [];
     let nextLines = [];
     let nextTime = 0;
+    let invoicedPaid = 0;
 
     if (this.props.contract && this.props.contract.invoicesId) {
       this.props.contract.invoicesId.map((el) => {
@@ -378,8 +395,10 @@ export default class ContractSingle extends Component {
         }
         linesId = linesId.concat(invoice ? invoice.linesId : []);
 
+        if (status == 'paid') invoicedPaid++;
+
         const date = invoice ? invoice.date : '';
-        if ((!nextTime || nextTime > new Date(date).getTime())) {
+        if ((!nextTime || nextTime > new Date(date).getTime()) && status != 'paid') {
           if (!isNaN((new Date(date)).getTime())) {
 
             nextLines = invoice ? invoice.linesId : [];
@@ -430,6 +449,7 @@ export default class ContractSingle extends Component {
       invoices,
       remaining,
       toinvoice,
+      invoicedPaid,
       lines: compact(lines), 
       invs,
       allowSave
@@ -620,7 +640,7 @@ export default class ContractSingle extends Component {
         }
 
         return (
-          <div className='col-xs-8 m-t-05'>
+          <div className='col-xs-8 m-t-05 noPrint'>
             {(() => {
 
               if (Meteor.users.findOne(managerId)) {
@@ -651,7 +671,7 @@ export default class ContractSingle extends Component {
                   const custId = this.state.editable ? this.state.dispContract.customerId : customerId;
                   const custName = Meteor.users.findOne(custId) ? (Meteor.users.findOne(custId).profile.name + " profile") : '';
 
-                  return <Link to={`/managePanel/customer/${custId}`} className="col-xs-12">{`${custName}`}</Link>
+                  return <Link to={`/managePanel/customer/${custId}`} className="col-xs-12 noPrint">{`${custName}`}</Link>
                 })()}
               </div>
               <div className="form-group profit col-xs-6">
@@ -660,7 +680,7 @@ export default class ContractSingle extends Component {
               </div>
             </div>
             <div className="row">
-              <div className="form-group profit col-xs-6">
+              <div className="form-group profit col-xs-6 noPrint">
                 <label htmlFor="contractAccountManager" className='col-xs-3'>Account manager</label>
                 { renderManager() }
 
@@ -671,13 +691,14 @@ export default class ContractSingle extends Component {
                   return <Link to={`/managePanel/customer/${manId}`} className="col-xs-12">{`${manName}`}</Link>
                 })()}
               </div>
+              <div className="form-group profit col-xs-6 onlyPrint"></div>
               <div className="form-group profit col-xs-6">
                 <label htmlFor="contractEndDate" className='col-xs-3'>End Date</label>
                 { renderEndDate() }
               </div>
             </div>
             <div className="row">
-              <div className="form-group profit col-xs-6 col-xs-push-6">
+              <div className="form-group profit col-xs-6 col-xs-push-6 noPrint">
                 <label htmlFor="contractStatus" className='col-xs-3'>Status</label>
                 { renderStatus() }
               </div>
@@ -696,10 +717,31 @@ export default class ContractSingle extends Component {
         )
       }
 
+      const renderPrintInsteadTabs = () => {
+        return (
+          <div className="row onlyPrint">
+            <div className="col-xs-12">
+              <TopDetailsTable 
+                    amount={this.state.amount}
+                    invoices={this.state.invoices}
+                    remaining={this.state.remaining}
+                    toinvoice={this.state.toinvoice} />
+
+
+              <h3>Invoice lines</h3>
+              { renderInvoiceLinesTable() }
+
+              <h3>Terms & conditions</h3>
+              <textarea className="form-control" rows="3" disabled value={termsAndConditions}></textarea>
+            </div>
+          </div>
+        )
+      }
+
 
       const renderTabs = () => {
         return (
-          <div className="row">
+          <div className="row noPrint">
             <ul className="nav nav-tabs" role="tablist">
               <li className="active">
                 <a href="#details" aria-controls="home" role="tab" data-toggle="tab">Details</a>
@@ -711,11 +753,15 @@ export default class ContractSingle extends Component {
               <div role="tabpanel" className="tab-pane p-x-1 active" id="details">
                 <TopDetailsTable 
                     amount={this.state.amount}
+                    invoicedPaid={this.state.invoicedPaid}
                     invoices={this.state.invoices}
                     remaining={this.state.remaining}
-                    toinvoice={this.state.toinvoice} />
+                    toinvoice={this.state.toinvoice}
+                    dispAmount={this.state.dispContract.amount}
+                    onChangeAmount={this.onChangeAmount}
+                    isEditing={this.state.editable} />
 
-                <h3>Invoicing settings</h3>
+                {<h3>Invoicing settings</h3>}
                 {(() => {
                   if (this.state.editable)
                     return <InvSettings 
@@ -775,6 +821,7 @@ export default class ContractSingle extends Component {
             { renderTopFields() }
 
             { renderTabs() }
+            { renderPrintInsteadTabs() }
           </div>
 
         </div>
