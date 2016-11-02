@@ -10,10 +10,10 @@ if (Meteor.isServer) {
     update: function (userId, doc, fields, modifier) {
       return true
     },
-    insert: (userId, doc) => {
+    insert: (userId, doc, fields, modifier) => {
       return true
     },
-    remove: (userId, doc) => {
+    remove: (userId, doc, fields, modifier) => {
       let _type = Meteor.user().profile.userType
       return (_type !== 'admin') ? false : true
     }

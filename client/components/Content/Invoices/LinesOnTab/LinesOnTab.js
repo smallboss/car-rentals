@@ -5,7 +5,7 @@ import { createContainer } from 'meteor/react-meteor-data'
 import { ApiCars } from '/imports/api/cars.js';
 import { ApiLines } from '/imports/api/lines.js';
 import { ApiInvoices } from '/imports/api/invoices.js';
-import { ApiRentals } from '/imports/api/rentals.js';
+import { ApiRentals, removeRental } from '/imports/api/rentals.js';
 import TableHeadButtons from './TableHeadButtons.js';
 import LineTabRow from './LineTabRow.js';
 
@@ -35,7 +35,9 @@ export default class LinesOnTab extends Component {
 
 
     handleSelectAll(){
-        let { selectedAll } = this.state;
+        let { selectedAll, isEdit } = this.state;
+        isEdit = selectedAll ? isEdit : false;
+
         let linesId = this.props.isNew ? this.props.storageLines : this.props.linesId
 
         if (this.props.isNew) {
@@ -46,8 +48,7 @@ export default class LinesOnTab extends Component {
             linesId = this.props.linesId;
         }
 
-        const selectedListId  = selectedAll ? [] : cloneDeep(linesId);
-
+        const selectedListId = selectedAll ? [] : cloneDeep(linesId);
 
         this.selectAll.checked = !selectedAll;
         this.setState({selectedListId, selectedAll: !selectedAll});
@@ -77,7 +78,7 @@ export default class LinesOnTab extends Component {
           this.selectAll.checked = currentSelectedAll;
         }
 
-        this.setState({selectedListId, isEdit, electedAll: currentSelectedAll});
+        this.setState({selectedListId, isEdit, selectedAll: currentSelectedAll});
     }
 
 // ====================== ADD = EDIT = REMOVE = SAVE ======================
@@ -121,9 +122,11 @@ export default class LinesOnTab extends Component {
             const invoice = this.props.invoice;
         
             map(this.state.selectedListId, (itemId, index) => {
+                const rentalId = find(this.props.lines, {_id: itemId}).rentalId;
                 invoice.linesId.splice(invoice.linesId.indexOf(itemId), 1);
                 ApiInvoices.update({_id: invoice._id}, {$pull: {linesId: itemId}})
                 ApiLines.remove(itemId);
+                removeRental(rentalId);
             })
         }
 
@@ -270,7 +273,12 @@ export default class LinesOnTab extends Component {
                         { renderRows() }
 
                         <tr style={{border: '1px solid white', backgroundColor: 'white'}}>
-                            <td style={{border: '1px solid white'}} className="noPrint"></td>
+                            {(() => { 
+                                if (!this.props.readOnly) 
+                                    return <td style={{border: '1px solid white'}} className="noPrint"></td>
+
+                                return null;
+                            })()}
                             <td style={{border: '1px solid white'}}></td>
                             <td style={{border: '1px solid white'}}></td>
                             <td style={{border: '1px solid white'}}></td>

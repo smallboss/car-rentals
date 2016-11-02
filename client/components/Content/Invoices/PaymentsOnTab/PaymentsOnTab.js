@@ -58,7 +58,7 @@ export default class PaymentsOnTab extends Component {
         }
 
 
-        this.setState({selectedListId, isEdit, electedAll: currentSelectedAll});
+        this.setState({selectedListId, isEdit, selectedAll: currentSelectedAll});
     }
 
 // ====================== ADD = EDIT = REMOVE = SAVE ======================

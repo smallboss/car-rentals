@@ -209,8 +209,6 @@ export default class InvoiceSingle extends Component {
       this.state.storageLines.map((line) => {
         const car = ApiCars.findOne({_id: line.car});
 
-        console.log('car', car, line.car);
-
         ApiRentals.insert({
             _id: line.rentalId,
             car: line.car, 
@@ -470,6 +468,11 @@ export default class InvoiceSingle extends Component {
                                         ? this.state.invoice.linesId 
                                         : [])
                             }
+                    storageLines={this.state.storageLines}
+                    onSaveLine={this.handleSaveLine}
+                    onAddNewLine={this.handleAddNewLine}
+                    onDeleteLines={this.handleDeleteLines}
+                    isNew={this.state.isNew}
                     readOnly={true} />
 
 
@@ -480,7 +483,6 @@ export default class InvoiceSingle extends Component {
 
 
       const renderTabs = () => {
-        console.log('this.state.storageLines', this.state.storageLines);
         return (
           <div className="row noPrint">
             <ul className="nav nav-tabs" role="tablist">

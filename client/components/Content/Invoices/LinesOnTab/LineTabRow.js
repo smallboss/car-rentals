@@ -76,9 +76,11 @@ export default class LineTabRow extends Component {
         let isDepr = false;
 
         isDepr = ((parseInt(value) < 0) || 
-                  (value.indexOf('e') != -1) || 
-                  (value.indexOf('E') != -1) ||  
-                  (value.length > 5));
+                  (value.includes('e')) || 
+                  (value.includes('E')) ||
+                  (value.length >= 10));
+
+        value = isNaN(parseInt(value)) ? '0' : parseInt(value)+'';
 
         newLine.amount = isDepr ?  newLine.amount : value;
         this.setState({dispLine: newLine});
@@ -175,7 +177,10 @@ export default class LineTabRow extends Component {
 
             return (
                 <Link to={`/managePanel/cars/${carIdStr}`}>
-                    <span>{(line && car) ? car.plateNumber : ''}</span>
+                    <span>{(line && car) 
+                            ? car.plateNumber ? car.plateNumber : 'car profile'
+                            : ''}
+                    </span>
                 </Link>
             )
         }
@@ -229,13 +234,25 @@ export default class LineTabRow extends Component {
             return <span>{(line && line.amount) ? line.amount : '0'}</span>
         }
 
+
+        const renderCheckBox = () => {
+            if (!this.props.readOnly) {
+                return (
+                    <th className="noPrint">
+                        <input  type="checkbox" 
+                                onChange={() => this.props.onSelect(line._id)}
+                                ref={(ref) => this.checkbox = ref} />
+                    </th>
+                )
+            } 
+
+            return null;
+        }
+
+
         return(
             <tr className="LineTabRow">
-                <th className="noPrint">
-                    <input  type="checkbox" 
-                            onChange={() => this.props.onSelect(line._id)}
-                            ref={(ref) => this.checkbox = ref} />
-                </th>
+                { renderCheckBox() }
                 <td>
                     { buttonSave() }
                     { showItem() }

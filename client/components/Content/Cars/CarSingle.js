@@ -215,7 +215,7 @@ export default class CarSingle extends Component {
     const carId = newCarData._id;
     delete newCarData._id;
 
-    ApiCars.update(carId, newCarData);
+    ApiCars.update(carId, {$set: newCarData});
 
     newCarData.maintenance.map((carMaintenance, key) => {
       if (carMaintenance._id == maintenance._id) {

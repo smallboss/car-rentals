@@ -141,7 +141,9 @@ export default class ContractSingle extends Component {
     isDepr = ((parseInt(value) < 0) || 
               (value.indexOf('e') != -1) || 
               (value.indexOf('E') != -1) ||  
-              (value.length > 5));
+              (value.length > 10));
+
+    value = isNaN(parseInt(value)) ? '0' : parseInt(value)+'';
 
     newContract.amount = isDepr ?  newContract.amount : value;
     this.setState({dispContract: newContract});

@@ -29,15 +29,12 @@ export default class TableOnTab extends Component {
         let { selectedAll } = this.state;
         const selectedItems  = selectedAll ? [] : cloneDeep(this.state.maintenanceList);
 
-        // console.log(this.state.maintenanceList, selectedAll);
-
         this.selectAll.checked = !selectedAll;
         this.setState({selectedItems, selectedAll: !selectedAll});
     }
 
 
     handleSelect(e, maintenance){
-        console.log('maintenance', maintenance);
         let newSelectedMaintenance = this.state.selectedItems;
         let currentSelectedAll = this.state.selectedAll;
 
@@ -69,7 +66,7 @@ export default class TableOnTab extends Component {
         this.setState({
             selectedItems: newSelectedMaintenance, 
             allowEdit, 
-            electedAll: currentSelectedAll
+            selectedAll: currentSelectedAll
         });
     }
 
@@ -177,14 +174,6 @@ export default class TableOnTab extends Component {
 
     render(){
         const { selectedItems, allowEdit } = this.state;
-
-
-        console.log('selectedItems', selectedItems);
-
-        selectedItems.map((el) => {
-            console.log('el', el);
-        })
-
         
         const renderBtnRemove = () => {
             if (this.props.loginLevel === 3) {

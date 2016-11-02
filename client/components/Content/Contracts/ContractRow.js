@@ -109,8 +109,13 @@ export default class ContractRow extends Component {
             <tr>
                 { renderCheckBox() }
                 <td onClick={onClick} >{ item.title }</td>
+
                 <td>
-                    <Link to={`/managePanel/customer/${item.customerId}`}>{ customerName ? customerName.username : ''}</Link>
+                    <Link to={`/managePanel/customer/${item.customerId}`}>{ (customerName && customerName.profile.name) 
+                                                                                    ? customerName.profile.name 
+                                                                                    : 'profile' 
+                                                                           }
+                    </Link>
                 </td>
                 <td onClick={onClick} >{ item.codeName }</td>
                 <td onClick={onClick} >{ renderLastInvoiceDate() }</td>
@@ -119,7 +124,11 @@ export default class ContractRow extends Component {
                 <td onClick={onClick} >{ item.endDate }</td>
                 <td onClick={onClick} >{ item.status }</td>
                 <td>
-                    <Link to={`/managePanel/customer/${item.managerId}`}>{ managerName ? managerName.username : ''}</Link>
+                    <Link to={`/managePanel/customer/${item.customerId}`}>{ (managerName && managerName.profile.name) 
+                                                                                    ? managerName.profile.name 
+                                                                                    : 'profile' 
+                                                                           }
+                    </Link>
                 </td>
             </tr>
         )

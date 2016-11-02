@@ -21,9 +21,9 @@ export default class InvSettings extends Component {
 
     render(){
 
-      const { amount, invoices, remaining, toinvoice, isEditing, dispAmount, invoicedPaid } = this.props;
-
+      const { amount, invoices, toinvoice, isEditing, dispAmount, invoicedPaid } = this.props;
       const currentAmount = dispAmount ? dispAmount : amount;
+      const remaining = ((currentAmount - invoices) >= 0) ? (currentAmount - invoices) : 0
 
       if (!dispAmount) {}
 
@@ -35,7 +35,7 @@ export default class InvSettings extends Component {
                 return (
                   <input type="number"
                          min="0"
-                         max="99999"
+                         max="99999999999"
                          value={ dispAmount }
                          onChange={ (e) => this.props.onChangeAmount(e.target.value) } />
                 )
@@ -61,8 +61,9 @@ export default class InvSettings extends Component {
             <tbody>
               <tr>
                 { renderAmount() }
-                <td>{ invoicedPaid }</td>
-                <td>{ currentAmount - invoices }</td>
+                { /*return (<td>{ invoicedPaid }</td> )*/}
+                <td>{ invoices }</td>
+                <td>{ remaining }</td>
               </tr>
             </tbody>
           </table>
