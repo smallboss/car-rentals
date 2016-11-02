@@ -2,7 +2,6 @@
  * Created by watcher on 10/8/16.
  */
 import React from 'react'
-import { Link } from 'react-router'
 
 class Rentals extends React.Component {
     constructor (props) {
@@ -28,7 +27,7 @@ class Rentals extends React.Component {
                         let { car, plateNumber, dateFrom, dateTo } = item
                         return (
                             <tr key={Math.random()}>
-                                <td><Link to={'/managePanel/cars/' + car._str}>{plateNumber}</Link></td>
+                                <td>{plateNumber}</td>
                                 <td>{dateFrom}</td>
                                 <td>{dateTo}</td>
                             </tr>
@@ -43,3 +42,4 @@ class Rentals extends React.Component {
 
 export default Rentals
 
+//<td><Link to={'/managePanel/cars/' + car._str}>{plateNumber}</Link></td>
