@@ -3,7 +3,6 @@
  */
 import React from 'react'
 import { Link } from 'react-router'
-import { Mongo } from 'meteor/mongo'
 
 class Rentals extends React.Component {
     constructor (props) {
@@ -11,7 +10,7 @@ class Rentals extends React.Component {
         this.state = {rentals: props.rentals || []}
     }
     componentWillReceiveProps(nextProps){
-        this.setState({rentals: nextProps.rentals})
+        this.setState({rentals: nextProps.rentals})        
     }
     render () {
         return (

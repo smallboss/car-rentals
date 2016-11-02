@@ -16,7 +16,7 @@ class Users extends React.Component {
             loginLevel: context.loginLevel,
             users: this.props.users,
             currentPage: 1,
-            elemsOnPage: 3,
+            elemsOnPage: 10,
             maxPage: 0,
             stateForRemove: []
         }

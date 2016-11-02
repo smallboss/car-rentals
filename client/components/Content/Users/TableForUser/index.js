@@ -129,25 +129,17 @@ class TableForUser extends React.Component {
                     </div>
                 )
             case 'rental_history':
-                currentArray = (this.state.arrToTable.profile) ? this.state.arrToTable.profile.rentals : []
-                currentArray.forEach(id => {
-                    let finder = ApiRentals.findOne({_id: new Mongo.ObjectID(id._str)})
-                    if(finder !== undefined){
-                        arrToTable.push(finder)   
-                    }                    
-                })
                 return (
                     <div>
                         <h4>{this.props.tableName}</h4>
-                        <Rentals rentals={arrToTable} />
+                        <Rentals rentals={this.state.arrToTable} />
                     </div>
                 )
             case 'car_requests':
-                arrToTable = (this.state.arrToTable.profile) ? this.state.arrToTable.profile.carRequest : []
                 return (
                     <div className='p-a-1'>
-                        <h4>Car Requests</h4>
-                        <CarRequests arrToTable={arrToTable} customerId={Meteor.userId()} />
+                        <h4>{this.props.tableName}</h4>
+                        <CarRequests arrToTable={this.state.arrToTable} customerId={Meteor.userId()} />
                     </div>
                 )
             default:
@@ -162,7 +154,9 @@ class TableForUser extends React.Component {
 
 export default createContainer (({params}) => {
     let { tableTarget } = params,
-        loginId = Meteor.userId()
+        loginId = Meteor.userId(),
+        arrCurr = [],
+        arrNew = []
     if(!tableTarget || !loginId) {
         return {
             arrToTable: []
@@ -187,13 +181,25 @@ export default createContainer (({params}) => {
                     arrToTable: ApiInvoices.find({customerId: loginId}).fetch(),
                     tableName: 'Invoices'
                 }
-            case 'car_requests': 
+            case 'car_requests':
+                arrCurr = Meteor.users.findOne({_id: loginId}) || []
+                arrNew = (arrCurr.profile) ? arrCurr.profile.carRequest : []
                 return {
-                    arrToTable: Meteor.users.findOne({_id: loginId})
+                    arrToTable: arrNew,
+                    tableName: 'Car Requests'
                 }
             case 'rental_history':
+                arrCurr = Meteor.users.findOne({_id: loginId}) || []
+                if(arrCurr.profile) {
+                    arrCurr.profile.rentals.forEach(id => {
+                        let finder = ApiRentals.findOne({_id: new Mongo.ObjectID(id._str)})
+                        if(finder !== undefined){
+                            arrNew.push(finder)
+                        }
+                    })
+                }
                 return {
-                    arrToTable: Meteor.users.findOne({_id: loginId}),
+                    arrToTable: arrNew,
                     tableName: 'Rental History'
                 }
             default:
