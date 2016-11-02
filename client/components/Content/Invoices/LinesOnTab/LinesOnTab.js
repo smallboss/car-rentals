@@ -36,22 +36,21 @@ export default class LinesOnTab extends Component {
 
     handleSelectAll(){
         let { selectedAll, isEdit } = this.state;
-        isEdit = selectedAll ? isEdit : false;
+        isEdit = selectedAll ? false : isEdit;
 
-        let linesId = this.props.isNew ? this.props.storageLines : this.props.linesId
+
+        let linesId = this.props.isNew ? [] : this.props.linesId
 
         if (this.props.isNew) {
             this.props.storageLines.map((el) => {
-                linesId.push(el);
+                linesId.push(el._id);
             })
-        } else {
-            linesId = this.props.linesId;
         }
 
         const selectedListId = selectedAll ? [] : cloneDeep(linesId);
 
         this.selectAll.checked = !selectedAll;
-        this.setState({selectedListId, selectedAll: !selectedAll});
+        this.setState({selectedListId, selectedAll: !selectedAll, isEdit});
     }
 
 
