@@ -68,10 +68,10 @@ class Sidebar extends Component {
             <div id='circle-user' style={{backgroundImage: 'url(' + imgUser + ')'}}></div>
             <ul className='sidebar-nav'>
               <li><Link to='/user_profile' className='p-l-3'>Profile</Link></li>
-              <li><Link to='/user_profile/rental_history' className='p-l-3'>Rental History</Link></li>
-              <li><Link to='/user_profile/payments' className='p-l-3'>Payments</Link></li>
-              <li><Link to='/user_profile/contracts' className='p-l-3'>Contracts</Link></li>
-              <li><Link to='/user_profile/invoices' className='p-l-3'>Invoices</Link></li>
+                {(this.state.loginLevel === 1) ? <li><Link to='/user_profile/rental_history' className='p-l-3'>Rental History</Link></li> : '' }
+                {(this.state.loginLevel === 1) ? <li><Link to='/user_profile/payments' className='p-l-3'>Payments</Link></li> : '' }
+                {(this.state.loginLevel === 1) ?<li><Link to='/user_profile/contracts' className='p-l-3'>Contracts</Link></li> : '' }
+                {(this.state.loginLevel === 1) ?<li><Link to='/user_profile/invoices' className='p-l-3'>Invoices</Link></li> : '' }
                 {(this.state.loginLevel === 1) ? <li><Link to='/user_profile/car_requests' className='p-l-3'>Car Requests</Link></li> : ''}
               {adminPart}
             </ul>
