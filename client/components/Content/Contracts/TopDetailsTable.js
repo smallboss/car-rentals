@@ -35,7 +35,7 @@ export default class InvSettings extends Component {
                 return (
                   <input type="number"
                          min="0"
-                         max="99999"
+                         max="99999999999"
                          value={ dispAmount }
                          onChange={ (e) => this.props.onChangeAmount(e.target.value) } />
                 )
