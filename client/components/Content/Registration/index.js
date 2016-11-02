@@ -2,12 +2,11 @@
  * Created by watcher on 10/4/16.
  */
 import React from 'react'
-//import { browserHistory } from 'react-router'
 import { Mongo } from 'meteor/mongo'
 import { createContainer } from 'meteor/react-meteor-data'
 import { imgToBase64 } from '../../../helpers/handlerImages'
 import LoginButtons from '../Login/LoginButtons'
-
+import './style.css'
 const DatePicker = require('react-bootstrap-date-picker')
 
 class Registration extends React.Component {
@@ -19,7 +18,6 @@ class Registration extends React.Component {
     addUserHandler (e) {
         e.preventDefault()
         /*Check passwords start*/
-        //console.log(e.target)
         let formTarget = e.target
         if(formTarget['password'].value.length < 6) {
             alert('Password must be large then 6 symbols')
@@ -145,73 +143,77 @@ class Registration extends React.Component {
                 <LoginButtons toShowModal={1} />
             )
         }
+        let dateForPicker = new Date()
+        dateForPicker.setFullYear(dateForPicker.getFullYear() - 18)
         return (
-            <form className='form-horizontal text-left add-user-form' onSubmit={this.addUserHandler} encType='multipart/form-data'>
-                <h3>Register user</h3>
-                <div className='form-group'>
-                    <label htmlFor='name' className='control-label col-xs-2'>Name</label>
-                    <div className='col-xs-10'>
-                        <input type='text' name='name' className='form-control' required />
-                    </div>
-                </div><br />
-                <div className='form-group'>
-                    <label htmlFor='user_name' className='control-label col-xs-2'>User Name</label>
-                    <div className='col-xs-10'>
-                        <input type='text' name='user_name' className='form-control' required onKeyDown={(e) => {if (e.keyCode == 32) {alert('Spaces are not allowed'); e.preventDefault()}}} 
-                        onChange={(e) => {if(e.target.value.indexOf(' ') !== -1) {e.target.value = e.target.value.replace(/ /g, '')}}}
-                        />
-                    </div>
-                </div><br />
-                <div className='form-group'>
-                    <label htmlFor='email' className='control-label col-xs-2'>Email</label>
-                    <div className='col-xs-10'>
-                        <input type='email' name='email' className='form-control' required />
-                    </div>
-                </div><br />
-                <div className='form-group'>
-                    <label htmlFor='birth_date' className='control-label col-xs-2'>Birth Date</label>
-                    <div className='col-xs-10'>
-                        <DatePicker dateFormat='MM/DD/YYYY' value={new Date().toUTCString()} ref={ref => {this.rNewFieldBirthDate = ref}} />
-                    </div>
-                </div><br />
-                <div className='form-group'>
-                    <label htmlFor='phone_number' className='control-label col-xs-2'>Phone Number</label>
-                    <div className='col-xs-10'>
-                        <input type='text' name='phone_number' className='form-control'  maxLength='15' />
-                    </div>
-                </div><br />
-                <div className='form-group'>
-                    <label htmlFor='address' className='control-label col-xs-2'>Address</label>
-                    <div className='col-xs-10'>
-                        <input type='text' name='address' className='form-control'  />
-                    </div>
-                </div><br />
-                <div className='form-group'>
-                    <label htmlFor='password' className='control-label col-xs-2'>Password</label>
-                    <div className='col-xs-10'>
-                        <input type='password' name='password' className='form-control' required />
-                    </div>
-                </div><br />
-                <div className='form-group'>
-                    <label htmlFor='repeat_password' className='control-label col-xs-2'>Repeat password</label>
-                    <div className='col-xs-10'>
-                        <input type='password' name='repeat_password' className='form-control' required />
-                    </div>
-                </div><br />
-                <div className='form-group'>
-                    <label htmlFor='imgId' className='control-label col-xs-2'>Upload ID</label>
-                    <div className='col-xs-10'>
-                        <input type='file' name='imgId' className='form-control' />
-                    </div>
-                </div><br />
-                <div className='form-group'>
-                    <label htmlFor='imgLicense' className='control-label col-xs-2'>Upload License</label>
-                    <div className='col-xs-10'>
-                        <input type='file' name='imgLicense' className='form-control' />
-                    </div>
-                </div><br />
-                <input type='submit' className='btn btn-success' value='Register' />
-            </form>
+            <div className='text-center'>
+                <form className='form-horizontal text-left add-user-form' onSubmit={this.addUserHandler} encType='multipart/form-data'>
+                    <h3>Register user</h3>
+                    <div className='form-group'>
+                        <label htmlFor='name' className='control-label col-xs-2'>Name</label>
+                        <div className='col-xs-10'>
+                            <input type='text' name='name' className='form-control' required />
+                        </div>
+                    </div><br />
+                    <div className='form-group'>
+                        <label htmlFor='user_name' className='control-label col-xs-2'>User Name</label>
+                        <div className='col-xs-10'>
+                            <input type='text' name='user_name' className='form-control' required onKeyDown={(e) => {if (e.keyCode == 32) {alert('Spaces are not allowed'); e.preventDefault()}}}
+                                   onChange={(e) => {if(e.target.value.indexOf(' ') !== -1) {e.target.value = e.target.value.replace(/ /g, '')}}}
+                            />
+                        </div>
+                    </div><br />
+                    <div className='form-group'>
+                        <label htmlFor='email' className='control-label col-xs-2'>Email</label>
+                        <div className='col-xs-10'>
+                            <input type='email' name='email' className='form-control' required />
+                        </div>
+                    </div><br />
+                    <div className='form-group'>
+                        <label htmlFor='birth_date' className='control-label col-xs-2'>Birth Date</label>
+                        <div className='col-xs-10'>
+                            <DatePicker dateFormat='MM/DD/YYYY' value={dateForPicker} ref={ref => {this.rNewFieldBirthDate = ref}} />
+                        </div>
+                    </div><br />
+                    <div className='form-group'>
+                        <label htmlFor='phone_number' className='control-label col-xs-2'>Phone Number</label>
+                        <div className='col-xs-10'>
+                            <input type='text' name='phone_number' className='form-control'  maxLength='15' />
+                        </div>
+                    </div><br />
+                    <div className='form-group'>
+                        <label htmlFor='address' className='control-label col-xs-2'>Address</label>
+                        <div className='col-xs-10'>
+                            <input type='text' name='address' className='form-control'  />
+                        </div>
+                    </div><br />
+                    <div className='form-group'>
+                        <label htmlFor='password' className='control-label col-xs-2'>Password</label>
+                        <div className='col-xs-10'>
+                            <input type='password' name='password' className='form-control' required />
+                        </div>
+                    </div><br />
+                    <div className='form-group'>
+                        <label htmlFor='repeat_password' className='control-label col-xs-2'>Repeat password</label>
+                        <div className='col-xs-10'>
+                            <input type='password' name='repeat_password' className='form-control' required />
+                        </div>
+                    </div><br />
+                    <div className='form-group'>
+                        <label htmlFor='imgId' className='control-label col-xs-2'>Upload ID</label>
+                        <div className='col-xs-10'>
+                            <input type='file' name='imgId' className='form-control' />
+                        </div>
+                    </div><br />
+                    <div className='form-group'>
+                        <label htmlFor='imgLicense' className='control-label col-xs-2'>Upload License</label>
+                        <div className='col-xs-10'>
+                            <input type='file' name='imgLicense' className='form-control' />
+                        </div>
+                    </div><br />
+                    <input type='submit' className='btn btn-success' value='Register' />
+                </form>
+            </div>
         )
     }
 }

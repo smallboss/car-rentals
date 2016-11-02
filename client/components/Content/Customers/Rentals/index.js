@@ -2,14 +2,15 @@
  * Created by watcher on 10/8/16.
  */
 import React from 'react'
+import { Link } from 'react-router'
 
 class Rentals extends React.Component {
-    constructor (props) {
+    constructor (props, context) {
         super(props)
-        this.state = {rentals: props.rentals || []}
+        this.state = {loginLevel: context.loginLevel, rentals: props.rentals || []}
     }
-    componentWillReceiveProps(nextProps){
-        this.setState({rentals: nextProps.rentals})        
+    componentWillReceiveProps(nextProps, nextContext){
+        this.setState({rentals: nextProps.rentals, loginLevel: nextContext.loginLevel})        
     }
     render () {
         return (
@@ -27,7 +28,7 @@ class Rentals extends React.Component {
                         let { car, plateNumber, dateFrom, dateTo } = item
                         return (
                             <tr key={Math.random()}>
-                                <td>{plateNumber}</td>
+                                <td>{(this.state.loginLevel === 2 || this.state.loginLevel === 3) ? <Link to={'/managePanel/cars/' + car._str}>{plateNumber}</Link> : <span>{plateNumber}</span>}</td>
                                 <td>{dateFrom}</td>
                                 <td>{dateTo}</td>
                             </tr>
@@ -40,6 +41,8 @@ class Rentals extends React.Component {
     }
 }
 
-export default Rentals
+Rentals.contextTypes = {
+    loginLevel: React.PropTypes.number.isRequired
+}
 
-//<td><Link to={'/managePanel/cars/' + car._str}>{plateNumber}</Link></td>
+export default Rentals

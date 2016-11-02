@@ -21,7 +21,7 @@ class Wrapper extends React.Component {
     componentWillReceiveProps (nextProps) {
         let user = nextProps.loginedUser,
             loginLevel = 0,
-            showSideBar = (location.href.indexOf('home') !== -1) ? 0 : 1
+            showSideBar = (location.href.indexOf('home') !== -1 || location.href.indexOf('registration') !== -1) ? 0 : 1
         if(user) {
             switch (user.profile.userType) {
                 case 'customer':

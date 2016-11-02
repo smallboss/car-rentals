@@ -125,6 +125,6 @@ Users.contextTypes = {
 export default createContainer (() => {
     Meteor.subscribe('users')
     return {
-        users: Meteor.users.find({}).fetch()
+        users: Meteor.users.find({'profile.userType': {$in: ['employee', 'admin']}}).fetch()
     }
 }, Users)
