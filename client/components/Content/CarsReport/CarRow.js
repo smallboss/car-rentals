@@ -16,7 +16,20 @@ export default class CarRow extends Component {
     }
 
     render(){
-        const { car, onHandleSelect, onClick } = this.props;
+        const { car, onHandleSelect, onClick, carLines } = this.props;
+
+        let totalExpense = 0,
+            totalIncome = 0;
+
+        car.maintenance.map((el) => {
+            totalExpense += parseInt(el.amount ? el.amount : 0);
+        })
+
+        carLines.map((el) => {
+            totalIncome += parseInt(el.amount ? el.amount : 0);
+        })
+
+        const profit = (parseInt(totalIncome) - parseInt(totalExpense))+'';
 
         return (
             <tr>
@@ -24,9 +37,9 @@ export default class CarRow extends Component {
                 <td onClick={onClick} >{ car.name }</td>
                 <td onClick={onClick} >{ car.plateNumber }</td>
                 <td onClick={onClick} >{ car.status }</td>
-                <td onClick={onClick} >{ car.totalExpense }</td>
-                <td onClick={onClick} >{ car.totalIncome }</td>
-                <td onClick={onClick} >{ car.profit }</td>
+                <td onClick={onClick} >{ totalExpense }</td>
+                <td onClick={onClick} >{ totalIncome }</td>
+                <td onClick={onClick} >{ profit }</td>
             </tr>
         )
     }

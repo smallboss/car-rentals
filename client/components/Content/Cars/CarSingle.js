@@ -136,7 +136,6 @@ export default class CarSingle extends Component {
 
     newCar_id = id;
 
-
     this.setState({car: newCar, dispCar: newCar, editable: false});
   }
 

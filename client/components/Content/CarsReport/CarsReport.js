@@ -6,11 +6,12 @@ import export_table_to_excel from './Table2Excel.js'
 import { createContainer } from 'meteor/react-meteor-data';
 
 import { ApiCars } from '/imports/api/cars.js';
+import { ApiLines } from '/imports/api/lines.js';
 
 import CarRow from './CarRow.js';
 import HeadList from './HeadList.js';
 
-import { map, debounce, find } from 'lodash';
+import { map, debounce, find, filter } from 'lodash';
 
 
 class CarsReport extends Component {
@@ -175,6 +176,7 @@ class CarsReport extends Component {
           return <CarRow 
                     key={key} 
                     car={itemCar} 
+                    carLines={ filter(this.props.lines, {car: itemCar._id}) }
                     onClick={this.handleCarSingleOnClick.bind(null, itemCar._id)}
                     selectedCarsId={this.state.selectedCarsID} 
                     onHandleSelect={this.handleSelect} />
@@ -270,8 +272,10 @@ CarsReport.contextTypes = {
 
 export default createContainer(() => {
   Meteor.subscribe('cars');
+  Meteor.subscribe('lines');
 
   return {
     cars: ApiCars.find().fetch(),
+    lines: ApiLines.find().fetch()
   };
 }, CarsReport);

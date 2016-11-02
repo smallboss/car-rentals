@@ -74,7 +74,7 @@ class Invoices extends Component {
       map(invoice.paymentsId, (el) => {
         const payment = ApiPayments.findOne({_id: el});
         const customer = Meteor.users.findOne({ "profile.payments": el});
-        console.log('el', el);
+        console.log('el', el, customer);
         Meteor.users.update({_id: customer._id}, {$pull: { "profile.payments": el}});
         ApiPayments.remove({_id: el});
       })
