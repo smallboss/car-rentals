@@ -62,6 +62,24 @@ class Registration extends React.Component {
                 _images
             }            
         }
+        let checkBirthYear = +_user.profile.birthDate.slice(0, 4),
+            checkBirthMonth = +_user.profile.birthDate.slice(5, 7),
+            checkBirthDay = +_user.profile.birthDate.slice(9, 11),
+            _date = new Date()
+        if(checkBirthYear > _date.getFullYear() - 18) {
+            alert('You must be over then 18 years')
+            return            
+        } else if (checkBirthYear == _date.getFullYear() - 18) {
+            if(checkBirthMonth > _date.getMonth() + 1) {
+                alert('You must be over then 18 years')
+                return
+            } else if (checkBirthMonth == _date.getMonth() + 1) {
+                if(checkBirthDay > _date.getDay() - 1) {
+                    alert('You must be over then 18 years')
+                    return
+                }   
+            }            
+        }        
         /*Create must have variable end*/
         /*handle images if they are start*/
         if(typeof fileId != 'string' || typeof fileLicense != 'string') {

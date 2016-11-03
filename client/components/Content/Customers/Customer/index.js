@@ -54,6 +54,7 @@ class Customer extends React.Component {
         super(props)
         this.state = {loginLevel: context.loginLevel, customer: (this.props.params.id == 'new') ? _user : props.customer || _user, editAble: 0}
         this.handlerEditCustomer = this.handlerEditCustomer.bind(this)
+        this.datePickerHandler = this.datePickerHandler.bind(this)
         //this.handlerChildState = this.handlerChildState.bind(this)
     }
     componentWillMount () {
@@ -211,6 +212,30 @@ class Customer extends React.Component {
         Meteor.users.update(_id, {$set: _state})
     }
     */
+    datePickerHandler(date) {
+        let checkBirthYear = +date.slice(0, 4),
+            checkBirthMonth = +date.slice(5, 7),
+            checkBirthDay = +date.slice(8, 10),
+            _date = new Date(),
+            defaultDate = new Date().setFullYear(new Date().getFullYear() - 18)
+            customer = this.state.customer
+        customer.profile['birthDate'] = date.slice(0,10)
+        if(checkBirthYear > _date.getFullYear() - 18) {
+            customer.profile['birthDate'] = defaultDate
+            return
+        } else if (checkBirthYear == _date.getFullYear() - 18) {
+            if(checkBirthMonth > _date.getMonth() + 1) {
+                alert('User must be over then 18 years')
+                customer.profile['birthDate'] = defaultDate
+            } else if (checkBirthMonth == _date.getMonth() + 1) {
+                if(checkBirthDay > _date.getDay() - 1) {
+                    alert('User must be over then 18 years')
+                    customer.profile['birthDate'] = defaultDate
+                }
+            }
+        }        
+        this.setState({customer: customer})        
+    }
     render () {
         let editAble = (!this.state.editAble) ? 'disabled' : false
         let { _id, username, profile } = this.state.customer
@@ -288,11 +313,7 @@ class Customer extends React.Component {
                         <div className='col-xs-6'>
                             <label htmlFor='birhdate' className='col-xs-2'>Birth Date</label>
                             <div className='col-xs-8 form-horizontal'>
-                                <DatePicker dateFormat='MM/DD/YYYY' value={birthDate} name='check-picker' onChange={(date) => {
-                                let customer = this.state.customer
-                                customer.profile['birthDate'] = date.slice(0,10) 
-                                this.setState({customer: customer})
-                                }} disabled={editAble} />
+                                <DatePicker dateFormat='MM/DD/YYYY' value={birthDate} name='check-picker' onChange={this.datePickerHandler} disabled={editAble} />
                             </div>
                         </div>
                         <div className='col-xs-6'>
@@ -320,12 +341,12 @@ class Customer extends React.Component {
                                 <div className='col-xs-6'>
                                     <img src={imgId} />
                                     <input type='file' id='imgId' className='form-control' accept='image/*' disabled={editAble} />
-                                    {(this.state.loginLevel === 3) ? <a href={imgId} download>Download Id image</a> : ''}
+                                    {(imgId.length > 0 && this.state.loginLevel === 3) ? <a href={imgId} download>Download Id image</a> : ''}
                                 </div>
                                 <div className='col-xs-6'>
                                     <img src={imgLicense} />
                                     <input type='file' id='imgLicense' className='form-control' accept='image/*' disabled={editAble} />
-                                    {(this.state.loginLevel === 3) ? <a href={imgLicense} download>Download License image</a> : ''}
+                                    {(imgLicense.length > 0 && this.state.loginLevel === 3) ? <a href={imgLicense} download>Download License image</a> : ''}
                                 </div>
                             </div>
                             <div id='div_car_request'  className='inner-div-users-edit'>
