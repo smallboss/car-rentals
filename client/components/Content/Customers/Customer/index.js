@@ -221,8 +221,8 @@ class Customer extends React.Component {
             customer = this.state.customer
         customer.profile['birthDate'] = date.slice(0,10)
         if(checkBirthYear > _date.getFullYear() - 18) {
-            customer.profile['birthDate'] = defaultDate
-            return
+            alert('User must be over then 18 years')
+            customer.profile['birthDate'] = defaultDate            
         } else if (checkBirthYear == _date.getFullYear() - 18) {
             if(checkBirthMonth > _date.getMonth() + 1) {
                 alert('User must be over then 18 years')
