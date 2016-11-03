@@ -15,7 +15,7 @@ import { ApiYearWrite } from '/imports/api/yearWrite'
 import HeadSingle from './HeadSingle.js';
 import { browserHistory } from 'react-router';
 import React, { Component } from 'react';
-import { clone, cloneDeep, reverse, find, map } from 'lodash';
+import { clone, cloneDeep, reverse, find, map, sortBy } from 'lodash';
 import { getInvoiceMsg } from '/client/helpers/generatorTextMessages.js'
 
 import PaymentsOnTab from './PaymentsOnTab/PaymentsOnTab.js'
@@ -179,15 +179,17 @@ export class InvoiceSingle extends Component {
 
 
     if(this.state.isNew){
-      const invoiceLast = ApiInvoices.find().fetch().reverse()[0];
-      let invoicesNumb = invoiceLast.codeName ? parseInt((invoiceLast.codeName.split('/'))[2])+1+'' : '1';
+      const invoices = ApiInvoices.find().fetch();
+      let invoiceLast;
+      if (invoices.length){ invoiceLast = (sortBy(invoices, 'codeName'))[invoices.length-1]} ;
+      let invoicesNumb = invoiceLast && invoiceLast.codeName ? parseInt((invoiceLast.codeName.split('/'))[2])+1+'' : '1';
 
       invoiceId = new Mongo.ObjectID();
       newInvoice._id = invoiceId;
       if (this.props.contract) newInvoice.contractId = this.props.contract._id;
       ApiInvoices.insert(newInvoice);
 
-      let yearWrite = ApiYearWrite.findOne({year: (new Date()).getFullYear()});
+      let yearWrite = ApiYearWrite.findOne({year: (new Date()).getFullYear()+''});
 /////
       if (yearWrite) {
         if(!yearWrite.invoicesNumb) yearWrite.invoicesNumb = invoicesNumb-1;
@@ -265,6 +267,18 @@ export class InvoiceSingle extends Component {
           Meteor.users.update({_id: newInvoice.customerId}, {$addToSet: { "profile.payments": el}});
         })
       }
+
+      if (newInvoice.linesId) {
+        map(newInvoice.linesId, (el) => {
+          const line = ApiLines.findOne({_id: el});
+          if (line) {
+            const rentalId = line.rentalId;
+            Meteor.users.update({_id: this.state.invoice.customerId}, {$pull: { "profile.rentals": rentalId}});
+            ApiRentals.update({_id: rentalId}, {$set: {customerId: newInvoice.customerId}});
+            Meteor.users.update({_id: newInvoice.customerId}, {$addToSet: { "profile.rentals": rentalId}});
+          }
+        })
+      }
     }
 
 
@@ -297,8 +311,8 @@ export class InvoiceSingle extends Component {
     })
 
     map(this.state.invoice.linesId, (el) => {
-      const rentalId = ApiLines.find({_id: el}).rentalId;
-      // removeRental(rentalId);
+      const line = ApiLines.findOne({_id: el});
+      if (line) removeRental(line.rentalId);
       ApiLines.remove({_id: el});
     })
 

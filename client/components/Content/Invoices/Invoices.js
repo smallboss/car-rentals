@@ -6,6 +6,7 @@ import { createContainer } from 'meteor/react-meteor-data';
 import { ApiInvoices } from '/imports/api/invoices.js';
 import { ApiPayments } from '/imports/api/payments.js';
 import { ApiLines } from '/imports/api/lines.js';
+import { ApiRentals, removeRental } from '/imports/api/rentals.js'
 import InvoiceRow from './InvoiceRow.js';
 import HeadList from './HeadList.js';
 
@@ -80,6 +81,8 @@ class Invoices extends Component {
       })
 
       map(invoice.linesId, (el) => {
+        const line = ApiLines.findOne({_id: el});
+        if (line) removeRental(line.rentalId);
         ApiLines.remove({_id: el});
       })
     })

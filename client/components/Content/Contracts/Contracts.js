@@ -8,6 +8,7 @@ import { ApiUsers } from '/imports/api/users';
 import { ApiInvoices } from '/imports/api/invoices';
 import { ApiPayments } from '/imports/api/payments';
 import { ApiLines } from '/imports/api/lines';
+import { ApiRentals, removeRental } from '/imports/api/rentals.js'
 
 import ContractRow from './ContractRow.js';
 import HeadList from './HeadList.js';
@@ -69,7 +70,6 @@ class Contracts extends Component {
 
 
   removeContracts() {
-    console.log('this.state.selectedContractsID', this.state.selectedContractsID);
     this.state.selectedContractsID.map((contractID) => {
     
       // =======================
@@ -98,6 +98,8 @@ class Contracts extends Component {
       })
       // REMOVE LINES ========================
       linesId.map((el) => {
+        const line = ApiLines.findOne({_id: el});
+        if (line) removeRental(line.rentalId);
         ApiLines.remove({_id: el});
       })
 

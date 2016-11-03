@@ -125,11 +125,11 @@ export class LinesOnTab extends Component {
             const invoice = this.props.invoice;
         
             map(this.state.selectedListId, (itemId, index) => {
-                const rentalId = find(this.props.lines, {_id: itemId}).rentalId;
+                const line = find(this.props.lines, {_id: itemId});
+                if (line) removeRental(line.rentalId);
                 invoice.linesId.splice(invoice.linesId.indexOf(itemId), 1);
                 ApiInvoices.update({_id: invoice._id}, {$pull: {linesId: itemId}})
                 ApiLines.remove(itemId);
-                removeRental(rentalId);
             })
         }
 
@@ -139,6 +139,7 @@ export class LinesOnTab extends Component {
 
 
     handleSaveLine(line){
+        const oldLine = ApiLines.findOne({_id: line._is});
         let selectedListId = this.state.selectedListId;
         let index = -1;
 
@@ -153,6 +154,10 @@ export class LinesOnTab extends Component {
         } else {
             const _id = line._id;
             delete line._id;
+
+            // if (oldLine.car._str != line.car._str) {
+            //     ApiRentals.update({_id: oldLine.rentalId}, {$set: {car: line.car}})
+            // }
 
             ApiLines.update({_id: _id }, {$set: line });
             const car = find(this.props.cars, ['_id', line.car]);
