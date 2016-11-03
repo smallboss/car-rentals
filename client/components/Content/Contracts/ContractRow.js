@@ -6,7 +6,7 @@ import { ApiInvoices } from '/imports/api/invoices';
 import { ApiLines } from '/imports/api/lines';
 import { createContainer } from 'meteor/react-meteor-data';
 
-export default class ContractRow extends Component {
+export class ContractRow extends Component {
     constructor(props) {
         super(props);
     }
@@ -55,6 +55,7 @@ export default class ContractRow extends Component {
 
 
         const renderTotalToInvoice = () => {
+            /*
             let totalToInvoice = 0;
 
             if (item.invoicesId) {
@@ -71,7 +72,7 @@ export default class ContractRow extends Component {
                 })
             }
 
-            return totalToInvoice;
+            return totalToInvoice;*/
         }
 
 
@@ -119,7 +120,6 @@ export default class ContractRow extends Component {
                 </td>
                 <td onClick={onClick} >{ item.codeName }</td>
                 <td onClick={onClick} >{ renderLastInvoiceDate() }</td>
-                <td onClick={onClick} >{ renderTotalToInvoice() }</td>
                 <td onClick={onClick} >{ item.startDate }</td>
                 <td onClick={onClick} >{ item.endDate }</td>
                 <td onClick={onClick} >{ item.status }</td>

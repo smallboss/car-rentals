@@ -7,7 +7,7 @@ import { ApiLines } from '/imports/api/lines.js';
 import TableHeadButtons from './TableHeadButtons.js';
 import LineTabRow from './LineTabRow.js';
 
-export default class LinesOnTab extends Component {
+export class LinesOnTab extends Component {
     constructor(props) {
         super(props); 
 

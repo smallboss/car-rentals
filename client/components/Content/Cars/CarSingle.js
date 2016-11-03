@@ -17,7 +17,7 @@ import Tolls from '../Tolls'
 import './carStyle.css'
 
 
-export default class CarSingle extends Component {
+export class CarSingle extends Component {
   constructor(props, context) {
     super(props, context);
 
@@ -168,7 +168,7 @@ export default class CarSingle extends Component {
     const carId = newCarData._id;
     delete newCarData._id;
 
-    ApiCars.update(carId, newCarData);
+    ApiCars.update(carId, {$set: newCarData});
 
     newCarData._id = carId;
 
@@ -181,7 +181,7 @@ export default class CarSingle extends Component {
 
     selectedItems.map((delMaintenance) => {
       car.maintenance.map((carMaintenance, key) => {
-        if (carMaintenance._id == delMaintenance._id) {
+        if (carMaintenance._id._str == delMaintenance._id._str) {
           maintenance.splice(key, 1);
         }
       })
@@ -192,7 +192,7 @@ export default class CarSingle extends Component {
     const carId = car._id;
     delete car._id;
 
-    ApiCars.update(carId, car);
+    ApiCars.update(carId, {$set: car});
 
     car._id = carId;
 

@@ -26,11 +26,12 @@ export default class TableOnTab extends Component {
 
 
     handleSelectAll(){
-        let { selectedAll } = this.state;
+        let { selectedAll, allowEdit } = this.state;
+        allowEdit = selectedAll ? false : allowEdit;
         const selectedItems  = selectedAll ? [] : cloneDeep(this.state.maintenanceList);
 
         this.selectAll.checked = !selectedAll;
-        this.setState({selectedItems, selectedAll: !selectedAll});
+        this.setState({selectedItems, selectedAll: !selectedAll, allowEdit});
     }
 
 
@@ -133,9 +134,12 @@ export default class TableOnTab extends Component {
                                 ? this.state.allowEdit
                                 : false
 
+        this.selectAll.checked = false;
+
         this.setState({
             selectedItems: newSelMaintenanceList, 
-            allowEdit: newAllowEdit
+            allowEdit: newAllowEdit,
+            selectedAll: false
         });
 
         this.props.onSaveMaintenance(maintenance, selectedItemsID);
@@ -168,7 +172,8 @@ export default class TableOnTab extends Component {
         const t = clone(this.state.selectedItems);
         this.props.onRemove(t);
         
-        this.setState({selectedItems: []});
+        this.selectAll.checked = false;
+        this.setState({selectedItems: [], selectedAll: false});
     }
 
 
@@ -194,13 +199,21 @@ export default class TableOnTab extends Component {
 
         const renderHeadCheckBox = () => {
             if (!this.props.readOnly ){
-                return (
-                  <th className="noPrint">
-                    <input type="checkbox" 
-                           ref={(ref) => this.selectAll = ref}
-                           onChange={this.handleSelectAll} />
-                  </th>
-                )
+                if (this.props.maintenanceList.length) {
+                    return (
+                        <th className="noPrint">
+                            <input  type="checkbox" 
+                                    ref={(ref) => this.selectAll = ref}
+                                    onChange={this.handleSelectAll} />
+                        </th>
+                    )
+                } else {
+                    return (
+                        <th className="noPrint">
+                            <input  type="checkbox" disabled />
+                        </th>
+                    )
+                }
             }
 
           return null;

@@ -276,7 +276,6 @@ class Contracts extends Component {
               <th>Customer</th>
               <th>Contract ID</th>
               <th>Last invoice Date</th>
-              <th>Total to invoice</th>
               <th>Start Date</th>
               <th>End Date</th>
               <th>Status</th>

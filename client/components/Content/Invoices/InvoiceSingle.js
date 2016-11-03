@@ -8,7 +8,7 @@ import { ApiInvoices } from '/imports/api/invoices.js'
 import { ApiPayments } from '/imports/api/payments.js'
 import { ApiCars } from '/imports/api/cars.js'
 import { ApiLines } from '/imports/api/lines.js'
-import { ApiRentals } from '/imports/api/rentals.js'
+import { ApiRentals, removeRental } from '/imports/api/rentals.js'
 import { ApiContracts } from '/imports/api/contracts'
 import { ApiUsers } from '/imports/api/users'
 import { ApiYearWrite } from '/imports/api/yearWrite'
@@ -27,7 +27,7 @@ import './invoiceStyle.css'
 import '/client/main.css'
 
 
-export default class InvoiceSingle extends Component {
+export class InvoiceSingle extends Component {
   constructor(props, context) {
     super(props, context);
 
@@ -56,6 +56,22 @@ export default class InvoiceSingle extends Component {
     this.handleEdit = this.handleEdit.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
     this.handleSendByEmail = this.handleSendByEmail.bind(this);
+    this.pullLineId = this.pullLineId.bind(this);
+  }
+
+  pullLineId(lineId) {
+    let { invoice } = this.state;
+    let index = -1;
+
+    if(!invoice.linesId) invoice.linesId = [];
+    invoice.linesId.map((el, key) => {
+      if (lineId._str == el._str)
+        index = key;
+    })
+
+    if (index === -1) invoice.linesId.push(lineId);
+
+    this.setState({invoice});
   }
 
 // ====================== ON CHANGE ======================
@@ -148,7 +164,7 @@ export default class InvoiceSingle extends Component {
 
     linesId.map((lineId) => {
       storageLines.map((line, key) => {
-        if (lineId == line._id) 
+        if (lineId._str == line._id._str) 
           storageLines.splice(key, 1);
       })
     })
@@ -163,16 +179,18 @@ export default class InvoiceSingle extends Component {
 
 
     if(this.state.isNew){
+      const invoiceLast = ApiInvoices.find().fetch().reverse()[0];
+      let invoicesNumb = invoiceLast.codeName ? parseInt((invoiceLast.codeName.split('/'))[2])+1+'' : '1';
+
       invoiceId = new Mongo.ObjectID();
       newInvoice._id = invoiceId;
       if (this.props.contract) newInvoice.contractId = this.props.contract._id;
       ApiInvoices.insert(newInvoice);
 
-      let yearWrite = ApiYearWrite.findOne({year: '2016'});
-      let invoicesNumb = '1';
+      let yearWrite = ApiYearWrite.findOne({year: (new Date()).getFullYear()});
 /////
       if (yearWrite) {
-        if(!yearWrite.invoicesNumb) yearWrite.invoicesNumb = '0';
+        if(!yearWrite.invoicesNumb) yearWrite.invoicesNumb = invoicesNumb-1;
         yearWrite.invoicesNumb = ''+(parseInt(yearWrite.invoicesNumb)+1);
         invoicesNumb = parseInt(yearWrite.invoicesNumb);
       } else {
@@ -233,6 +251,11 @@ export default class InvoiceSingle extends Component {
     } else {
       invoiceId = newInvoice._id;
       delete newInvoice._id;
+      let inv = ApiInvoices.findOne({_id: invoiceId});
+      if (inv) {
+        newInvoice.linesId = inv.linesId;
+        newInvoice.paymentsId = inv.paymentsId;
+      }
       ApiInvoices.update(invoiceId, {$set: newInvoice});
 
       if (newInvoice.paymentsId) {
@@ -259,7 +282,7 @@ export default class InvoiceSingle extends Component {
   handleEdit() {
     this.setState({
         editable: !this.state.editable, 
-        dispInvoice: clone(this.state.invoice), 
+        dispInvoice: clone(this.state.invoice),
         allowSave: this.state.invoice.customerId
     });
   }
@@ -274,6 +297,8 @@ export default class InvoiceSingle extends Component {
     })
 
     map(this.state.invoice.linesId, (el) => {
+      const rentalId = ApiLines.find({_id: el}).rentalId;
+      // removeRental(rentalId);
       ApiLines.remove({_id: el});
     })
 
@@ -507,7 +532,8 @@ export default class InvoiceSingle extends Component {
                     onAddNewLine={this.handleAddNewLine}
                     onDeleteLines={this.handleDeleteLines}
                     isNew={this.state.isNew}
-                    readOnly={false} />
+                    readOnly={false}
+                    pullLineId={this.pullLineId} />
                 {
                   //invoice single: remove payment list from invoice lines tab
                   /*
