@@ -12,7 +12,7 @@ import { ApiInvoices } from '/imports/api/invoices'
 import HeadSingle from './HeadSingle.js';
 import { browserHistory } from 'react-router';
 import React, { Component } from 'react';
-import { clone, cloneDeep, reverse, find } from 'lodash';
+import { clone, cloneDeep, reverse, find, sortBy } from 'lodash';
 import { getPaymentMsg } from '/client/helpers/generatorTextMessages.js'
 
 import { paymentStateTypes } from '/imports/startup/typesList.js';
@@ -71,8 +71,6 @@ export class PaymentSingle extends Component {
               (value.length >= 10));
 
     value = isNaN(parseInt(value)) ? '0' : parseInt(value)+'';
-
-    console.log('value', value);
 
     newPayment.amount = isDepr ?  newPayment.amount : value;
     this.setState({dispPayment: newPayment});
@@ -142,14 +140,16 @@ export class PaymentSingle extends Component {
     let paymentId;
 
     if(this.state.isNew){
-      const paymentLast = ApiPayments.find().fetch().reverse()[0];
-      let paymentsNumb = paymentLast.codeName ? parseInt((paymentLast.codeName.split('/'))[2])+1+'' : '1';
+      const payments = ApiPayments.find().fetch();
+      let paymentLast;
+      if (payments.length){ paymentLast = (sortBy(payments, 'codeName'))[payments.length-1]} ;
+      let paymentsNumb = paymentLast && paymentLast.codeName ? parseInt((paymentLast.codeName.split('/'))[2])+1+'' : '1';
 
       paymentId = new Mongo.ObjectID();
       newPayment._id = paymentId;
       ApiPayments.insert(newPayment);
 
-      let yearWrite = ApiYearWrite.findOne({year: (new Date()).getFullYear()});
+      let yearWrite = ApiYearWrite.findOne({year: (new Date()).getFullYear()+''});
 
       if (yearWrite) {
         if(!yearWrite.paymentsNumb) yearWrite.paymentsNumb = paymentsNumb-1;

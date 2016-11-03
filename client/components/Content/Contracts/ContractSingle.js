@@ -9,13 +9,14 @@ import { ApiUsers } from '/imports/api/users'
 import { ApiContracts } from '/imports/api/contracts'
 import { ApiLines } from '/imports/api/lines'
 import { ApiYearWrite } from '/imports/api/yearWrite.js';
+import { ApiRentals, removeRental } from '/imports/api/rentals.js'
 import LinesOnTab from './LinesOnTab/LinesOnTab.js';
 import InvSettings from './InvSettings.js';
 import HeadSingle from './HeadSingle.js';
 import TopDetailsTable from './TopDetailsTable.js';
 import { browserHistory } from 'react-router';
 import React, { Component } from 'react';
-import { clone, cloneDeep, reverse, concat, find, compact } from 'lodash';
+import { clone, cloneDeep, reverse, concat, find, compact, sortBy } from 'lodash';
 import { getContractMsg } from '/client/helpers/generatorTextMessages.js'
 
 import { contractStateTypes } from '/imports/startup/typesList.js';
@@ -261,15 +262,19 @@ export class ContractSingle extends Component {
 
 
     if(this.state.isNew){
+      const contracts = ApiContracts.find().fetch();
+      let contractLast;
+      if (contracts.length){ contractLast = (sortBy(contracts, 'codeName'))[contracts.length-1]} ;
+      let contractsNumb = contractLast && contractLast.codeName ? parseInt((contractLast.codeName.split('/'))[2])+1+'' : '1';
+
       contractId = new Mongo.ObjectID();
       newContract._id = contractId;
       ApiContracts.insert(newContract);
 
-      let yearWrite = ApiYearWrite.findOne({year: '2016'});
-      let contractsNumb = '1';
+      let yearWrite = ApiYearWrite.findOne({year: (new Date()).getFullYear()+''});
 
       if (yearWrite) {
-        if(!yearWrite.contractsNumb) yearWrite.contractsNumb = '0';
+        if(!yearWrite.contractsNumb) yearWrite.contractsNumb = contractsNumb-1;
         yearWrite.contractsNumb = ''+(parseInt(yearWrite.contractsNumb)+1);
         contractsNumb = parseInt(yearWrite.contractsNumb);
       } else {
@@ -347,6 +352,8 @@ export class ContractSingle extends Component {
     })
     // REMOVE LINES ========================
     linesId.map((el) => {
+      const line = ApiLines.findOne({_id: el});
+      if (line) removeRental(line.rentalId);
       ApiLines.remove({_id: el});
     })
 

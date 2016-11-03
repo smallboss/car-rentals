@@ -9,8 +9,11 @@ const rentals = new Mongo.Collection('rentals');
 export const ApiRentals = rentals;// = new Mongo.Collection('rentals');
 
 export const removeRental = (rentalId) => {
-    const customerId = rentals.findOne({_id: rentalId}).customerId;
-    Meteor.users.update({_id: customerId}, {$pull: {'profile.rentals': rentalId}});
+    const customer = rentals.findOne({_id: rentalId});
+
+    if (customer) 
+      Meteor.users.update({_id: customer.customerId}, {$pull: {'profile.rentals': rentalId}});
+    
     rentals.remove(rentalId);
 }
 
