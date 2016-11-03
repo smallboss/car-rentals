@@ -320,12 +320,12 @@ class Customer extends React.Component {
                                 <div className='col-xs-6'>
                                     <img src={imgId} />
                                     <input type='file' id='imgId' className='form-control' accept='image/*' disabled={editAble} />
-                                    {(this.state.loginLevel === 3) ? <a href={imgId} download>Download Id image</a> : ''}
+                                    {(imgId.length > 0 && this.state.loginLevel === 3) ? <a href={imgId} download>Download Id image</a> : ''}
                                 </div>
                                 <div className='col-xs-6'>
                                     <img src={imgLicense} />
                                     <input type='file' id='imgLicense' className='form-control' accept='image/*' disabled={editAble} />
-                                    {(this.state.loginLevel === 3) ? <a href={imgLicense} download>Download License image</a> : ''}
+                                    {(imgLicense.length > 0 && this.state.loginLevel === 3) ? <a href={imgLicense} download>Download License image</a> : ''}
                                 </div>
                             </div>
                             <div id='div_car_request'  className='inner-div-users-edit'>
