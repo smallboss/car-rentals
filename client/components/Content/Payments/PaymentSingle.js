@@ -21,7 +21,7 @@ import './paymentStyle.css'
 import '/client/main.css'
 
 
-export default class PaymentSingle extends Component {
+export class PaymentSingle extends Component {
   constructor(props, context) {
     super(props, context);
 
@@ -142,15 +142,17 @@ export default class PaymentSingle extends Component {
     let paymentId;
 
     if(this.state.isNew){
+      const paymentLast = ApiPayments.find().fetch().reverse()[0];
+      let paymentsNumb = paymentLast.codeName ? parseInt((paymentLast.codeName.split('/'))[2])+1+'' : '1';
+
       paymentId = new Mongo.ObjectID();
       newPayment._id = paymentId;
       ApiPayments.insert(newPayment);
 
-      let yearWrite = ApiYearWrite.findOne({year: '2016'});
-      let paymentsNumb = '1';
+      let yearWrite = ApiYearWrite.findOne({year: (new Date()).getFullYear()});
 
       if (yearWrite) {
-        if(!yearWrite.paymentsNumb) yearWrite.paymentsNumb = '0';
+        if(!yearWrite.paymentsNumb) yearWrite.paymentsNumb = paymentsNumb-1;
         yearWrite.paymentsNumb = ''+(parseInt(yearWrite.paymentsNumb)+1);
         paymentsNumb = parseInt(yearWrite.paymentsNumb);
       } else {

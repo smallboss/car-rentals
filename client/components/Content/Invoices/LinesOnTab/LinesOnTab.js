@@ -9,7 +9,7 @@ import { ApiRentals, removeRental } from '/imports/api/rentals.js';
 import TableHeadButtons from './TableHeadButtons.js';
 import LineTabRow from './LineTabRow.js';
 
-export default class LinesOnTab extends Component {
+export class LinesOnTab extends Component {
     constructor(props, context) {
         super(props, context); 
 
@@ -107,12 +107,16 @@ export default class LinesOnTab extends Component {
         let selectedListId = this.state.selectedListId;
             selectedListId.push(lineId);
 
-        this.setState({ selectedListId, isEdit: true });
+        // this.props.pullLineId(lineId);
+
+        this.setState({ selectedListId, isEdit: true});
     }
+
 
     handleEditLines(){
         this.setState({isEdit: !this.state.isEdit})
     }
+
 
     handleRemoveLines(){
         if (this.props.isNew) {
@@ -129,12 +133,23 @@ export default class LinesOnTab extends Component {
             })
         }
 
-        this.setState({selectedListId: [], isEdit: false});
+        this.selectAll.checked = false;
+        this.setState({selectedListId: [], isEdit: false, selectedAll: false});
     }
 
+
     handleSaveLine(line){
+        let selectedListId = this.state.selectedListId;
+        let index = -1;
+
         if (this.props.isNew) {
             this.props.onSaveLine(line)
+
+            selectedListId.map((el, key) => {
+                if (el._str == line._id._str) {
+                    index = key;
+                }
+            })
         } else {
             const _id = line._id;
             delete line._id;
@@ -147,14 +162,22 @@ export default class LinesOnTab extends Component {
                                                             dateTo: line.dateTo,
                                                             plateNumber: car ? car.plateNumber : ''
                                                         }});
+
+
+            selectedListId.map((el, key) => {
+                if (el._str == _id._str) {
+                    index = key;
+                }
+            })
         }
 
-        let selectedListId = this.state.selectedListId;
-        selectedListId.splice(selectedListId.indexOf(line._id), 1);
+
+        selectedListId.splice(index, 1);
 
         const isEdit = (selectedListId.length === 0) ? false : this.state.isEdit;
 
-        this.setState({ selectedListId, isEdit });
+        this.selectAll.checked = false;
+        this.setState({ selectedListId, isEdit, selectedAll: false });
     }
 // END =================== ADD = EDIT = REMOVE = SAVE ======================
 
@@ -236,10 +259,7 @@ export default class LinesOnTab extends Component {
                 else {
                     return (
                       <th className="noPrint">
-                        <input type="checkbox" 
-                               ref={(ref) => this.selectAll = ref}
-                               onChange={this.handleSelectAll}
-                               disabled />
+                        <input type="checkbox" disabled />
                       </th>
                     )
                 }

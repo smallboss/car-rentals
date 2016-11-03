@@ -8,7 +8,7 @@ import { ApiYearWrite } from '/imports/api/yearWrite';
 import TableHeadButtons from './TableHeadButtons.js';
 import PaymentTabRow from './PaymentTabRow.js';
 
-export default class PaymentsOnTab extends Component {
+export class PaymentsOnTab extends Component {
     constructor(props, context) {
         super(props, context); 
 
@@ -56,7 +56,6 @@ export default class PaymentsOnTab extends Component {
           currentSelectedAll = false;
           this.selectAll.checked = currentSelectedAll;
         }
-
 
         this.setState({selectedListId, isEdit, selectedAll: currentSelectedAll});
     }
@@ -117,11 +116,14 @@ export default class PaymentsOnTab extends Component {
 
 
     handleSelectAll(){
-        let { selectedAll } = this.state;
-        const selectedListId  = selectedAll ? [] : cloneDeep(this.props.paymentsId);
+        let { selectedAll, isEdit } = this.state;
+        isEdit = selectedAll ? false : isEdit;
+        const selectedListId  = selectedAll
+                                                        ? [] 
+                                                        : cloneDeep(this.props.paymentsId);
 
         this.selectAll.checked = !selectedAll;
-        this.setState({selectedListId, selectedAll: !selectedAll});
+        this.setState({selectedListId, selectedAll: !selectedAll, isEdit});
     }
 
 
@@ -140,7 +142,8 @@ export default class PaymentsOnTab extends Component {
             ApiPayments.remove(itemId);
         })
 
-        this.setState({selectedListId: [], isEdit: false});
+        this.selectAll.checked = false;
+        this.setState({selectedListId: [], isEdit: false, selectedAll: false});
     }
 
     handleSavePayment(payment){
@@ -150,11 +153,20 @@ export default class PaymentsOnTab extends Component {
         ApiPayments.update(_id, {$set: payment });
 
         let selectedListId = this.state.selectedListId;
-        selectedListId.splice(selectedListId.indexOf(_id), 1);
+        let index = -1;
 
-         const isEdit = (selectedListId.length === 0) ? false : this.state.isEdit;
+        selectedListId.map((el, key) => {
+            if (el._str == _id._str) {
+                index = key;
+            }
+        })
 
-        this.setState({ selectedListId, isEdit });
+        selectedListId.splice(index, 1);
+
+        const isEdit = (selectedListId.length === 0) ? false : this.state.isEdit;
+
+        this.selectAll.checked = false;
+        this.setState({ selectedListId, isEdit, selectedAll: false });
     }
 // END =================== ADD = EDIT = REMOVE = SAVE ======================
 
@@ -180,13 +192,21 @@ export default class PaymentsOnTab extends Component {
 
         const renderHeadCheckBox = () => {
             if (!this.props.readOnly ){
-                return (
-                  <th className="noPrint">
-                    <input type="checkbox" 
-                           ref={(ref) => this.selectAll = ref}
-                           onChange={this.handleSelectAll} />
-                  </th>
-                )
+                if (paymentListId.length) {
+                    return (
+                        <th className="noPrint">
+                            <input type="checkbox" 
+                                   ref={(ref) => this.selectAll = ref}
+                                   onChange={this.handleSelectAll} />
+                        </th>
+                    )
+                } else {
+                    return (
+                        <th className="noPrint">
+                            <input type="checkbox" disabled />
+                        </th>
+                    )
+                }
             }
 
             return null;

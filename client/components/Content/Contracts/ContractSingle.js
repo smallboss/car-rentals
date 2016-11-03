@@ -23,7 +23,7 @@ import { contractStateTypes } from '/imports/startup/typesList.js';
 import '/client/main.css'
 
 
-export default class ContractSingle extends Component {
+export class ContractSingle extends Component {
   constructor(props, context) {
     super(props, context);
 
