@@ -9,12 +9,15 @@ import { imgToBase64 } from '../../../helpers/handlerImages'
 import LoginButtons from '../Login/LoginButtons'
 import './style.css'
 
+const DatePicker = require('react-bootstrap-date-picker')
+
 class UserProfile extends React.Component {
     constructor(props) {
         super(props)
         this.state = {user: props.user, editAble: 0, toShowLogin: (Meteor.userId()) ? 0 : 1}
         this.handlerButtonsEdit = this.handlerButtonsEdit.bind(this)
         this.handlerInputs = this.handlerInputs.bind(this)
+        this.datePickerHandler = this.datePickerHandler.bind(this)
     }
     componentWillReceiveProps (nextProps) {
         this.setState({user: nextProps.user, toShowLogin: (Meteor.userId()) ? 0 : 1})
@@ -111,6 +114,30 @@ class UserProfile extends React.Component {
         }
         
     }
+    datePickerHandler(date) {
+        let checkBirthYear = +date.slice(0, 4),
+            checkBirthMonth = +date.slice(5, 7),
+            checkBirthDay = +date.slice(8, 10),
+            _date = new Date(),
+            defaultDate = new Date().setFullYear(new Date().getFullYear() - 18),
+            user = this.state.user
+        user.profile['birthDate'] = date.slice(0,10)
+        if(checkBirthYear > _date.getFullYear() - 18) {
+            alert('User must be over then 18 years')
+            user.profile['birthDate'] = defaultDate
+        } else if (checkBirthYear == _date.getFullYear() - 18) {
+            if(checkBirthMonth > _date.getMonth() + 1) {
+                alert('User must be over then 18 years')
+                user.profile['birthDate'] = defaultDate
+            } else if (checkBirthMonth == _date.getMonth() + 1) {
+                if(checkBirthDay > _date.getDay() - 1) {
+                    alert('User must be over then 18 years')
+                    user.profile['birthDate'] = defaultDate
+                }
+            }
+        }
+        this.setState({user: user})
+    }
     render () {
         if(this.state.toShowLogin) {
             return (
@@ -167,6 +194,12 @@ class UserProfile extends React.Component {
                                 <label htmlFor='address' className='col-xs-4'>Address</label>
                                 <div className='col-xs-8'>
                                     <input type='text' id='address' className='form-control' value={address} disabled={editAble} />
+                                </div>
+                            </div><br />
+                            <div className='form-group'>
+                                <label htmlFor='birthdate' className='col-xs-4'>Birth Date</label>
+                                <div className='col-xs-8'>
+                                    <DatePicker dateFormat='MM/DD/YYYY' value={birthDate} name='check-picker' onChange={this.datePickerHandler} disabled={editAble} />
                                 </div>
                             </div><br />
                             <div className='form-group'>

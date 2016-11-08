@@ -217,7 +217,7 @@ class Customer extends React.Component {
             checkBirthMonth = +date.slice(5, 7),
             checkBirthDay = +date.slice(8, 10),
             _date = new Date(),
-            defaultDate = new Date().setFullYear(new Date().getFullYear() - 18)
+            defaultDate = new Date().setFullYear(new Date().getFullYear() - 18),
             customer = this.state.customer
         customer.profile['birthDate'] = date.slice(0,10)
         if(checkBirthYear > _date.getFullYear() - 18) {
