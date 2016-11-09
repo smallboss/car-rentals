@@ -155,10 +155,6 @@ export class LinesOnTab extends Component {
             const _id = line._id;
             delete line._id;
 
-            // if (oldLine.car._str != line.car._str) {
-            //     ApiRentals.update({_id: oldLine.rentalId}, {$set: {car: line.car}})
-            // }
-
             ApiLines.update({_id: _id }, {$set: line });
             const car = find(this.props.cars, ['_id', line.car]);
             ApiRentals.update({_id: line.rentalId}, {$set: {car: line.car, 

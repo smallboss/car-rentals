@@ -200,15 +200,32 @@ class CarsReport extends Component {
            { 
               this.state.selectedCarsID.map((el, key) => {
                 const currentCar = find(this.props.cars, {_id: new Mongo.ObjectID(el)});
+          
+                totalExpense = 0;
+                totalIncome = 0;
+  
+                if (currentCar.maintenance) {
+                  currentCar.maintenance.map((el) => {
+                    totalExpense += parseInt(el.amount);
+                  })
+                }
+  
+
+                this.props.lines.map((lineEl) => {
+                  if (lineEl.car._str == currentCar._id._str) {
+                    totalIncome += parseInt(lineEl.amount);
+                  }
+                })
+
 
                 return (
                   <tr key={`tr-${key}`}>
-                    <td>{ currentCar.name+'' }</td>
-                    <td>{ currentCar.plateNumber+'' }</td>
-                    <td>{ currentCar.status+'' }</td>
-                    <td>{ currentCar.totalExpense }</td>
-                    <td>{ currentCar.totalIncome }</td>
-                    <td>{ currentCar.profit }</td>
+                    <td>{ currentCar.name ? + currentCar.name+'' : '' }</td>
+                    <td>{ currentCar.plateNumber ? currentCar.plateNumber+'' : '' }</td>
+                    <td>{ currentCar.status ? currentCar.status+'' : '' }</td>
+                    <td>{ totalExpense }</td>
+                    <td>{ totalIncome }</td>
+                    <td>{ totalIncome - totalExpense }</td>
                   </tr>
                 )
               })
