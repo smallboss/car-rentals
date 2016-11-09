@@ -212,7 +212,7 @@ class CarsReport extends Component {
   
 
                 this.props.lines.map((lineEl) => {
-                  if (lineEl.car._str == currentCar._id._str) {
+                  if (lineEl.car && lineEl.car._str == currentCar._id._str) {
                     totalIncome += parseInt(lineEl.amount);
                   }
                 })
