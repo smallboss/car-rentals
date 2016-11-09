@@ -206,21 +206,26 @@ class CarsReport extends Component {
   
                 if (currentCar.maintenance) {
                   currentCar.maintenance.map((el) => {
-                    totalExpense += parseInt(el.amount);
+                    const amount = !isNaN(parseInt(el.amount)) ? parseInt(el.amount) : 0;
+                    totalExpense += amount;
                   })
                 }
   
 
                 this.props.lines.map((lineEl) => {
                   if (lineEl.car && lineEl.car._str == currentCar._id._str) {
-                    totalIncome += parseInt(lineEl.amount);
+                    const amount = !isNaN(parseInt(lineEl.amount)) ? parseInt(lineEl.amount) : 0;
+                    totalIncome += amount;
                   }
                 })
 
 
+                console.log('currentCar.name', currentCar.name);
+
+
                 return (
                   <tr key={`tr-${key}`}>
-                    <td>{ currentCar.name ? + currentCar.name+'' : '' }</td>
+                    <td>{ currentCar.name ? currentCar.name+'' : '' }</td>
                     <td>{ currentCar.plateNumber ? currentCar.plateNumber+'' : '' }</td>
                     <td>{ currentCar.status ? currentCar.status+'' : '' }</td>
                     <td>{ totalExpense }</td>
