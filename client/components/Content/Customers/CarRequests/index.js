@@ -81,9 +81,12 @@ class CarRequests extends React.Component {
                             alert(err)
                         } else {
                             //alert('Email was sent. Our manager will be connect with You soon')
-                            location.reload()
+                            //location.reload()
                         }
                     })
+                }
+                if(_arrNew.length > 0) {
+                    alert('Emails was sent. Our managers will be contact with You soon')
                 }
                 this.setState({arrToTable: currentArray, addNewField: 0})
                 this.forceUpdate()
