@@ -3,13 +3,41 @@
  */
 import React from 'react'
 import { Meteor } from 'meteor/meteor'
+import { Mongo } from 'meteor/mongo'
 import { createContainer } from 'meteor/react-meteor-data'
+const DatePicker = require('react-bootstrap-date-picker')
+
+var newUser = {
+    _new: 1,
+    _id: new Mongo.ObjectID(),
+    username: '',
+    password: '',
+    email: '',
+    profile: {
+        userType: 'employee',
+        name: '',
+        birthDate: '',
+        phone: '',
+        address: '',
+        carRequest: [],
+        rentals: [],
+        payments: [],
+        _images: {
+            imgId: '',
+            imgLicense: '',
+            imgUser: ''
+        }
+    }
+}
 
 class UserSingle extends React.Component {
     constructor (props, context) {
         super(props)
-        this.state = {loginLevel: context.loginLevel, user: props.user, editAble: 0}
+        let user = (props.params.id === 'new') ? newUser : props.user,
+            editAble = 0
+        this.state = {loginLevel: context.loginLevel, user, editAble}
         this.handlerEditUser = this.handlerEditUser.bind(this)        
+        this.datePickerHandler = this.datePickerHandler.bind(this)        
     }
     componentWillReceiveProps (nextProps, nextContext) {
         let user = nextProps.user,
@@ -18,6 +46,11 @@ class UserSingle extends React.Component {
         _newStateEdit = (user.profile.userType == 'admin') ? 1 : 0
         this.setState({user: user, editAble: _newStateEdit, loginLevel})
         this.forceUpdate()
+    }
+    componentDidMount() {
+        if(this.state.user && this.state.user._new) {
+            this.handlerEditUser({target: {id: 'button_edit'}})
+        }
     }
     handlerNavUserEdit (e) {
         let li_s = $('.nav-user-edit li').removeClass('active-href-nav'),
@@ -53,11 +86,13 @@ class UserSingle extends React.Component {
                         if(typeof _newValue == 'string') {
                             if (_target == 'username') {
                                 user[_target] = _newValue
+                            } else if(_target == 'password' && user._new) {
+                                user[_target] = _newValue
                             } else {
                                 if (_target == 'email') {
                                     if(this.props.params.id == 'new') {
                                         user[_target] = _newValue
-                                        user.emails[0].address = _newValue
+                                        user.emails = [{address: _newValue}]
                                     } else {
                                         user.emails[0].address = _newValue
                                     }
@@ -72,6 +107,34 @@ class UserSingle extends React.Component {
                 document.getElementById('button_save').addEventListener('click', this.handlerEditUser)
                 break
             case 'button_save':
+                if(_newState._new) {
+                    if(_newState.username.length < 3) {
+                        alert('Username must be large then 3 symbols')
+                        return false
+                    } else if (_newState.password.length < 6) {
+                        alert('Password must be large then 6 symbols')
+                        return false
+                    } else if (this.refPassword.value !== this.refRepeatPassword.value) {
+                        alert('Input right repeat password please')
+                        return false
+                    } else if (_newState.profile.birthDate.length == 0) {
+                        alert('User`s age must be over then 18 years')
+                        return false
+                    }
+                    delete _newState._new
+                    Meteor.call('createNewUser', _newState, (err, result) => {
+                        if(err) {
+                            alert(err.reason)
+                            _newState._new = 1
+                            this.setState({user: _newState})
+                        } else {
+                            alert('Congrats. New user was created')
+                            document.location.href = '/managePanel/user_single/' + result
+                        }
+                    })
+                    return
+                }
+                
                 delete _newState._id
                 Meteor.users.update(_id, {$set: _newState}, false, (err, result) => {
                     this.setState({editAble: 0})
@@ -110,12 +173,35 @@ class UserSingle extends React.Component {
         delete this.state.user._id
         Meteor.users.update(_id, {$set: _state})
     }
+    datePickerHandler(date) {
+        let checkBirthYear = +date.slice(0, 4),
+            checkBirthMonth = +date.slice(5, 7),
+            checkBirthDay = +date.slice(8, 10),
+            _date = new Date(),
+            defaultDate = new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().slice(0, 10),
+            user = this.state.user
+        user.profile['birthDate'] = date.slice(0,10)
+        if(checkBirthYear > _date.getFullYear() - 18) {
+            alert('User must be over then 18 years')
+            user.profile['birthDate'] = defaultDate
+        } else if (checkBirthYear == _date.getFullYear() - 18) {
+            if(checkBirthMonth > _date.getMonth() + 1) {
+                alert('User must be over then 18 years')
+                user.profile['birthDate'] = defaultDate
+            } else if (checkBirthMonth == _date.getMonth() + 1) {
+                if(checkBirthDay > _date.getDate()) {
+                    alert('User must be over then 18 years')
+                    user.profile['birthDate'] = defaultDate
+                }
+            }
+        }
+        this.setState({user: user})
+    }
     render () {
         let editAble = (!this.state.editAble) ? 'disabled' : false
         let { _id, username } = this.state.user || [];
         let email = (this.state.user && this.state.user.emails) ? this.state.user.emails[0].address : ''
-        let { name, userType } = (this.state.user) ? this.state.user.profile : '';
-
+        let { name, userType, birthDate } = (this.state.user) ? this.state.user.profile : '';
         return (
             <div className='panel panel-default'>
                 <div className='panel-heading'>
@@ -127,7 +213,7 @@ class UserSingle extends React.Component {
                     <div className='col-xs-6'>
                         <div className='row m-t-1'>
                             <div className='form-group'>
-                                <label htmlFor='username' className='col-xs-2'>User Name</label>
+                                <label htmlFor='username' className='col-xs-3'>User Name</label>
                                 <div className='col-xs-8 form-horizontal'>
                                     <input type='text' id='username' className='form-control' value={username} disabled={editAble} />
                                 </div>
@@ -135,7 +221,7 @@ class UserSingle extends React.Component {
                         </div>
                         <div className='row m-t-1'>
                             <div className='form-group '>
-                                <label htmlFor='username' className='col-xs-2'>Name</label>
+                                <label htmlFor='username' className='col-xs-3'>Name</label>
                                 <div className='col-xs-8 form-horizontal'>
                                     <input type='text' id='name' className='form-control' value={name} disabled={editAble} />
                                 </div>
@@ -143,16 +229,24 @@ class UserSingle extends React.Component {
                         </div>
                         <div className='row m-t-1'>
                             <div className='form-group'>
-                                <label htmlFor='email' className='col-xs-2'>Email</label>
+                                <label htmlFor='email' className='col-xs-3'>Email</label>
                                 <div className='col-xs-8 form-horizontal'>
                                     <input type='email' id='email' className='form-control' value={email} disabled={editAble} />
                                 </div>
                             </div>
                         </div>
+                        <div className='row m-t-1'>
+                            <div className='form-group'>
+                                <label htmlFor='birthdate' className='col-xs-3'>Birth Date</label>
+                                <div className='col-xs-8 form-horizontal'>
+                                    {(editAble) ? <input type="date" className='form-control' value={birthDate} disabled='disabled'/> : <DatePicker dateFormat='MM/DD/YYYY' value={birthDate} name='check-picker' onChange={this.datePickerHandler} /> }
+                                </div>
+                            </div>
+                        </div>                        
                         {(this.state.loginLevel === 3 ) ?
                         <div className='row m-t-1'>
                             <div className='form-group'>
-                                <label htmlFor='password' className='col-xs-2'>Password</label>
+                                <label htmlFor='password' className='col-xs-3'>Password</label>
                                 <div className='col-xs-8 form-horizontal'>
                                     <input type='password' id='password' className='form-control' ref={(ref) => {this.refPassword = ref}} disabled={editAble} />
                                 </div>
@@ -161,7 +255,7 @@ class UserSingle extends React.Component {
                         {(this.state.loginLevel === 3 ) ?
                         <div className='row m-t-1'>
                             <div className='form-group'>
-                                <label htmlFor='repeat_password' className='col-xs-2'>Repeat Password</label>
+                                <label htmlFor='repeat_password' className='col-xs-3'>Repeat Password</label>
                                 <div className='col-xs-8 form-horizontal'>
                                     <input type='password' id='repeat_password' className='form-control' ref={(ref) => {this.refRepeatPassword = ref}} disabled={editAble} />
                                 </div>
@@ -170,7 +264,7 @@ class UserSingle extends React.Component {
                         {(this.state.loginLevel === 3 ) ?
                         <div className='row m-t-1'>
                             <div className='form-group'>
-                                <label htmlFor='userType' className='col-xs-2'>Role</label>
+                                <label htmlFor='userType' className='col-xs-3'>Role</label>
                                 <div className='col-xs-8 form-horizontal'>
                                     <select id='userType' className='form-control' value={userType} disabled={editAble}>
                                         <option value='customer'>Customer</option>
@@ -200,7 +294,7 @@ export default createContainer (({params}) => {
         }
     } else {
         return {
-            user: false
+            user: 'new'
         }
     }
 }, UserSingle)
