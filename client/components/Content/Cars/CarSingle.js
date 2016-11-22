@@ -2,6 +2,7 @@ import { Meteor } from 'meteor/meteor'
 import { Mongo } from 'meteor/mongo'
 import { createContainer } from 'meteor/react-meteor-data'
 import { ApiCars } from '/imports/api/cars.js'
+import { ApiLines } from '/imports/api/lines.js'
 import HeadSingle from './HeadSingle.js';
 import { browserHistory } from 'react-router';
 import React, { Component } from 'react';
@@ -16,11 +17,12 @@ import Tolls from '../Tolls'
 import './carStyle.css'
 
 
-export default class CarSingle extends Component {
-  constructor(props) {
-    super(props);
+export class CarSingle extends Component {
+  constructor(props, context) {
+    super(props, context);
 
     this.state = {
+      loginLevel: context.loginLevel,
       car: clone(this.props.car),
       dispCar: clone(this.props.car),
       isNew: this.props.isNew,
@@ -31,7 +33,6 @@ export default class CarSingle extends Component {
 
     this.onChangeName = this.onChangeName.bind(this);
     this.onChangePlateNumber = this.onChangePlateNumber.bind(this);
-    this.onChangeProfit = this.onChangeProfit.bind(this);
     this.onChangeStatus = this.onChangeStatus.bind(this);
     this.handleSave = this.handleSave.bind(this);
     this.handleEdit = this.handleEdit.bind(this);
@@ -39,8 +40,6 @@ export default class CarSingle extends Component {
     this.handleDelete = this.handleDelete.bind(this);
     this.onChangeFines = this.onChangeFines.bind(this);
     this.onChangeTolls = this.onChangeTolls.bind(this);
-    this.onChangeExpense = this.onChangeExpense.bind(this)
-    this.onChangeIncome = this.onChangeIncome.bind(this);
     this.onChangeDescription = this.onChangeDescription.bind(this);
     this.onChangeNotes = this.onChangeNotes.bind(this);
     this.handleSelect = this.handleSelect.bind(this);
@@ -62,36 +61,6 @@ export default class CarSingle extends Component {
     this.setState({dispCar: newCar});
   }
 
-  onChangeExpense(value) {
-    let newCar = this.state.dispCar;
-
-    value = (value!='' && isNaN(parseInt(value))) ? '0' : value;
-    let isDepr = false;
-
-    isDepr = ((parseInt(value) < 0) || 
-              (value.indexOf('e') != -1) || 
-              (value.indexOf('E') != -1) ||  
-              (value.length > 5));
-
-    newCar.totalExpense = isDepr ?  newCar.totalExpense : value;
-    this.setState({dispCar: newCar});
-  }
-
-  onChangeIncome(value) {
-    let newCar = this.state.dispCar;
-
-    value = (value!='' && isNaN(parseInt(value))) ? '0' : value;
-    let isDepr = false;
-
-    isDepr = ((parseInt(value) < 0) || 
-              (value.indexOf('e') != -1) || 
-              (value.indexOf('E') != -1) ||  
-              (value.length > 5));
-
-    newCar.totalIncome = isDepr ?  newCar.totalIncome : value;
-    this.setState({dispCar: newCar});
-  }
-
   onChangeName(value) {
     let newCar = this.state.dispCar;
     newCar.name = value;
@@ -101,18 +70,6 @@ export default class CarSingle extends Component {
   onChangePlateNumber(value) {
     let newCar = this.state.dispCar;
     newCar.plateNumber = value;
-    this.setState({dispCar: newCar});
-  }
-
-  onChangeProfit(value) {
-    let newCar = this.state.dispCar;
-    let isDepr = false;
-
-    isDepr = ((value.indexOf('e') != -1) || 
-              (value.indexOf('E') != -1) ||  
-              (value.length > 5));
-
-    newCar.profit = isDepr ? newCar.profit : value;
     this.setState({dispCar: newCar});
   }
 
@@ -135,7 +92,7 @@ export default class CarSingle extends Component {
   }
 
 
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps(nextProps, nextContext) {
     let c = nextProps.car;
 
     if (this.state.car) {
@@ -162,8 +119,8 @@ export default class CarSingle extends Component {
 
     this.setState({
       car: clone(c),
-      dispCar: dataDispCar
-      // editable: this.props.isNew
+      dispCar: dataDispCar,
+      loginLevel: nextContext.loginLevel
     });
   }
 
@@ -179,12 +136,11 @@ export default class CarSingle extends Component {
 
     newCar_id = id;
 
-
     this.setState({car: newCar, dispCar: newCar, editable: false});
   }
 
   handlePrint(){
-    console.log('PRINT >>>>');
+    window.print();
   }
 
   handleEdit() {
@@ -212,7 +168,7 @@ export default class CarSingle extends Component {
     const carId = newCarData._id;
     delete newCarData._id;
 
-    ApiCars.update(carId, newCarData);
+    ApiCars.update(carId, {$set: newCarData});
 
     newCarData._id = carId;
 
@@ -225,7 +181,7 @@ export default class CarSingle extends Component {
 
     selectedItems.map((delMaintenance) => {
       car.maintenance.map((carMaintenance, key) => {
-        if (carMaintenance._id == delMaintenance._id) {
+        if (carMaintenance._id._str == delMaintenance._id._str) {
           maintenance.splice(key, 1);
         }
       })
@@ -236,7 +192,7 @@ export default class CarSingle extends Component {
     const carId = car._id;
     delete car._id;
 
-    ApiCars.update(carId, car);
+    ApiCars.update(carId, {$set: car});
 
     car._id = carId;
 
@@ -258,7 +214,7 @@ export default class CarSingle extends Component {
     const carId = newCarData._id;
     delete newCarData._id;
 
-    ApiCars.update(carId, newCarData);
+    ApiCars.update(carId, {$set: newCarData});
 
     newCarData.maintenance.map((carMaintenance, key) => {
       if (carMaintenance._id == maintenance._id) {
@@ -299,27 +255,39 @@ export default class CarSingle extends Component {
                     onPrint={this.handlePrint}
                     onEdit={this.handleEdit}
                     onDelete={this.handleDelete}
-                    itemName={this.state.car.name}/>
+                    itemName={this.state.car.name}
+                    loginLevel={this.state.loginLevel} />
       )
     }
 
     if (this.state.car) {
 
       let {
+        _id,
         name,
         status,
         plateNumber,
-        profit,
         notes,
         description,
-        totalExpense,
-        totalIncome,
         fines,
         tolls,
         maintenance } = this.state.car;
 
-      if (!maintenance) maintenance = new Array();
+      
+      let totalExpense = 0,
+          totalIncome = 0;
 
+      maintenance.map((el) => {
+        totalExpense += parseInt(el.amount ? el.amount : 0);
+      })
+
+      this.props.carLines.map((el) => {
+        totalIncome += parseInt(el.amount ? el.amount : 0);
+      })
+
+      const profit = (parseInt(totalIncome) - parseInt(totalExpense))+'';
+
+      if (!maintenance) maintenance = new Array();
 
       const renderTopFields = () => {
         return (
@@ -396,24 +364,7 @@ export default class CarSingle extends Component {
 
               <div className="form-group profit col-xs-6">
                 <label htmlFor="carprofit" className='col-xs-3'>Profit</label>
-                {(() => {
-                  if (this.state.editable) {
-                    return (
-                      <div className=' col-xs-8 form-horizontal'>
-                        <input
-                          type="number"
-                          min="-99999"
-                          max="99999"
-                          id="carProfit"
-                          className="form-control "
-                          onChange={(e) => this.onChangeProfit(e.target.value)}
-                          value={ this.state.dispCar.profit }/>
-                      </div>
-                    )
-                  }
-
-                  return <div className='col-xs-8 m-t-05'>{profit}</div>
-                })()}
+                <div className='col-xs-8 m-t-05'>{profit}</div>
               </div>
             </div>
           </div>
@@ -432,8 +383,8 @@ export default class CarSingle extends Component {
               <li><a href="#fines" aria-controls="messages" role="tab" data-toggle="tab">Fines</a></li>
               <li><a href="#tolls" aria-controls="messages" role="tab" data-toggle="tab">Tolls</a></li>
               <li><a href="#notes" aria-controls="messages" role="tab" data-toggle="tab">Notes</a></li>
-              <li><a href="#totalExpense" aria-controls="settings" role="tab" data-toggle="tab">Total Expense</a></li>
-              <li><a href="#totalIncome" aria-controls="settings" role="tab" data-toggle="tab">Total income</a></li>
+              <li><a href="#totalExpense" aria-controls="messages" role="tab" data-toggle="tab">Total Expense</a></li>
+              <li><a href="#totalIncome" aria-controls="messages" role="tab" data-toggle="tab">Total income</a></li>
             </ul>
             <div className="tab-content">
               <div role="tabpanel" className="tab-pane p-x-1 active" id="description">
@@ -466,7 +417,8 @@ export default class CarSingle extends Component {
                   maintenanceList={this.state.car.maintenance}
                   onAddNew={this.onAddNewMaintenance}
                   onSaveMaintenance={this.onSaveMaintenance}
-                  onRemove={this.onRemoveMaintenance}/>
+                  onRemove={this.onRemoveMaintenance}
+                  loginLevel={this.state.loginLevel} />
 
               </div>
               <div role="tabpanel" className="tab-pane" id="fines">
@@ -499,37 +451,11 @@ export default class CarSingle extends Component {
                     )
                 })()}
               </div>
-              <div role="tabpanel" className="tab-pane" id="totalExpense">
-                {(() => {
-                  if (this.state.editable) {
-                    return (
-                      <input type="number"
-                             min="0"
-                             max="99999"
-                             className='form-control'
-                             onChange={(e) => this.onChangeExpense(e.target.value)}
-                             value={ this.state.dispCar.totalExpense }/>
-                    )
-                  }
-
-                  return <div>{totalExpense}</div>
-                })()}
+              <div role="tabpanel" className="tab-pane p-a-1" id="totalExpense">
+                <div>{ totalExpense }</div>
               </div>
-              <div role="tabpanel" className="tab-pane" id="totalIncome">
-                {(() => {
-                  if (this.state.editable) {
-                    return (
-                      <input type="number"
-                             min="0"
-                             max="99999"
-                             className='form-control'
-                             onChange={(e) => this.onChangeIncome(e.target.value)}
-                             value={ this.state.dispCar.totalIncome }/>
-                    )
-                  }
-
-                  return <div>{totalIncome}</div>
-                })()}
+              <div role="tabpanel" className="tab-pane p-a-1" id="totalIncome">
+                <div>{ totalIncome }</div>
               </div>
             </div>
           </div>
@@ -556,8 +482,14 @@ export default class CarSingle extends Component {
 }
 
 
+CarSingle.contextTypes = {
+  loginLevel: React.PropTypes.number.isRequired
+}
+
+
 export default createContainer(({params}) => {
   Meteor.subscribe('cars');
+  Meteor.subscribe('lines');
 
   let isNew = false;
   let carId = params.carId;
@@ -576,8 +508,13 @@ export default createContainer(({params}) => {
     browserHistory.push('/managePanel/cars');
   }
 
+  let car = ApiCars.findOne(idForQuery);
+
+  const carIdLines = (car != 'new') ? new Mongo.ObjectID(carId) : '';
+
   return {
-    car: ApiCars.findOne(idForQuery),
+    car,
+    carLines: ApiLines.find({car: carIdLines}).fetch(),
     isNew: isNew
   }
 

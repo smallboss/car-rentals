@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor'
 import { Mongo } from 'meteor/mongo'
 import { Link } from 'react-router';
+import { Email } from 'meteor/email'
 import DatePicker from 'react-bootstrap-date-picker'
 import { createContainer } from 'meteor/react-meteor-data'
 import { ApiInvoices } from '/imports/api/invoices.js'
@@ -8,24 +9,29 @@ import { ApiUsers } from '/imports/api/users'
 import { ApiContracts } from '/imports/api/contracts'
 import { ApiLines } from '/imports/api/lines'
 import { ApiYearWrite } from '/imports/api/yearWrite.js';
+import { ApiRentals, removeRental } from '/imports/api/rentals.js'
 import LinesOnTab from './LinesOnTab/LinesOnTab.js';
 import InvSettings from './InvSettings.js';
 import HeadSingle from './HeadSingle.js';
 import TopDetailsTable from './TopDetailsTable.js';
 import { browserHistory } from 'react-router';
 import React, { Component } from 'react';
-import { clone, cloneDeep, reverse, concat, find } from 'lodash';
+import { clone, cloneDeep, reverse, concat, find, compact, sortBy } from 'lodash';
+import { getContractMsg } from '/client/helpers/generatorTextMessages.js'
 
 import { contractStateTypes } from '/imports/startup/typesList.js';
 
 import '/client/main.css'
 
 
-export default class ContractSingle extends Component {
-  constructor(props) {
-    super(props);
+export class ContractSingle extends Component {
+  constructor(props, context) {
+    super(props, context);
 
     this.state = {
+      oldCustomerId: this.props.contract ? this.props.contract.customerId : undefined,
+      oldManagerId: this.props.contract ? this.props.contract.managerId : undefined,
+      loginLevel: context.loginLevel,
       contract: clone(this.props.contract),
       dispContract: clone(this.props.contract),
       isNew: this.props.isNew,
@@ -33,11 +39,13 @@ export default class ContractSingle extends Component {
       customerList: this.props.customerList,
       managerList: this.props.managerList,
 
+      lines: [],
       invs: [],
       amount: 0,
       invoices: 0,
       remaining: 0,
       toinvoice: 0,
+      invoicedPaid: 0,
 
       editable: this.props.isNew
     }
@@ -51,6 +59,7 @@ export default class ContractSingle extends Component {
     this.onChangeTermsAndConditions = this.onChangeTermsAndConditions.bind(this);
     this.onChangeNotes = this.onChangeNotes.bind(this);
     this.onChangeStatus = this.onChangeStatus.bind(this);
+    this.onChangeAmount = this.onChangeAmount.bind(this);
     this.handleSave = this.handleSave.bind(this);
     this.handlePrint = this.handlePrint.bind(this);
     this.handleEdit = this.handleEdit.bind(this);
@@ -125,11 +134,26 @@ export default class ContractSingle extends Component {
     newContract.notes = value;
     this.setState({dispContract: newContract});
   }
+  onChangeAmount(value){
+    let newContract = this.state.dispContract;
+    value = (value!='' && isNaN(parseInt(value))) ? '0' : value;
+    let isDepr = false;
+
+    isDepr = ((parseInt(value) < 0) || 
+              (value.indexOf('e') != -1) || 
+              (value.indexOf('E') != -1) ||  
+              (value.length > 10));
+
+    value = isNaN(parseInt(value)) ? '0' : parseInt(value)+'';
+
+    newContract.amount = isDepr ?  newContract.amount : value;
+    this.setState({dispContract: newContract});
+  }
 // END ================== ON CHANGE ======================
 
 
 
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps(nextProps, nextContext) {
     let c = nextProps.contract;
 
 
@@ -149,12 +173,12 @@ export default class ContractSingle extends Component {
 
     c = nextProps.contract;
 
-
     // ================
       let linesId = [];
       let invs = [];
       let nextLines = [];
       let nextTime = 0;
+      let invoicedPaid = 0;
 
       if (nextProps.contract && nextProps.contract.invoicesId) {
         nextProps.contract.invoicesId.map((el) => {
@@ -162,13 +186,16 @@ export default class ContractSingle extends Component {
           const codeName = invoice ? invoice.codeName : '';
           const status = invoice ? invoice.status : '';
           const length = (invoice && invoice.linesId) ? invoice.linesId.length : 0
-          invs.push({_id: el, codeName, numb: length, status});
+          if (length){
+            invs.push({_id: el, codeName, numb: length, status});
+          }
           linesId = linesId.concat(invoice ? invoice.linesId : []);
 
-          const date = invoice ? invoice.date : '';
-          if ((!nextTime || nextTime > new Date(date).getTime())) {
-            if (!isNaN((new Date(date)).getTime())) {
+          if (status == 'paid') invoicedPaid++;
 
+          const date = invoice ? invoice.date : '';
+          if ((!nextTime || nextTime > new Date(date).getTime()) && status != 'paid') {
+            if (!isNaN((new Date(date)).getTime())) {
               nextLines = invoice ? invoice.linesId : [];
             }
           }
@@ -185,6 +212,7 @@ export default class ContractSingle extends Component {
       if (nextLines){
         nextLines.map((el) => {
           let line = find(nextProps.lines, ['_id', el]);
+          if (true) {}
           toinvoice += parseInt(line ? line.amount : 0);
         })
       }
@@ -204,8 +232,6 @@ export default class ContractSingle extends Component {
               if (inv[0].numb === 0) inv.splice(0, 1);
           }
 
-          console.log('line', line, status);
-
           if (status === 'paid') invoices += parseInt(line ? line.amount : 0);
           if (status === 'open' || !status) {
             remaining += parseInt(line ? line.amount : 0);
@@ -216,6 +242,7 @@ export default class ContractSingle extends Component {
 
 
     this.setState({
+      loginLevel: nextContext.loginLevel,
       contract: clone(c),
       dispContract: dataDispContract,
       allowSave,
@@ -223,7 +250,8 @@ export default class ContractSingle extends Component {
       invoices,
       remaining,
       toinvoice,
-      lines, 
+      invoicedPaid,
+      lines: compact(lines), 
       invs
     });
   }
@@ -234,15 +262,19 @@ export default class ContractSingle extends Component {
 
 
     if(this.state.isNew){
+      const contracts = ApiContracts.find().fetch();
+      let contractLast;
+      if (contracts.length){ contractLast = (sortBy(contracts, 'codeName'))[contracts.length-1]} ;
+      let contractsNumb = contractLast && contractLast.codeName ? parseInt((contractLast.codeName.split('/'))[2])+1+'' : '1';
+
       contractId = new Mongo.ObjectID();
       newContract._id = contractId;
       ApiContracts.insert(newContract);
 
-      let yearWrite = ApiYearWrite.findOne({year: '2016'});
-      let contractsNumb = '1';
+      let yearWrite = ApiYearWrite.findOne({year: (new Date()).getFullYear()+''});
 
       if (yearWrite) {
-        if(!yearWrite.contractsNumb) yearWrite.contractsNumb = '0';
+        if(!yearWrite.contractsNumb) yearWrite.contractsNumb = contractsNumb-1;
         yearWrite.contractsNumb = ''+(parseInt(yearWrite.contractsNumb)+1);
         contractsNumb = parseInt(yearWrite.contractsNumb);
       } else {
@@ -278,6 +310,12 @@ export default class ContractSingle extends Component {
 
     Meteor.users.update({_id: newContract.customerId}, {$addToSet: { "profile.contracts": contractId}});
     Meteor.users.update({_id: newContract.managerId}, {$addToSet: { "profile.contracts": contractId}});
+    if (this.state.oldCustomerId != this.state.contract.customerId) {
+      Meteor.users.update({_id: this.state.oldCustomerId}, {$pull: { "profile.contracts": contractId}});
+    }
+    if (this.state.oldManagerId != this.state.contract.managerId) {
+      Meteor.users.update({_id: this.state.oldManagerId}, {$pull: { "profile.contracts": contractId}});
+    }
     if (this.state.isNew) browserHistory.push(`/managePanel/contracts/${contractId}`);
     this.setState({contract: newContract, dispContract: newContract, editable: false, isNew: false});
   }
@@ -314,6 +352,8 @@ export default class ContractSingle extends Component {
     })
     // REMOVE LINES ========================
     linesId.map((el) => {
+      const line = ApiLines.findOne({_id: el});
+      if (line) removeRental(line.rentalId);
       ApiLines.remove({_id: el});
     })
 
@@ -323,11 +363,19 @@ export default class ContractSingle extends Component {
   }
 
   handleSendByEmail(){
-    console.log('SEND BY EMAIL >>>>')
+    const email = find(this.props.customerList, {_id: this.state.contract.customerId}).emails[0];
+
+    Meteor.call('sendEmail',
+            email.address,
+            'smallboss@live.ru',
+            'Contract ' + this.state.contract.codeName,
+            getContractMsg(this.state.contract._id, ));
+
+    alert(`Message sent to ${email.address}`);
   }
 
   handlePrint(){
-    console.log('PRINT >>>>')
+    window.print();
   }
 
   componentDidMount() {
@@ -339,9 +387,83 @@ export default class ContractSingle extends Component {
                             ? (this.props.contract.customerId && this.props.contract.managerId)
                             : undefined;
 
-    this.setState({allowSave});
-  }
+    let linesId = [];
+    let invs = [];
+    let nextLines = [];
+    let nextTime = 0;
+    let invoicedPaid = 0;
 
+    if (this.props.contract && this.props.contract.invoicesId) {
+      this.props.contract.invoicesId.map((el) => {
+        const invoice = find(this.props.invoices, ['_id', el]);
+        const codeName = invoice ? invoice.codeName : '';
+        const status = invoice ? invoice.status : '';
+        const length = (invoice && invoice.linesId) ? invoice.linesId.length : 0
+        if (length){
+          invs.push({_id: el, codeName, numb: length, status});
+        }
+        linesId = linesId.concat(invoice ? invoice.linesId : []);
+
+        if (status == 'paid') invoicedPaid++;
+
+        const date = invoice ? invoice.date : '';
+        if ((!nextTime || nextTime > new Date(date).getTime()) && status != 'paid') {
+          if (!isNaN((new Date(date)).getTime())) {
+
+            nextLines = invoice ? invoice.linesId : [];
+          }
+        }
+      })
+    }
+
+
+    let lines = [];
+    let amount = 0;
+    let invoices = 0;
+    let remaining = 0;
+    let toinvoice = 0;
+    
+    if (nextLines){
+      nextLines.map((el) => {
+        let line = find(this.props.lines, ['_id', el]);
+        toinvoice += parseInt(line ? line.amount : 0);
+      })
+    }
+    
+
+    let inv = cloneDeep(invs);
+
+    if (linesId.length && this.props.lines.length) {
+      linesId.map((el) => {
+        let line = find(this.props.lines, ['_id', el]);
+        amount += parseInt(line ? line.amount : 0);
+        lines.push(line);
+        let status;
+        if (inv[0]) {
+            status = inv[0].status;
+            inv[0].numb--;
+            if (inv[0].numb === 0) inv.splice(0, 1);
+        }
+
+        if (status === 'paid') invoices += parseInt(line ? line.amount : 0);
+        if (status === 'open' || !status) {
+          remaining += parseInt(line ? line.amount : 0);
+        }
+      })
+    }
+    // ================
+
+    this.setState({
+      amount, 
+      invoices,
+      remaining,
+      toinvoice,
+      invoicedPaid,
+      lines: compact(lines), 
+      invs,
+      allowSave
+    });
+  }
 
   render() {
 
@@ -353,7 +475,8 @@ export default class ContractSingle extends Component {
                     onDelete={this.handleDelete}
                     onSendByEmail={this.handleSendByEmail}
                     allowSave={this.state.allowSave}
-                    title={this.props.contract.codeName} />
+                    title={this.props.contract.codeName}
+                    loginLevel={this.state.loginLevel} />
       )
     }
 
@@ -387,7 +510,7 @@ export default class ContractSingle extends Component {
           )
         }
 
-        return <div className='col-xs-10 m-t-05'>{title}</div>
+        return <div className='col-xs-9 m-t-015'>{title}</div>
       }
 
       const renderStartDate = () => {
@@ -401,7 +524,7 @@ export default class ContractSingle extends Component {
           )
         }
 
-        return <div className='col-xs-8 m-t-05'>{startDate}</div>
+        return <div className='col-xs-8 m-t-015'>{startDate}</div>
       }
 
       const renderEndDate = () => {
@@ -526,7 +649,7 @@ export default class ContractSingle extends Component {
         }
 
         return (
-          <div className='col-xs-8 m-t-05'>
+          <div className='col-xs-8 m-t-05 noPrint'>
             {(() => {
 
               if (Meteor.users.findOne(managerId)) {
@@ -557,7 +680,7 @@ export default class ContractSingle extends Component {
                   const custId = this.state.editable ? this.state.dispContract.customerId : customerId;
                   const custName = Meteor.users.findOne(custId) ? (Meteor.users.findOne(custId).profile.name + " profile") : '';
 
-                  return <Link to={`/managePanel/customer/${custId}`} className="col-xs-12">{`${custName}`}</Link>
+                  return <Link to={`/managePanel/customer/${custId}`} className="col-xs-12 noPrint">{`${custName}`}</Link>
                 })()}
               </div>
               <div className="form-group profit col-xs-6">
@@ -566,7 +689,7 @@ export default class ContractSingle extends Component {
               </div>
             </div>
             <div className="row">
-              <div className="form-group profit col-xs-6">
+              <div className="form-group profit col-xs-6 noPrint">
                 <label htmlFor="contractAccountManager" className='col-xs-3'>Account manager</label>
                 { renderManager() }
 
@@ -577,13 +700,14 @@ export default class ContractSingle extends Component {
                   return <Link to={`/managePanel/customer/${manId}`} className="col-xs-12">{`${manName}`}</Link>
                 })()}
               </div>
+              <div className="form-group profit col-xs-6 onlyPrint"></div>
               <div className="form-group profit col-xs-6">
                 <label htmlFor="contractEndDate" className='col-xs-3'>End Date</label>
                 { renderEndDate() }
               </div>
             </div>
             <div className="row">
-              <div className="form-group profit col-xs-6 col-xs-push-6">
+              <div className="form-group profit col-xs-6 col-xs-push-6 noPrint">
                 <label htmlFor="contractStatus" className='col-xs-3'>Status</label>
                 { renderStatus() }
               </div>
@@ -602,10 +726,31 @@ export default class ContractSingle extends Component {
         )
       }
 
+      const renderPrintInsteadTabs = () => {
+        return (
+          <div className="row onlyPrint">
+            <div className="col-xs-12">
+              <TopDetailsTable 
+                    amount={this.state.amount}
+                    invoices={this.state.invoices}
+                    remaining={this.state.remaining}
+                    toinvoice={this.state.toinvoice} />
+
+
+              <h3>Invoice lines</h3>
+              { renderInvoiceLinesTable() }
+
+              <h3>Terms & conditions</h3>
+              <textarea className="form-control" rows="3" disabled value={termsAndConditions}></textarea>
+            </div>
+          </div>
+        )
+      }
+
 
       const renderTabs = () => {
         return (
-          <div className="row">
+          <div className="row noPrint">
             <ul className="nav nav-tabs" role="tablist">
               <li className="active">
                 <a href="#details" aria-controls="home" role="tab" data-toggle="tab">Details</a>
@@ -617,11 +762,15 @@ export default class ContractSingle extends Component {
               <div role="tabpanel" className="tab-pane p-x-1 active" id="details">
                 <TopDetailsTable 
                     amount={this.state.amount}
+                    invoicedPaid={this.state.invoicedPaid}
                     invoices={this.state.invoices}
                     remaining={this.state.remaining}
-                    toinvoice={this.state.toinvoice} />
+                    toinvoice={this.state.toinvoice}
+                    dispAmount={this.state.dispContract.amount}
+                    onChangeAmount={this.onChangeAmount}
+                    isEditing={this.state.editable} />
 
-                <h3>Invoicing settings</h3>
+                {<h3>Invoicing settings</h3>}
                 {(() => {
                   if (this.state.editable)
                     return <InvSettings 
@@ -650,7 +799,7 @@ export default class ContractSingle extends Component {
                       </textarea>
                     )
                   }
-                  return <textarea className="form-control" rows="3" disabled value={notes}></textarea>
+                  return <textarea className="form-control" rows="3" disabled value={termsAndConditions}></textarea>
                 })()}
               </div>
               <div role="tabpanel" className="tab-pane p-x-1" id="notes">
@@ -681,6 +830,7 @@ export default class ContractSingle extends Component {
             { renderTopFields() }
 
             { renderTabs() }
+            { renderPrintInsteadTabs() }
           </div>
 
         </div>
@@ -691,6 +841,10 @@ export default class ContractSingle extends Component {
   }
 }
 
+
+ContractSingle.contextTypes = {
+  loginLevel: React.PropTypes.number.isRequired
+}
 
 export default createContainer(({params}) => {
   Meteor.subscribe('contracts');
@@ -709,17 +863,12 @@ export default createContainer(({params}) => {
     contract = ApiContracts.findOne(new Mongo.ObjectID(contractId));
   }
 
-  const invoices = ApiInvoices.find({}).fetch();
-
-  // console.log('invoices', invoices);
-  // console.log('line', ApiLines.find({}).fetch());
-
   return {
     contract,
     customerList: Meteor.users.find({'profile.userType': 'customer'}).fetch(),
     managerList: Meteor.users.find({'profile.userType': {$in:["admin","employee"]}}).fetch(),
-    invoices,
-    lines: ApiLines.find({}).fetch(),
+    invoices: ApiInvoices.find({}).fetch(),
+    lines: ApiLines.find().fetch(),
     isNew
   }
 

@@ -60,13 +60,13 @@ export default class PaymentTabRow extends Component {
         let isDepr = false;
 
         isDepr = ((parseInt(value) < 0) || 
-                  (value.indexOf('e') != -1) || 
-                  (value.indexOf('E') != -1) ||  
-                  (value.length > 5));
+                  (value.includes('e')) || 
+                  (value.includes('E')) ||  
+                  (value.length > 10));
+
+        value = isNaN(parseInt(value)) ? '0' : value+'';
 
         newPayment.amount = isDepr ?  newPayment.amount : value;
-
-
         this.setState({dispPayment: newPayment});
     }
     onChangeStatus(value){
@@ -156,7 +156,7 @@ export default class PaymentTabRow extends Component {
                 {(() => {
                     if (!this.props.readOnly) {
                         return (
-                            <th>
+                            <th className="noPrint">
                                 <input  type="checkbox" 
                                         onChange={() => this.props.onSelect(payment._id)}
                                         ref={(ref) => this.checkbox = ref}/>

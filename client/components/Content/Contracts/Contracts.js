@@ -4,6 +4,11 @@ import { Email } from 'meteor/email'
 import { createContainer } from 'meteor/react-meteor-data';
 
 import { ApiContracts } from '/imports/api/contracts.js';
+import { ApiUsers } from '/imports/api/users';
+import { ApiInvoices } from '/imports/api/invoices';
+import { ApiPayments } from '/imports/api/payments';
+import { ApiLines } from '/imports/api/lines';
+import { ApiRentals, removeRental } from '/imports/api/rentals.js'
 
 import ContractRow from './ContractRow.js';
 import HeadList from './HeadList.js';
@@ -16,14 +21,17 @@ class Contracts extends Component {
     super(props, context); 
 
     this.state = {
+      loginLevel: context.loginLevel,
       selectedContractsID: [],
       foundItems: [],
       searchField: '',
       currentPage: 1,
-      itemsOnPage: 10
+      itemsOnPage: 10,
+      selectedAll: false
     }
 
     this.handleSelect = this.handleSelect.bind(this);
+    this.handleSelectAll = this.handleSelectAll.bind(this);
     this.handleChangeSearchField = debounce(this.handleChangeSearchField.bind(this), 350);
     this.removeContracts = this.removeContracts.bind(this);
     this.addContract = this.addContract.bind(this);
@@ -35,10 +43,12 @@ class Contracts extends Component {
   }
 
 
-  componentWillReceiveProps(props) {    
+  componentWillReceiveProps(props, nextContext) {    
     if (this.props.contracts != props.contracts) {
       this.handleChangeSearchField(this.state.searchField, props);
     }
+
+    this.setState({loginLevel: nextContext.loginLevel});
   }
 
   componentWillUpdate(nextProps, nextState){
@@ -61,13 +71,70 @@ class Contracts extends Component {
 
   removeContracts() {
     this.state.selectedContractsID.map((contractID) => {
-      console.log('contractID', contractID);
+    
+      // =======================
+      let paymentsId = [];
+      let linesId = [];
+      let contract = ApiContracts.findOne(new Mongo.ObjectID(contractID));
+
+      let invs = (contract && contract.invoicesId) ? contract.invoicesId : [];
+
+
+      invs.map((el) => {
+        let inv = find(this.props.invoices, {_id: el });
+        inv = inv ? inv : {};
+        paymentsId = paymentsId.concat(inv.paymentsId);
+        linesId = linesId.concat(inv.linesId);
+        const customerId = inv.customerId;
+        Meteor.users.update({_id: customerId}, {$pull: { 'profile.invoices': el }})
+        ApiInvoices.remove({_id: el});
+      })
+
+      // REMOVE PAYMENTS ========================
+      paymentsId.map((el) => {
+        const customerId = ApiPayments.find({_id: el}).customerId;
+        Meteor.users.update({_id: customerId}, {$pull: { 'profile.payments': el }})
+        ApiPayments.remove({_id: el});
+      })
+      // REMOVE LINES ========================
+      linesId.map((el) => {
+        const line = ApiLines.findOne({_id: el});
+        if (line) removeRental(line.rentalId);
+        ApiLines.remove({_id: el});
+      })
+
+      Meteor.users.update({_id: contract.customerId}, {$pull: { "profile.contracts": contract._id}});
+      Meteor.users.update({_id: contract.managerId}, {$pull: { "profile.contracts": contract._id}});
       ApiContracts.remove(new Mongo.ObjectID(contractID));
+      // =======================
     })
 
-    console.log('this.state.selectedContractsID', this.state.selectedContractsID);
 
-    this.setState({selectedContractsID: []});
+    const selectedAll = false;
+    this.selectAll.checked = selectedAll;
+
+    this.setState({selectedContractsID: [], selectedAll});
+  }
+
+  handleSelectAll(){
+    const { selectedContractsID, itemsOnPage, foundItems, selectedAll } = this.state;
+    let newSelectedContractsID = [];
+
+    if (!selectedAll) {
+      foundItems.map((itemContract, key) => {
+          if((key >= (this.state.currentPage-1) * this.state.itemsOnPage) && 
+             (key <   this.state.currentPage    * this.state.itemsOnPage)){
+
+            if (!newSelectedContractsID.includes(itemContract._id._str)) {
+              newSelectedContractsID.push(itemContract._id._str);
+            }
+          }
+      });
+    }
+
+    this.selectAll.checked = !selectedAll;
+    
+    this.setState({selectedContractsID: newSelectedContractsID, selectedAll: !selectedAll});
   }
 
 
@@ -75,6 +142,7 @@ class Contracts extends Component {
     let newSelectedContractsID = this.state.selectedContractsID;
     const ContractID = ""+Contract._id;
     const index = newSelectedContractsID.indexOf(ContractID)
+    let currentSelectedAll = this.state.selectedAll;
 
 
     if (index === -1 ) 
@@ -82,8 +150,12 @@ class Contracts extends Component {
     else 
       newSelectedContractsID.splice(index, 1);
     
+    if (currentSelectedAll || !newSelectedContractsID.length) {
+      currentSelectedAll = false;
+      this.selectAll.checked = currentSelectedAll;
+    }
 
-    this.setState({selectedContractsID: newSelectedContractsID});
+    this.setState({selectedContractsID: newSelectedContractsID, electedAll: currentSelectedAll});
   }
 
 
@@ -146,15 +218,43 @@ class Contracts extends Component {
           return <ContractRow 
                       key={`contract-${key}`} 
                       item={item} 
+                      invoices={this.props.invoices}
+                      lines={this.props.lines}
                       customerName={Meteor.users.findOne(item.customerId)}
                       managerName={Meteor.users.findOne(item.managerId)}
                       onClick={this.handleClickOnRow.bind(null, item._id)}
                       selectedContractsId={this.state.selectedContractsID} 
-                      onHandleSelect={this.handleSelect} />
+                      onHandleSelect={this.handleSelect}
+                      loginLevel={this.state.loginLevel} />
           }
         }
       )
     }
+
+    const renderHeadCheckBox = () => {
+      if (this.state.loginLevel === 3) 
+        if (this.state.foundItems.length) {
+          return (
+            <th>
+              <input type="checkbox" 
+                     ref={(ref) => this.selectAll = ref}
+                     onChange={this.handleSelectAll}/>
+            </th>
+          )
+        } else {
+          return (
+            <th>
+              <input type="checkbox" 
+                     ref={(ref) => this.selectAll = ref}
+                     onChange={this.handleSelectAll}
+                     disabled />
+            </th>
+          )
+        }
+
+      return null;
+    }
+
 
     return (
       <div>
@@ -167,17 +267,17 @@ class Contracts extends Component {
           pageDown={this.pageDown}
           onChangeSearchField={this.handleChangeSearchField}
           onAddNew={this.addContract} 
-          onRemoveContracts={this.removeContracts} />
+          onRemoveContracts={this.removeContracts}
+          loginLevel={this.state.loginLevel} />
 
         <table className="table table-bordered table-hover">
           <thead>
             <tr>
-              <th><input type="checkbox" disabled="true"/></th>
+              { renderHeadCheckBox() }
               <th>Contract title</th>
               <th>Customer</th>
               <th>Contract ID</th>
               <th>Last invoice Date</th>
-              <th>Total to invoice</th>
               <th>Start Date</th>
               <th>End Date</th>
               <th>Status</th>
@@ -199,7 +299,8 @@ Contracts.propTypes = {
 };
 
 Contracts.contextTypes = {
-  router: React.PropTypes.object.isRequired
+  router: React.PropTypes.object.isRequired,
+  loginLevel: React.PropTypes.number.isRequired
 }
 
 
@@ -207,9 +308,14 @@ export default createContainer(() => {
   Meteor.subscribe('contracts');
   Meteor.subscribe('users');
   Meteor.subscribe('yearwrite');
+  Meteor.subscribe('invoices');
+  Meteor.subscribe('lines');
+
 
   return {
     contracts: ApiContracts.find().fetch(),
-    userList: Meteor.users.find().fetch()
+    userList: Meteor.users.find().fetch(),
+    invoices: ApiInvoices.find().fetch(),
+    lines: ApiLines.find().fetch()
   };
 }, Contracts);

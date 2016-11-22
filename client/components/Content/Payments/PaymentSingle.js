@@ -1,6 +1,8 @@
 import { Meteor } from 'meteor/meteor'
 import { Mongo } from 'meteor/mongo'
 import { Link } from 'react-router';
+import { Email } from 'meteor/email'
+import NumericInput from 'react-numeric-input';
 import DatePicker from 'react-bootstrap-date-picker'
 import { createContainer } from 'meteor/react-meteor-data'
 import { ApiPayments } from '/imports/api/payments.js'
@@ -10,7 +12,8 @@ import { ApiInvoices } from '/imports/api/invoices'
 import HeadSingle from './HeadSingle.js';
 import { browserHistory } from 'react-router';
 import React, { Component } from 'react';
-import { clone, cloneDeep, reverse } from 'lodash';
+import { clone, cloneDeep, reverse, find, sortBy } from 'lodash';
+import { getPaymentMsg } from '/client/helpers/generatorTextMessages.js'
 
 import { paymentStateTypes } from '/imports/startup/typesList.js';
 
@@ -18,13 +21,15 @@ import './paymentStyle.css'
 import '/client/main.css'
 
 
-export default class PaymentSingle extends Component {
-  constructor(props) {
-    super(props);
+export class PaymentSingle extends Component {
+  constructor(props, context) {
+    super(props, context);
 
     this.state = {
-      payment: clone(this.props.payment),
-      dispPayment: clone(this.props.payment),
+      oldCustomerId: this.props.payment ? this.props.payment.customerId : undefined,
+      loginLevel: context.loginLevel,
+      payment: this.props.payment,
+      dispPayment: this.props.payment,
       allowSave: false,
       isNew: this.props.isNew,
       customerList: this.props.userList,
@@ -37,6 +42,7 @@ export default class PaymentSingle extends Component {
     this.onChangeAmount = this.onChangeAmount.bind(this);
     this.onChangeNotes = this.onChangeNotes.bind(this);
     this.onChangeStatus = this.onChangeStatus.bind(this);
+    this.onChangeDate = this.onChangeDate.bind(this);
     this.onChangeRef = this.onChangeRef.bind(this);
     this.handleSave = this.handleSave.bind(this);
     this.handlePrint = this.handlePrint.bind(this);
@@ -60,12 +66,13 @@ export default class PaymentSingle extends Component {
     let isDepr = false;
 
     isDepr = ((parseInt(value) < 0) || 
-              (value.indexOf('e') != -1) || 
-              (value.indexOf('E') != -1) ||  
-              (value.length > 5));
+              (value.includes('e')) || 
+              (value.includes('E')) ||
+              (value.length >= 10));
+
+    value = isNaN(parseInt(value)) ? '0' : parseInt(value)+'';
 
     newPayment.amount = isDepr ?  newPayment.amount : value;
-
     this.setState({dispPayment: newPayment});
   }
   onChangeStatus(value) {
@@ -95,7 +102,7 @@ export default class PaymentSingle extends Component {
   }
 // END ================== ON CHANGE ======================
 
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps(nextProps, nextContext) {
     let c = nextProps.payment;
 
 
@@ -118,13 +125,14 @@ export default class PaymentSingle extends Component {
     this.setState({
       payment: clone(c),
       dispPayment: dataDispPayment,
-      allowSave
+      allowSave,
+      loginLevel: nextContext.loginLevel
     });
   }
 
 
   handlePrint(){
-    console.log('PRINT >>>');
+    window.print();
   }
 
   handleSave() {
@@ -132,15 +140,19 @@ export default class PaymentSingle extends Component {
     let paymentId;
 
     if(this.state.isNew){
+      const payments = ApiPayments.find().fetch();
+      let paymentLast;
+      if (payments.length){ paymentLast = (sortBy(payments, 'codeName'))[payments.length-1]} ;
+      let paymentsNumb = paymentLast && paymentLast.codeName ? parseInt((paymentLast.codeName.split('/'))[2])+1+'' : '1';
+
       paymentId = new Mongo.ObjectID();
       newPayment._id = paymentId;
       ApiPayments.insert(newPayment);
 
-      let yearWrite = ApiYearWrite.findOne({year: '2016'});
-      let paymentsNumb = '1';
+      let yearWrite = ApiYearWrite.findOne({year: (new Date()).getFullYear()+''});
 
       if (yearWrite) {
-        if(!yearWrite.paymentsNumb) yearWrite.paymentsNumb = '0';
+        if(!yearWrite.paymentsNumb) yearWrite.paymentsNumb = paymentsNumb-1;
         yearWrite.paymentsNumb = ''+(parseInt(yearWrite.paymentsNumb)+1);
         paymentsNumb = parseInt(yearWrite.paymentsNumb);
       } else {
@@ -177,6 +189,9 @@ export default class PaymentSingle extends Component {
     }
 
     Meteor.users.update({_id: newPayment.customerId}, {$addToSet: { "profile.payments": paymentId}});
+    if (this.state.oldCustomerId != this.state.payment.customerId) {
+      Meteor.users.update({_id: this.state.oldCustomerId}, {$pull: { "profile.payments": paymentId}});
+    }
     if (this.state.isNew) browserHistory.push(`/managePanel/payments/${paymentId}`);
     this.setState({payment: newPayment, dispPayment: newPayment, editable: false, isNew: false});
   }
@@ -201,7 +216,15 @@ export default class PaymentSingle extends Component {
   }
 
   handleSendByEmail(){
-    console.log('SEND BY EMAIL >>>>')
+    const email = find(this.props.userList, {_id: this.state.payment.customerId}).emails[0];
+
+    Meteor.call('sendEmail',
+            email.address,
+            'smallboss@live.ru',
+            'Payment ' + this.state.payment.codeName,
+            getPaymentMsg(this.state.payment._id));
+
+    alert(`Message sent to ${email.address}`);
   }
 
 
@@ -225,7 +248,8 @@ export default class PaymentSingle extends Component {
                     onDelete={this.handleDelete}
                     onSendByEmail={this.handleSendByEmail}
                     allowSave={this.state.allowSave}
-                    title={this.props.payment.codeName} />
+                    title={this.props.payment.codeName}
+                    loginLevel={this.state.loginLevel} />
       )
     }
 
@@ -316,7 +340,7 @@ export default class PaymentSingle extends Component {
             </div>
 
             <div className="row">
-              <div className="form-group profit col-xs-6">
+              <div className="form-group profit col-xs-6 noPrint">
                 <label htmlFor="paymentStatus" className='col-xs-3'>Status</label>
                 {(() => {
                   if (this.state.editable) {
@@ -357,6 +381,7 @@ export default class PaymentSingle extends Component {
                           className="form-control "
                           onChange={(e) => this.onChangeAmount(e.target.value)}
                           value={ this.state.dispPayment.amount }/>
+
                       </div>
                     )
                   }
@@ -366,7 +391,7 @@ export default class PaymentSingle extends Component {
               </div>
             </div>
             <div className="row">
-              <div className="form-group profit col-xs-6">
+              <div className="form-group profit col-xs-6 noPrint">
                 <label htmlFor="paymentRef" className='col-xs-3'>Ref.</label>
                 {(() => {
                   const custId = this.state.editable ? this.state.dispPayment.customerId : customerId;
@@ -384,7 +409,7 @@ export default class PaymentSingle extends Component {
 
       const renderTabs = () => {
         return (
-          <div className="row">
+          <div className="row noPrint">
             <ul className="nav nav-tabs" role="tablist">
               <li className="active">
                 <a href="#description" aria-controls="home" role="tab" data-toggle="tab">Notes</a>
@@ -431,6 +456,12 @@ export default class PaymentSingle extends Component {
 }
 
 
+PaymentSingle.contextTypes = {
+  loginLevel: React.PropTypes.number.isRequired
+}
+
+
+
 export default createContainer(({params}) => {
   Meteor.subscribe('payments');
   Meteor.subscribe('invoices');
@@ -450,6 +481,7 @@ export default createContainer(({params}) => {
   return {
     payment,
     userList: Meteor.users.find({'profile.userType': 'customer'}).fetch(),
+    managerList: Meteor.users.find({'profile.userType': {$in:["admin","employee"]}}).fetch(),
     isNew
   }
 

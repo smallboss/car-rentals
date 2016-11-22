@@ -1,14 +1,14 @@
 import React, { Component, PropTypes } from 'react';
 import DatePicker from 'react-bootstrap-date-picker'
 import { Link } from 'react-router';
-import { map, find, clone} from 'lodash';
+import { map, find, clonem, cloneDeep } from 'lodash';
 
 export default class LineTabRow extends Component {
     constructor(props) {
         super(props); 
 
         this.state = {
-            dispLine: this.props.line,
+            dispLine: cloneDeep(this.props.line),
             isEdit: false
         }
 
@@ -21,7 +21,7 @@ export default class LineTabRow extends Component {
 
 
     componentWillReceiveProps(nextProps){
-        let dispLine = nextProps.line 
+        let dispLine = cloneDeep(nextProps.line);
 
         const nextLine = nextProps.line ? nextProps.line._id._str : '';
         const isSelected = find(nextProps.selectedListId, {_str: nextLine});
@@ -35,9 +35,9 @@ export default class LineTabRow extends Component {
 
 
     componentDidMount() {
-        let dispLine = this.props.line;
+        let dispLine = cloneDeep(this.props.line);
 
-        const nextLine =  this.props.line ?  this.props.line._id._str : '';
+        const nextLine =  this.props.line ? this.props.line._id._str : '';
         const isSelected = find( this.props.selectedListId, {_str: nextLine});
 
         if (this.checkbox)
@@ -76,9 +76,11 @@ export default class LineTabRow extends Component {
         let isDepr = false;
 
         isDepr = ((parseInt(value) < 0) || 
-                  (value.indexOf('e') != -1) || 
-                  (value.indexOf('E') != -1) ||  
-                  (value.length > 5));
+                  (value.includes('e')) || 
+                  (value.includes('E')) ||
+                  (value.length >= 10));
+
+        value = isNaN(parseInt(value)) ? '0' : parseInt(value)+'';
 
         newLine.amount = isDepr ?  newLine.amount : value;
         this.setState({dispLine: newLine});
@@ -113,13 +115,18 @@ export default class LineTabRow extends Component {
                     <select className=' form-control' onChange={(e) => this.onChangeCarName(e.target.value)}>
                           {(() => {
                             if (car) {
-                              
-                            return (    
-                              <option 
-                                className='' 
-                                value={car._id}>{ car.name }
-                              </option>
-                            )}
+                                return (    
+                                  <option
+                                    value={ car._id }>{ car.name }
+                                  </option>
+                                )
+                            } else {
+                                return ( 
+                                    <option
+                                        value={ '' }>{ '' }
+                                    </option>
+                                )
+                            }
 
                           })()}
                           {
@@ -170,7 +177,10 @@ export default class LineTabRow extends Component {
 
             return (
                 <Link to={`/managePanel/cars/${carIdStr}`}>
-                    <span>{(line && car) ? car.plateNumber : ''}</span>
+                    <span>{(line && car) 
+                            ? car.plateNumber ? car.plateNumber : 'car profile'
+                            : ''}
+                    </span>
                 </Link>
             )
         }
@@ -224,13 +234,25 @@ export default class LineTabRow extends Component {
             return <span>{(line && line.amount) ? line.amount : '0'}</span>
         }
 
+
+        const renderCheckBox = () => {
+            if (!this.props.readOnly) {
+                return (
+                    <th className="noPrint">
+                        <input  type="checkbox" 
+                                onChange={() => this.props.onSelect(line._id)}
+                                ref={(ref) => this.checkbox = ref} />
+                    </th>
+                )
+            } 
+
+            return null;
+        }
+
+
         return(
             <tr className="LineTabRow">
-                <th>
-                    <input  type="checkbox" 
-                            onChange={() => this.props.onSelect(line._id)}
-                            ref={(ref) => this.checkbox = ref}/>
-                </th>
+                { renderCheckBox() }
                 <td>
                     { buttonSave() }
                     { showItem() }

@@ -1,10 +1,11 @@
 import React, { Component, PropTypes } from 'react';
 
 export default class TableHeadButtons extends Component {
-    constructor(props) {
-        super(props); 
+    constructor(props, context) {
+        super(props, context); 
 
         this.state = {
+            loginLevel: context.loginLevel,
             activeButton: this.props.selectedItems
         }
 
@@ -12,7 +13,10 @@ export default class TableHeadButtons extends Component {
     }   
 
     componentWillReceiveProps(nextProps) {
-        this.setState({activeButton: nextProps.selectedItems})
+        this.setState({
+            loginLevel: nextProps.loginLevel,
+            activeButton: nextProps.selectedItems
+        })
     }
 
 
@@ -25,12 +29,28 @@ export default class TableHeadButtons extends Component {
     }
 
     disablingButtons(){
-        this.buttonEdit.disabled = 
-        this.buttonRemove.disabled = !this.state.activeButton;
+        this.buttonEdit.disabled = !this.state.activeButton;
+        if (this.buttonRemove) this.buttonRemove.disabled = !this.state.activeButton;
     }
 
 
     render(){
+        const renderBtnRemove = () => {
+            if (this.props.loginLevel === 3) {
+                return (
+                    <button
+                        onClick={this.props.onRemove}
+                        ref={(ref) => this.buttonRemove = ref}
+                        style={{margin: '10px'}}
+                        className=' m-1 btn btn-danger'>
+                        Delete
+                    </button>
+                )
+            }
+            return null;
+        }
+
+
         return(
             <div className="TableHeadButtons">
                 <button
@@ -46,13 +66,7 @@ export default class TableHeadButtons extends Component {
                     onClick={this.props.onEdit}>
                     Edit
                   </button>
-                  <button
-                    onClick={this.props.onRemove}
-                    ref={(ref) => this.buttonRemove = ref}
-                    style={{margin: '10px'}}
-                    className=' m-1 btn btn-danger'>
-                    Delete
-                  </button>
+                  { renderBtnRemove() }
             </div>
         )
     }

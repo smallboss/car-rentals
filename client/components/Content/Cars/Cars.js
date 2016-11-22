@@ -16,14 +16,17 @@ class Cars extends Component {
     super(props, context); 
 
     this.state = {
+      loginLevel: context.loginLevel,
       selectedCarsID: [],
       foundItems: [],
       searchField: '',
       currentPage: 1,
-      itemsOnPage: 10
+      itemsOnPage: 10,
+      electedAll: false
     }
 
     this.handleSelect = this.handleSelect.bind(this);
+    this.handleSelectAll = this.handleSelectAll.bind(this);
     this.handleChangeSearchField = debounce(this.handleChangeSearchField.bind(this), 350);
     this.removeCars = this.removeCars.bind(this);
     this.addCar = this.addCar.bind(this);
@@ -35,10 +38,12 @@ class Cars extends Component {
   }
   
 
-  componentWillReceiveProps(props) {    
+  componentWillReceiveProps(props, nextContext) {    
     if (this.props.cars != props.cars) {
       this.handleChangeSearchField(this.state.searchField, props);
     }
+
+    this.setState({loginLevel: nextContext.loginLevel});
   }
 
   componentWillUpdate(nextProps, nextState){
@@ -64,25 +69,56 @@ class Cars extends Component {
   removeCars() {
     this.state.selectedCarsID.map((carID) => {
       ApiCars.remove(new Mongo.ObjectID(carID));
-
     })
 
-    this.setState({selectedCarsID: []});
+
+    const selectedAll = false;
+    this.selectAll.checked = selectedAll;
+
+    this.setState({selectedCarsID: [], selectedAll});
+  }
+
+
+  handleSelectAll(){
+    const { selectedCarsID, itemsOnPage, foundItems, selectedAll } = this.state;
+    let newSelectedCarsID = [];
+
+    if (!selectedAll) {
+      foundItems.map((itemCar, key) => {
+          if((key >= (this.state.currentPage-1) * this.state.itemsOnPage) && 
+             (key <   this.state.currentPage    * this.state.itemsOnPage)){
+
+            if (!newSelectedCarsID.includes(itemCar._id._str)) {
+              newSelectedCarsID.push(itemCar._id._str);
+            }
+          }
+      });
+    }
+
+    this.selectAll.checked = !selectedAll;
+    
+    this.setState({selectedCarsID: newSelectedCarsID, selectedAll: !selectedAll});
   }
 
 
   handleSelect(e, Car){
     let newSelectedCarsID = this.state.selectedCarsID;
     const CarID = ""+Car._id;
-    const index = newSelectedCarsID.indexOf(CarID)
+    const index = newSelectedCarsID.indexOf(CarID);
+    let currentSelectedAll = this.state.selectedAll;
 
     if (index === -1 ) 
       newSelectedCarsID.push(CarID);
     else 
       newSelectedCarsID.splice(index, 1);
+
+    if (currentSelectedAll || !newSelectedCarsID.length) {
+      currentSelectedAll = false;
+      this.selectAll.checked = currentSelectedAll;
+    }
     
 
-    this.setState({selectedCarsID: newSelectedCarsID});
+    this.setState({selectedCarsID: newSelectedCarsID, electedAll: currentSelectedAll});
   }
 
 
@@ -134,10 +170,37 @@ class Cars extends Component {
                     car={itemCar} 
                     onClick={this.handleCarSingleOnClick.bind(null, itemCar._id)}
                     selectedCarsId={this.state.selectedCarsID} 
-                    onHandleSelect={this.handleSelect} />
+                    onHandleSelect={this.handleSelect}
+                    loginLevel={this.state.loginLevel} />
         }
       )
     }
+
+
+    const renderHeadCheckBox = () => {
+      if (this.state.loginLevel === 3) 
+        if (this.state.foundItems.length) {
+          return (
+            <th>
+              <input type="checkbox" 
+                     ref={(ref) => this.selectAll = ref}
+                     onChange={this.handleSelectAll}/>
+            </th>
+          )
+        } else {
+          return (
+            <th>
+              <input type="checkbox" 
+                     ref={(ref) => this.selectAll = ref}
+                     onChange={this.handleSelectAll}
+                     disabled />
+            </th>
+          )
+        }
+
+      return null;
+    }
+    
 
     return (
       <div>
@@ -150,12 +213,13 @@ class Cars extends Component {
           pageDown={this.pageDown}
           onChangeSearchField={this.handleChangeSearchField}
           onAddNew={this.addCar} 
-          onRemoveCars={this.removeCars} />
+          onRemoveCars={this.removeCars}
+          loginLevel={this.state.loginLevel} />
 
         <table className="table table-bordered table-hover">
           <thead>
             <tr>
-              <th><input type="checkbox" disabled="true"/></th>
+              { renderHeadCheckBox() }
               <th>Name</th>
               <th>Plate number</th>
               <th>Status</th>
@@ -176,7 +240,8 @@ Cars.propTypes = {
 };
 
 Cars.contextTypes = {
-    router: React.PropTypes.object.isRequired
+  router: React.PropTypes.object.isRequired,
+  loginLevel: React.PropTypes.number.isRequired
 }
 
 

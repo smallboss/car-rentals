@@ -3,6 +3,7 @@ import { browserHistory } from 'react-router'
 
 import { createContainer } from 'meteor/react-meteor-data';
 import { ApiPayments } from '/imports/api/payments.js';
+import { ApiInvoices } from '/imports/api/invoices.js';
 
 import PaymentRow from './PaymentRow.js';
 import HeadList from './HeadList.js';
@@ -16,13 +17,16 @@ class Payments extends Component {
 
     this.state = {
       selectedPaymentsID: [],
+      loginLevel: context.loginLevel,
       foundItems: [],
       searchField: '',
       currentPage: 1,
-      itemsOnPage: 10
+      itemsOnPage: 10,
+      selectedAll: false
     }
 
     this.handleSelect = this.handleSelect.bind(this);
+    this.handleSelectAll = this.handleSelectAll.bind(this);
     this.handleChangeSearchField = debounce(this.handleChangeSearchField.bind(this), 350);
     this.removePayments = this.removePayments.bind(this);
     this.addPayment = this.addPayment.bind(this);
@@ -34,10 +38,12 @@ class Payments extends Component {
   }
 
 
-  componentWillReceiveProps(props) {    
+  componentWillReceiveProps(props, nextContext) {    
     if (this.props.payments != props.payments) {
       this.handleChangeSearchField(this.state.searchField, props);
     }
+
+    this.setState({loginLevel: nextContext.loginLevel});
   }
 
   componentWillUpdate(nextProps, nextState){
@@ -60,14 +66,40 @@ class Payments extends Component {
 
   removePayments() {
     this.state.selectedPaymentsID.map((paymentID) => {
-      const payment = ApiPayments.findOne(new Mongo.ObjectID(paymentID));
-      const invoice = ApiInvoices.findOne({paymentsId: this.state.payment._id});
+      const payment = find(this.props.payments, {'_id': new Mongo.ObjectID(paymentID)});
+      const invoice = ApiInvoices.findOne({paymentsId: payment._id});
       if (invoice) ApiInvoices.update({_id: invoice._id}, {$pull: { paymentsId: this.state.payment._id}});
       ApiPayments.remove(new Mongo.ObjectID(paymentID));
       Meteor.users.update({_id: payment.customerId}, {$pull: { "profile.payments": new Mongo.ObjectID(paymentID)}});   
     })
 
-    this.setState({selectedPaymentsID: []});
+
+    const selectedAll = false;
+    this.selectAll.checked = selectedAll;
+
+    this.setState({selectedPaymentsID: [], selectedAll});
+  }
+
+
+  handleSelectAll(){
+    const { selectedPaymentsID, itemsOnPage, foundItems, selectedAll } = this.state;
+    let newSelectedPaymentsID = [];
+
+    if (!selectedAll) {
+      foundItems.map((itemPayment, key) => {
+          if((key >= (this.state.currentPage-1) * this.state.itemsOnPage) && 
+             (key <   this.state.currentPage    * this.state.itemsOnPage)){
+
+            if (!newSelectedPaymentsID.includes(itemPayment._id._str)) {
+              newSelectedPaymentsID.push(itemPayment._id._str);
+            }
+          }
+      });
+    }
+
+    this.selectAll.checked = !selectedAll;
+    
+    this.setState({selectedPaymentsID: newSelectedPaymentsID, selectedAll: !selectedAll});
   }
 
 
@@ -75,15 +107,19 @@ class Payments extends Component {
     let newSelectedPaymentsID = this.state.selectedPaymentsID;
     const PaymentID = ""+Payment._id;
     const index = newSelectedPaymentsID.indexOf(PaymentID)
-
+    let currentSelectedAll = this.state.selectedAll;
 
     if (index === -1 ) 
       newSelectedPaymentsID.push(PaymentID);
     else 
       newSelectedPaymentsID.splice(index, 1);
-    
 
-    this.setState({selectedPaymentsID: newSelectedPaymentsID});
+    if (currentSelectedAll || !newSelectedPaymentsID.length) {
+      currentSelectedAll = false;
+      this.selectAll.checked = currentSelectedAll;
+    }
+    
+    this.setState({selectedPaymentsID: newSelectedPaymentsID, electedAll: currentSelectedAll});
   }
 
 
@@ -94,7 +130,7 @@ class Payments extends Component {
         const paymentAmount = el.amount ? el.amount.toLowerCase()   : '';
         const paymentStatus = el.status ? el.status.toLowerCase()   : '';
         const paymentDate   = el.date   ? el.date.toLowerCase()     : '';
-        const paymentCodeName     = el.codeName    ? el.codeName.toLowerCase() : '';
+        const paymentCodeName = el.codeName ? el.codeName.toLowerCase() : '';
         let paymentCustomerName = find(props.userList , {_id: el.customerId});
         paymentCustomerName = paymentCustomerName ? paymentCustomerName.profile.name : '';
 
@@ -138,6 +174,7 @@ class Payments extends Component {
           return <PaymentRow 
                       key={key} 
                       item={itemPayment} 
+                      loginLevel={this.state.loginLevel}
                       customerName={Meteor.users.findOne(itemPayment.customerId)}
                       onClick={this.handlePaymentSingleOnClick.bind(null, itemPayment._id)}
                       selectedPaymentsId={this.state.selectedPaymentsID} 
@@ -146,6 +183,33 @@ class Payments extends Component {
         }
       )
     }
+
+
+    const renderHeadCheckBox = () => {
+      if (this.state.loginLevel === 3) 
+        if (this.state.foundItems.length) {
+          return (
+            <th>
+              <input type="checkbox" 
+                     ref={(ref) => this.selectAll = ref}
+                     onChange={this.handleSelectAll}/>
+            </th>
+          )
+        } else {
+          return (
+            <th>
+              <input type="checkbox" 
+                     ref={(ref) => this.selectAll = ref}
+                     onChange={this.handleSelectAll}
+                     disabled />
+            </th>
+          )
+        }
+
+      return null;
+    }
+
+
 
     return (
       <div>
@@ -158,12 +222,13 @@ class Payments extends Component {
           pageDown={this.pageDown}
           onChangeSearchField={this.handleChangeSearchField}
           onAddNew={this.addPayment} 
-          onRemovePayments={this.removePayments} />
+          onRemovePayments={this.removePayments}
+          loginLevel={this.state.loginLevel} />
 
         <table className="table table-bordered table-hover">
           <thead>
             <tr>
-              <th><input type="checkbox" disabled="true"/></th>
+              { renderHeadCheckBox() }
               <th>Customer Name</th>
               <th>Date</th>
               <th>Payment ID</th>
@@ -186,7 +251,8 @@ Payments.propTypes = {
 };
 
 Payments.contextTypes = {
-  router: React.PropTypes.object.isRequired
+  router: React.PropTypes.object.isRequired,
+  loginLevel: React.PropTypes.number.isRequired
 }
 
 

@@ -12,7 +12,8 @@ export default class TableOnTab extends Component {
         this.state = {
             maintenanceList: reverse(clone(this.props.maintenanceList)),
             selectedItems: [],
-            allowEdit: false
+            allowEdit: false,
+            selectedAll: false
         }
 
         this.onEdit = this.onEdit.bind(this);
@@ -20,12 +21,23 @@ export default class TableOnTab extends Component {
         this.onSaveMaintenance = this.onSaveMaintenance.bind(this);
         this.editListEditing = this.editListEditing.bind(this);
         this.onRemoveMaintenance = this.onRemoveMaintenance.bind(this);
+        this.handleSelectAll = this.handleSelectAll.bind(this);
     }   
+
+
+    handleSelectAll(){
+        let { selectedAll, allowEdit } = this.state;
+        allowEdit = selectedAll ? false : allowEdit;
+        const selectedItems  = selectedAll ? [] : cloneDeep(this.state.maintenanceList);
+
+        this.selectAll.checked = !selectedAll;
+        this.setState({selectedItems, selectedAll: !selectedAll, allowEdit});
+    }
 
 
     handleSelect(e, maintenance){
         let newSelectedMaintenance = this.state.selectedItems;
-        
+        let currentSelectedAll = this.state.selectedAll;
 
         let index = -1;
 
@@ -46,8 +58,19 @@ export default class TableOnTab extends Component {
                                 : this.state.allowEdit
 
 
-        this.setState({selectedItems: newSelectedMaintenance, allowEdit});
+        if (currentSelectedAll || !newSelectedMaintenance.length) {
+          currentSelectedAll = false;
+          this.selectAll.checked = currentSelectedAll;
+        }
+
+
+        this.setState({
+            selectedItems: newSelectedMaintenance, 
+            allowEdit, 
+            selectedAll: currentSelectedAll
+        });
     }
+
 
     componentWillReceiveProps(nextProps){
         let newAllowEdit = this.state.allowEdit;
@@ -81,21 +104,20 @@ export default class TableOnTab extends Component {
 
     componentDidUpdate(){
         if(this.buttonEdit) {
-            this.buttonEdit.disabled =
-            this.buttonRemove.disabled = !this.state.selectedItems.length;
+            this.buttonEdit.disabled = !this.state.selectedItems.length;
+            if (this.buttonRemove) this.buttonRemove.disabled = !this.state.selectedItems.length;
         }
     }
 
 
     componentDidMount(){
         if(this.buttonEdit) {
-            this.buttonEdit.disabled =
-            this.buttonRemove.disabled = !this.state.selectedItems.length;
+            this.buttonEdit.disabled =!this.state.selectedItems.length;
+            if (this.buttonRemove) this.buttonRemove.disabled = !this.state.selectedItems.length;
         }
     }
 
     onSaveMaintenance(maintenance){
-        console.log('EDIT')
         let newSelMaintenanceList = clone(this.state.selectedItems)
 
 
@@ -112,12 +134,12 @@ export default class TableOnTab extends Component {
                                 ? this.state.allowEdit
                                 : false
 
-        console.log('newSelMaintenanceList', newSelMaintenanceList.length)
-        console.log('newAllowEdit', newAllowEdit)
+        this.selectAll.checked = false;
 
         this.setState({
             selectedItems: newSelMaintenanceList, 
-            allowEdit: newAllowEdit
+            allowEdit: newAllowEdit,
+            selectedAll: false
         });
 
         this.props.onSaveMaintenance(maintenance, selectedItemsID);
@@ -150,14 +172,53 @@ export default class TableOnTab extends Component {
         const t = clone(this.state.selectedItems);
         this.props.onRemove(t);
         
-        this.setState({selectedItems: []});
+        this.selectAll.checked = false;
+        this.setState({selectedItems: [], selectedAll: false});
     }
 
 
     render(){
         const { selectedItems, allowEdit } = this.state;
-
         
+        const renderBtnRemove = () => {
+            if (this.props.loginLevel === 3) {
+                return (
+                    <button
+                        onClick={this.onRemoveMaintenance}
+                        ref={(ref) => this.buttonRemove = ref}
+                        style={{margin: '10px'}}
+                        className=' m-1 btn btn-danger'>
+                        Delete
+                    </button>
+                )
+            }
+
+            return null;
+        }
+
+
+        const renderHeadCheckBox = () => {
+            if (!this.props.readOnly ){
+                if (this.props.maintenanceList.length) {
+                    return (
+                        <th className="noPrint">
+                            <input  type="checkbox" 
+                                    ref={(ref) => this.selectAll = ref}
+                                    onChange={this.handleSelectAll} />
+                        </th>
+                    )
+                } else {
+                    return (
+                        <th className="noPrint">
+                            <input  type="checkbox" disabled />
+                        </th>
+                    )
+                }
+            }
+
+          return null;
+        }
+
 
         return (
             <div className="TableOnTab">
@@ -176,18 +237,12 @@ export default class TableOnTab extends Component {
                     onClick={this.onEdit}>
                     Edit
                   </button>
-                  <button
-                    onClick={this.onRemoveMaintenance}
-                    ref={(ref) => this.buttonRemove = ref}
-                    style={{margin: '10px'}}
-                    className=' m-1 btn btn-danger'>
-                    Delete
-                  </button>
+                  { renderBtnRemove() }
                 </div>
-                <table className="table table-bordered table-hover">
+                <table className="table table-bordered table-hover vertMiddle min">
                   <thead>
                       <tr>
-                        <th><input type="checkbox" disabled/></th>
+                        { renderHeadCheckBox() }
                         <th>Job ID</th>
                         <th>Job Name</th>
                         <th>Description</th>
@@ -207,7 +262,7 @@ export default class TableOnTab extends Component {
                         let index = -1;
 
                         selectedItems.map((el, key) => {
-                            if (el._id == item._id) {
+                            if (el._id._str == item._id._str) {
                                 isInEditList = true;
                                 index = key;
                             }
@@ -239,4 +294,8 @@ export default class TableOnTab extends Component {
             </div>
         )
     }
+}
+
+TableOnTab.contextTypes = {
+  loginLevel: React.PropTypes.number.isRequired
 }

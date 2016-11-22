@@ -6,6 +6,7 @@ import { createContainer } from 'meteor/react-meteor-data';
 import { ApiInvoices } from '/imports/api/invoices.js';
 import { ApiPayments } from '/imports/api/payments.js';
 import { ApiLines } from '/imports/api/lines.js';
+import { ApiRentals, removeRental } from '/imports/api/rentals.js'
 import InvoiceRow from './InvoiceRow.js';
 import HeadList from './HeadList.js';
 
@@ -17,14 +18,17 @@ class Invoices extends Component {
     super(props, context); 
 
     this.state = {
+      loginLevel: context.loginLevel,
       selectedInvoicesID: [],
       foundItems: [],
       searchField: '',
       currentPage: 1,
-      itemsOnPage: 10
+      itemsOnPage: 10,
+      selectedAll: false
     }
 
     this.handleSelect = this.handleSelect.bind(this);
+    this.handleSelectAll = this.handleSelectAll.bind(this);
     this.handleChangeSearchField = debounce(this.handleChangeSearchField.bind(this), 350);
     this.removeInvoices = this.removeInvoices.bind(this);
     this.addInvoice = this.addInvoice.bind(this);
@@ -36,10 +40,12 @@ class Invoices extends Component {
   }
 
 
-  componentWillReceiveProps(props) {    
+  componentWillReceiveProps(props, nextContext) {    
     if (this.props.invoices != props.invoices) {
       this.handleChangeSearchField(this.state.searchField, props);
     }
+
+    this.setState({loginLevel: nextContext.loginLevel});
   }
 
   componentWillUpdate(nextProps, nextState){
@@ -69,16 +75,45 @@ class Invoices extends Component {
       map(invoice.paymentsId, (el) => {
         const payment = ApiPayments.findOne({_id: el});
         const customer = Meteor.users.findOne({ "profile.payments": el});
+        console.log('el', el, customer);
         Meteor.users.update({_id: customer._id}, {$pull: { "profile.payments": el}});
         ApiPayments.remove({_id: el});
       })
 
       map(invoice.linesId, (el) => {
+        const line = ApiLines.findOne({_id: el});
+        if (line) removeRental(line.rentalId);
         ApiLines.remove({_id: el});
       })
     })
 
-    this.setState({selectedInvoicesID: []});
+
+    const selectedAll = false;
+    this.selectAll.checked = selectedAll;
+
+    this.setState({selectedInvoicesID: [], selectedAll});
+  }
+
+
+  handleSelectAll(){
+    const { selectedInvoicesID, itemsOnPage, foundItems, selectedAll } = this.state;
+    let newSelectedInvoicesID = [];
+
+    if (!selectedAll) {
+      foundItems.map((itemInvoice, key) => {
+          if((key >= (this.state.currentPage-1) * this.state.itemsOnPage) && 
+             (key <   this.state.currentPage    * this.state.itemsOnPage)){
+
+            if (!newSelectedInvoicesID.includes(itemInvoice._id._str)) {
+              newSelectedInvoicesID.push(itemInvoice._id._str);
+            }
+          }
+      });
+    }
+
+    this.selectAll.checked = !selectedAll;
+    
+    this.setState({selectedInvoicesID: newSelectedInvoicesID, selectedAll: !selectedAll});
   }
 
 
@@ -86,15 +121,19 @@ class Invoices extends Component {
     let newSelectedInvoicesID = this.state.selectedInvoicesID;
     const InvoiceID = ""+Invoice._id;
     const index = newSelectedInvoicesID.indexOf(InvoiceID)
-
+    let currentSelectedAll = this.state.selectedAll;
 
     if (index === -1 ) 
       newSelectedInvoicesID.push(InvoiceID);
     else 
       newSelectedInvoicesID.splice(index, 1);
-    
 
-    this.setState({selectedInvoicesID: newSelectedInvoicesID});
+    if (currentSelectedAll || !newSelectedInvoicesID.length) {
+      currentSelectedAll = false;
+      this.selectAll.checked = currentSelectedAll;
+    }
+    
+    this.setState({selectedInvoicesID: newSelectedInvoicesID, selectedAll: currentSelectedAll});
   }
 
 
@@ -152,9 +191,36 @@ class Invoices extends Component {
                       customerName={Meteor.users.findOne(itemInvoice.customerId)}
                       onClick={this.handleInvoiceSingleOnClick.bind(null, itemInvoice._id)}
                       selectedInvoicesId={this.state.selectedInvoicesID} 
-                      onHandleSelect={this.handleSelect} />
+                      onHandleSelect={this.handleSelect}
+                      loginLevel={this.state.loginLevel} />
         }
       })
+    }
+
+
+    const renderHeadCheckBox = () => {
+      if (this.state.loginLevel === 3) {
+        if (this.state.foundItems.length) {
+          return (
+            <th>
+              <input type="checkbox"
+                     ref={(ref) => this.selectAll = ref}
+                     onChange={this.handleSelectAll} />
+            </th>
+          )
+        } else {
+          return (
+            <th>
+              <input type="checkbox"
+                     ref={(ref) => this.selectAll = ref}
+                     onChange={this.handleSelectAll}
+                     disabled />
+            </th>
+          )
+        }
+      }
+
+      return null;
     }
 
     return (
@@ -168,12 +234,13 @@ class Invoices extends Component {
           pageDown={this.pageDown}
           onChangeSearchField={this.handleChangeSearchField}
           onAddNew={this.addInvoice} 
-          onRemoveItems={this.removeInvoices} />
+          onRemoveItems={this.removeInvoices}
+          loginLevel={this.state.loginLevel} />
 
         <table className="table table-bordered table-hover">
           <thead>
             <tr>
-              <th><input type="checkbox" disabled="true"/></th>
+              { renderHeadCheckBox() }
               <th>Customer Name</th>
               <th>Date</th>
               <th>Invoice ID</th>
@@ -197,7 +264,8 @@ Invoices.propTypes = {
 };
 
 Invoices.contextTypes = {
-  router: React.PropTypes.object.isRequired
+  router: React.PropTypes.object.isRequired,
+  loginLevel: React.PropTypes.number.isRequired
 }
 
 

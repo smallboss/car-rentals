@@ -5,17 +5,19 @@ import { createContainer } from 'meteor/react-meteor-data'
 import { ApiCars } from '/imports/api/cars.js';
 import { ApiLines } from '/imports/api/lines.js';
 import { ApiInvoices } from '/imports/api/invoices.js';
-import { ApiRentals } from '/imports/api/rentals.js';
+import { ApiRentals, removeRental } from '/imports/api/rentals.js';
 import TableHeadButtons from './TableHeadButtons.js';
 import LineTabRow from './LineTabRow.js';
 
-export default class LinesOnTab extends Component {
-    constructor(props) {
-        super(props); 
+export class LinesOnTab extends Component {
+    constructor(props, context) {
+        super(props, context); 
 
         this.state = {
+            loginLevel: context.loginLevel,
             selectedListId: [],
-            isEdit: false
+            isEdit: false,
+            selectedAll: false
         }
 
         this.changeSelectedItem = this.changeSelectedItem.bind(this);
@@ -23,12 +25,39 @@ export default class LinesOnTab extends Component {
         this.handleEditLines = this.handleEditLines.bind(this);
         this.handleRemoveLines = this.handleRemoveLines.bind(this);
         this.handleSaveLine = this.handleSaveLine.bind(this);
+        this.handleSelectAll = this.handleSelectAll.bind(this);
     }   
+
+
+    componentWillReceiveProps(nextProps, nextContext) {
+        this.setState({ loginLevel: nextContext.loginLevel})
+    }
+
+
+    handleSelectAll(){
+        let { selectedAll, isEdit } = this.state;
+        isEdit = selectedAll ? false : isEdit;
+
+
+        let linesId = this.props.isNew ? [] : this.props.linesId
+
+        if (this.props.isNew) {
+            this.props.storageLines.map((el) => {
+                linesId.push(el._id);
+            })
+        }
+
+        const selectedListId = selectedAll ? [] : cloneDeep(linesId);
+
+        this.selectAll.checked = !selectedAll;
+        this.setState({selectedListId, selectedAll: !selectedAll, isEdit});
+    }
 
 
     changeSelectedItem(itemId) {
         let selectedListId = this.state.selectedListId;
         let index = -1;
+        let currentSelectedAll = this.state.selectedAll;
 
         map(selectedListId, (item, key) => {
             if (item._str == itemId._str) {
@@ -43,64 +72,119 @@ export default class LinesOnTab extends Component {
         let isEdit = this.state.isEdit;
         isEdit = !selectedListId.length ? false : isEdit;
 
-        this.setState({selectedListId, isEdit});
+        if (currentSelectedAll || !selectedListId.length) {
+          currentSelectedAll = false;
+          this.selectAll.checked = currentSelectedAll;
+        }
+
+        this.setState({selectedListId, isEdit, selectedAll: currentSelectedAll});
     }
 
 // ====================== ADD = EDIT = REMOVE = SAVE ======================
     handleAddNewLine(){
         const rentalId = new Mongo.ObjectID();
-        ApiRentals.insert({_id: rentalId});
-
-
         const lineId = new Mongo.ObjectID();
 
-        ApiLines.insert({_id: lineId, invoiceId: this.props.invoice._id, rentalId, dateCreate: now(), amount: '0'});
-        ApiInvoices.update(this.props.invoice._id, {$push: { linesId:{ $each: [lineId], $position: 0}}});
+        if (this.props.isNew) {
+            const newLine = {
+                _id: lineId,
+                rentalId,
+                amount: '0'
+            }
+
+            this.props.onAddNewLine(newLine);
+        } else {
+
+            ApiRentals.insert({_id: rentalId});
+            ApiLines.insert({_id: lineId, invoiceId: this.props.invoice._id, rentalId, amount: '0'});
+            ApiInvoices.update(this.props.invoice._id, {$push: { linesId: lineId }});
+
+            const invoice = this.props.invoice;
+            Meteor.users.update({_id: invoice.customerId}, {$push: { 'profile.rentals': rentalId }});
+            ApiInvoices.update({_id: invoice._id}, {$push: {rentals: rentalId}});
+        }
 
         let selectedListId = this.state.selectedListId;
-        selectedListId.push(lineId)
+            selectedListId.push(lineId);
 
+        // this.props.pullLineId(lineId);
 
-        const invoice = this.props.invoice;
-        Meteor.users.update({_id: invoice.customerId}, {$push: { 'profile.rentals': rentalId }});
-        ApiInvoices.update({_id: invoice._id}, {$push: {rentals: rentalId}});
-        this.setState({ selectedListId, isEdit: true });
+        this.setState({ selectedListId, isEdit: true});
     }
+
 
     handleEditLines(){
         this.setState({isEdit: !this.state.isEdit})
     }
 
-    handleRemoveLines(){
-        const invoice = this.props.invoice;
-        
-        map(this.state.selectedListId, (itemId, index) => {
-            invoice.linesId.splice(invoice.linesId.indexOf(itemId), 1);
-            ApiInvoices.update({_id: invoice._id}, {$pull: {linesId: itemId}})
-            ApiLines.remove(itemId);
-        })
 
-        this.setState({selectedListId: [], isEdit: false});
+    handleRemoveLines(){
+        if (this.props.isNew) {
+            this.props.onDeleteLines(this.state.selectedListId);
+        } else {
+            const invoice = this.props.invoice;
+        
+            map(this.state.selectedListId, (itemId, index) => {
+                const line = find(this.props.lines, {_id: itemId});
+                if (line) removeRental(line.rentalId);
+                invoice.linesId.splice(invoice.linesId.indexOf(itemId), 1);
+                ApiInvoices.update({_id: invoice._id}, {$pull: {linesId: itemId}})
+                ApiLines.remove(itemId);
+            })
+        }
+
+        this.selectAll.checked = false;
+        this.setState({selectedListId: [], isEdit: false, selectedAll: false});
     }
 
+
     handleSaveLine(line){
-        const _id = line._id;
-        delete line._id;
-
-        ApiLines.update({_id: _id }, {$set: line });
-        ApiRentals.update({_id: line.rentalId}, {$set: {car: line.car, customerId: this.props.invoice.customerId, dateFrom: line.dateFrom, dateTo: line.dateTo}});
-
+        const oldLine = ApiLines.findOne({_id: line._is});
         let selectedListId = this.state.selectedListId;
-        selectedListId.splice(selectedListId.indexOf(line._id), 1);
+        let index = -1;
+
+        if (this.props.isNew) {
+            this.props.onSaveLine(line)
+
+            selectedListId.map((el, key) => {
+                if (el._str == line._id._str) {
+                    index = key;
+                }
+            })
+        } else {
+            const _id = line._id;
+            delete line._id;
+
+            ApiLines.update({_id: _id }, {$set: line });
+            const car = find(this.props.cars, ['_id', line.car]);
+            ApiRentals.update({_id: line.rentalId}, {$set: {car: line.car, 
+                                                            customerId: this.props.invoice.customerId, 
+                                                            dateFrom: line.dateFrom, 
+                                                            dateTo: line.dateTo,
+                                                            plateNumber: car ? car.plateNumber : ''
+                                                        }});
+
+
+            selectedListId.map((el, key) => {
+                if (el._str == _id._str) {
+                    index = key;
+                }
+            })
+        }
+
+
+        selectedListId.splice(index, 1);
 
         const isEdit = (selectedListId.length === 0) ? false : this.state.isEdit;
 
-        this.setState({ selectedListId, isEdit });
+        this.selectAll.checked = false;
+        this.setState({ selectedListId, isEdit, selectedAll: false });
     }
 // END =================== ADD = EDIT = REMOVE = SAVE ======================
 
     render(){
         let lineListId = this.props.linesId;
+        let totalAmount = 0;
 
         const RenderTableHeadButtons = () => {
             if (!this.props.readOnly) {
@@ -109,11 +193,80 @@ export default class LinesOnTab extends Component {
                         selectedItems={this.state.selectedListId.length}
                         onAddNew={this.handleAddNewLine}
                         onEdit={this.handleEditLines}
-                        onRemove={this.handleRemoveLines} />
+                        onRemove={this.handleRemoveLines}
+                        loginLevel={this.state.loginLevel} />
                 )
             }
 
             return null;
+        }
+
+
+        const renderRows = () => {
+            if (lineListId && this.props.isNew === false) {
+                return (
+                    lineListId.map((item, key) => {
+                        // const line = ApiLines.findOne({_id: item});
+                        const line = find(this.props.lines, {_id: item});
+                        if (!line) {return null}
+                        totalAmount += parseInt(line.amount);
+                        return (
+                            <LineTabRow key={`line-${key}`}
+                                onSelect={this.changeSelectedItem.bind(null,item)}
+                                line={ line }
+                                onSave={this.handleSaveLine}
+                                selectedListId={this.state.selectedListId}
+                                isEdit={this.state.isEdit}
+                                cars={this.props.cars}
+                                readOnly={this.props.readOnly} />
+                        )
+                    })
+                )
+            }
+
+            if (this.props.isNew) {
+                return (
+                    this.props.storageLines.map((line, key) => {
+                        totalAmount += parseInt(line.amount);
+                        return (
+                            <LineTabRow key={`line-${key}`}
+                                onSelect={this.changeSelectedItem.bind(null,line._id)}
+                                line={ line }
+                                onSave={this.handleSaveLine}
+                                selectedListId={this.state.selectedListId}
+                                isEdit={this.state.isEdit}
+                                cars={this.props.cars}
+                                readOnly={this.props.readOnly} />
+                        )
+                    })
+                )
+            }
+
+            return undefined
+        }
+
+
+        const renderHeadCheckBox = () => {
+            if (!this.props.readOnly ){
+                if (this.props.storageLines.length || lineListId.length) {
+                    return (
+                      <th className="noPrint">
+                        <input type="checkbox" 
+                               ref={(ref) => this.selectAll = ref}
+                               onChange={this.handleSelectAll} />
+                      </th>
+                    )
+                }
+                else {
+                    return (
+                      <th className="noPrint">
+                        <input type="checkbox" disabled />
+                      </th>
+                    )
+                }
+            }
+
+          return null;
         }
 
 
@@ -124,7 +277,7 @@ export default class LinesOnTab extends Component {
                 <table className="table table-bordered table-hover">
                     <thead>
                         <tr>
-                            { !this.props.readOnly ? (<th><input type="checkbox" disabled/></th>) : null }
+                            { renderHeadCheckBox() }
                             <th>Item</th>
                             <th>Description</th>
                             <th>Car plate#</th>
@@ -136,24 +289,24 @@ export default class LinesOnTab extends Component {
                     </thead>
 
                     <tbody>
-                        {(() => {
-                            if (lineListId) {
-                                return (
-                                    lineListId.map((item, key) => {
-                                        return (
-                                            <LineTabRow key={`line-${key}`}
-                                                onSelect={this.changeSelectedItem.bind(null,item)}
-                                                line={ApiLines.findOne({_id: item})}
-                                                onSave={this.handleSaveLine}
-                                                selectedListId={this.state.selectedListId}
-                                                isEdit={this.state.isEdit}
-                                                cars={this.props.cars}
-                                                readOnly={this.props.readOnly}/>
-                                        )
-                                }))
-                            }
-                            return undefined
-                        })()}
+
+                        { renderRows() }
+
+                        <tr style={{border: '1px solid white', backgroundColor: 'white'}}>
+                            {(() => { 
+                                if (!this.props.readOnly) 
+                                    return <td style={{border: '1px solid white'}} className="noPrint"></td>
+
+                                return null;
+                            })()}
+                            <td style={{border: '1px solid white'}}></td>
+                            <td style={{border: '1px solid white'}}></td>
+                            <td style={{border: '1px solid white'}}></td>
+                            <td style={{border: '1px solid white'}}></td>
+                            <td style={{border: '1px solid white'}}></td>
+                            <td style={{border: '1px solid white'}}><b>Total amount:</b></td>
+                            <td style={{border: '1px solid white'}}><b>{ totalAmount }</b></td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -166,7 +319,8 @@ LinesOnTab.propTypes = {
 };
 
 LinesOnTab.contextTypes = {
-  router: React.PropTypes.object.isRequired
+  router: React.PropTypes.object.isRequired,
+  loginLevel: React.PropTypes.number.isRequired
 }
 
 
@@ -176,7 +330,7 @@ export default createContainer(() => {
   Meteor.subscribe('rentals');
 
   return {
-    lines: ApiLines.find().fetch().reverse(),
+    lines: ApiLines.find().fetch(),
     cars: ApiCars.find().fetch()
   };
 }, LinesOnTab);

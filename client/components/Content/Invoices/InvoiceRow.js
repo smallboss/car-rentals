@@ -10,12 +10,14 @@ export default class InvoiceRow extends Component {
     }
 
     componentWillReceiveProps (props) {
-        this.input.checked = false;
+        if (this.input) {
+            this.input.checked = false;
 
-        map(props.selectedInvoicesId, (item) => {
-            if(item == props.item._id)
-                this.input.checked = true;
-        })
+            map(props.selectedInvoicesId, (item) => {
+                if(item == props.item._id)
+                    this.input.checked = true;
+            })
+        }
     }
 
 
@@ -37,15 +39,31 @@ export default class InvoiceRow extends Component {
         }
 
 
+        const renderCheckBox = () => {
+            if (this.props.loginLevel === 3) {
+                return (
+                    <th>
+                        <input 
+                            type="checkbox" 
+                            ref={(ref) => this.input = ref} 
+                            onChange={(e) => onHandleSelect(e, item)} />
+                    </th>
+                )
+            }
+
+            return null;
+        }
+
+
         return (
             <tr>
-                <th>
-                    <input 
-                        type="checkbox" ref={(ref) => this.input = ref} 
-                        onChange={(e) => onHandleSelect(e, item)} />
-                </th>
+                { renderCheckBox() }
                 <td>
-                    <Link to={`/managePanel/customer/${item.customerId}`}>{ customerName ? customerName.profile.name : '' }</Link>
+                    <Link to={`/managePanel/customer/${item.customerId}`}>{ (customerName && customerName.profile.name) 
+                                                                                    ? customerName.profile.name 
+                                                                                    : 'profile' 
+                                                                           }
+                    </Link>
                 </td>
                 <td onClick={onClick} >{ item.date }</td>
                 <td onClick={onClick} >{ item.codeName}</td>

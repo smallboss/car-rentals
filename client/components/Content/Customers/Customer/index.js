@@ -262,7 +262,7 @@ class Customer extends React.Component {
         }) 
         rentalsIds.forEach(id => {
             let finder = ApiRentals.findOne({_id: new Mongo.ObjectID(id._str)})
-            if (finder) {
+            if (finder && finder.car) {
                 let car = ApiCars.findOne({_id: new Mongo.ObjectID(finder.car._str)})
                 if(car && car.status == 'rented'){
                     fines.push(car.plateNumber)
