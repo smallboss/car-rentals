@@ -136,7 +136,8 @@ class CarRequests extends React.Component {
         Meteor.users.update({_id: id}, {$set: {'profile.carRequest': data}})
     }
     render () {
-        let classNameNewField = (!this.state.addNewField) ? 'hidden' : ''
+        let classNameNewField = (!this.state.addNewField) ? 'hidden' : '',
+            currentDate = new Date().toISOString()
         //let _stateToTh = (this.state.arrToTable) ? Object.keys(this.state.arrToTable[0] || {}, key => obj[key]) : [];
         return (
             <div>
@@ -158,9 +159,9 @@ class CarRequests extends React.Component {
                     <tbody>
                     <tr key={Math.random()} className={classNameNewField} ref={ref => this._r_addNewField = ref}>
                         <td>#<input type='button' className='btn btn-success m-l-1' name='save_notes_new' value='Save' onClick={this.handlerEditButtons} /></td>
-                        <td><DatePicker dateFormat='MM/DD/YYYY' value={new Date().toUTCString()} id='dateCreateRequest' ref={ref => {this.rNewFieldDateCreateRequest = ref}} disabled /></td>
-                        <td><DatePicker dateFormat='MM/DD/YYYY' value={new Date().toUTCString()} id='dateFrom' ref={ref => {this.rNewFieldDateFrom = ref}} /></td>
-                        <td><DatePicker dateFormat='MM/DD/YYYY' value={new Date().toUTCString()} id='dateTo' ref={ref => {this.rNewFieldDateTo = ref}} /></td>
+                        <td><DatePicker dateFormat='MM/DD/YYYY' value={currentDate} id='dateCreateRequest' ref={ref => {this.rNewFieldDateCreateRequest = ref}} disabled /></td>
+                        <td><DatePicker dateFormat='MM/DD/YYYY' value={currentDate} id='dateFrom' ref={ref => {this.rNewFieldDateFrom = ref}} /></td>
+                        <td><DatePicker dateFormat='MM/DD/YYYY' value={currentDate} id='dateTo' ref={ref => {this.rNewFieldDateTo = ref}} /></td>
                         <td><input type='text' id='requestText' className='form-control' ref={ref => {this.rNewFieldRequestText = ref}} /></td>                        
                     </tr>
                     {this.state.arrToTable.map((elem, i) => {

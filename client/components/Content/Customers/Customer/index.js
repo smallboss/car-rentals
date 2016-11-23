@@ -19,7 +19,7 @@ import CustomerTolls from '../../Customers/CustomersTolls'
 import CustomerPayments from '../CustomerPayments'
 import './style.css'
 const DatePicker = require('react-bootstrap-date-picker')
-const _user = {
+var _user = {
     id: new Mongo.ObjectID(),
     username: '',
     email: '',
@@ -27,7 +27,7 @@ const _user = {
     profile: {
         userType: 'customer',
         name: '',
-        birthDate: new Date().setFullYear(new Date().getFullYear() - 18),
+        birthDate: new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().slice(0, 10),
         phone: '',
         address: '',
         carRequest: [
