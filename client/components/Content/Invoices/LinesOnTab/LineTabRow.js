@@ -95,20 +95,6 @@ export default class LineTabRow extends Component {
         const cars = this.props.cars ? this.props.cars : [];
         const car = find(cars, {_id: line.car});
 
-        const buttonSave = () => {
-            if (this.state.isEdit) {
-                return (
-                    <button
-                        onClick={ () =>  this.props.onSave(this.state.dispLine) }
-                        className='btn btn-danger'>
-                        Save
-                    </button>
-                )
-            }
-
-            return undefined;
-        }
-
         const showItem = () => {
             if (this.state.isEdit){
                 return(
@@ -235,15 +221,28 @@ export default class LineTabRow extends Component {
         }
 
 
-        const renderCheckBox = () => {
+        const renderCheckBoxAndSave = () => {
             if (!this.props.readOnly) {
-                return (
-                    <th className="noPrint">
-                        <input  type="checkbox" 
-                                onChange={() => this.props.onSelect(line._id)}
-                                ref={(ref) => this.checkbox = ref} />
-                    </th>
-                )
+                
+                if (!this.state.isEdit){
+                    return (
+                        <th className="noPrint">
+                            <input  type="checkbox" 
+                                    onChange={() => this.props.onSelect(line._id)}
+                                    ref={(ref) => this.checkbox = ref} />
+                        </th>
+                    )
+                } else {
+                    return (
+                        <th className="noPrint">
+                            <button
+                                onClick={ () =>  this.props.onSave(this.state.dispLine) }
+                                className='btn btn-danger'>
+                                Save
+                            </button>
+                        </th>
+                    )
+                }
             } 
 
             return null;
@@ -252,9 +251,9 @@ export default class LineTabRow extends Component {
 
         return(
             <tr className="LineTabRow">
-                { renderCheckBox() }
+                { renderCheckBoxAndSave() }
                 <td>
-                    { buttonSave() }
+                    {/* buttonSave()*/ }
                     { showItem() }
                 </td>
                 <td>{ showDescription() }</td>

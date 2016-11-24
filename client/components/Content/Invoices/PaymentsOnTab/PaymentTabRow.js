@@ -26,7 +26,7 @@ export default class PaymentTabRow extends Component {
         const nextPayment = nextProps.payment ? nextProps.payment._id._str : '';
         const isSelected = find(nextProps.selectedListId, {_str: nextPayment});
         
-        if (!this.props.readOnly) 
+        if (this.checkbox)
             this.checkbox.checked = isSelected;
 
         const isEdit = (isSelected && nextProps.isEdit) ? true : false;
@@ -151,23 +151,38 @@ export default class PaymentTabRow extends Component {
             return <span>{payment ? payment.status : ''}</span>
         }
 
+        const renderCheckBoxAndSave = () => {
+            if (!this.props.readOnly) {
+                if (!this.state.isEdit) {
+                    return (
+                        <th className="noPrint">
+                            <input  type="checkbox" 
+                                    onChange={() => this.props.onSelect(payment._id)}
+                                    ref={(ref) => this.checkbox = ref}/>
+                        </th>
+                    )
+                } else {
+                    return (
+                        <th className="noPrint">
+                            <button
+                                onClick={ () =>  this.props.onSave(this.state.dispPayment) }
+                                className='btn btn-danger'>
+                                Save
+                            </button>
+                        </th>
+                    )
+                }
+            } 
+
+            return null;
+        }
+
+
         return(
             <tr className="PaymentTabRow">
-                {(() => {
-                    if (!this.props.readOnly) {
-                        return (
-                            <th className="noPrint">
-                                <input  type="checkbox" 
-                                        onChange={() => this.props.onSelect(payment._id)}
-                                        ref={(ref) => this.checkbox = ref}/>
-                            </th>
-                        )
-                    }
-
-                    return null;
-                })()}
+                { renderCheckBoxAndSave() }
                 <td>
-                    { buttonSave() }
+                    { /*buttonSave()*/ }
                     { showPaymentId() }
                 </td>
                 <td>{ showDate() }</td>
