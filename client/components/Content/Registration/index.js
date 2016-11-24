@@ -161,8 +161,7 @@ class Registration extends React.Component {
                 <LoginButtons toShowModal={1} />
             )
         }
-        let dateForPicker = new Date()
-        dateForPicker.setFullYear(dateForPicker.getFullYear() - 18)
+        var dateForPicker = new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString()
         return (
             <div className='text-center'>
                 <form className='form-horizontal text-left add-user-form' onSubmit={this.addUserHandler} encType='multipart/form-data'>
