@@ -109,7 +109,7 @@ class Users extends React.Component {
                     </tbody>
                 </table>
                 {(this.state.loginLevel === 3) ? <input type='button' className='btn btn-danger' name='remover-users' value='Delete users' onClick={this.handlerDeleteUser} /> : ''}
-                <input type='button' className='btn btn-success m-x-1' name='add-user' value='Add user' onClick={() => {let _new = 'new'; browserHistory.push(`/managePanel/customer/${_new}`)}} />
+                <input type='button' className='btn btn-success m-x-1' name='add-user' value='Add user' onClick={() => {let _new = 'new'; browserHistory.push(`/managePanel/user_single/${_new}`)}} />
                 {(this.state.maxPage > 1) ? <div className='text-center'>
                     <Pagination num={this.state.maxPage} handlerPagination={this.handlerPagination} key={Math.random()} />
                 </div> : ''}

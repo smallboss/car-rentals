@@ -102,7 +102,7 @@ class CustomerPayments extends React.Component {
         return (
             <div>
                 <div className='row p-l-1'>
-                    <div className='col-xs-5'>
+                    <div className='col-xs-12'>
                         <input type='button' name='add-note' className='btn btn-success' value='Add note' onClick={() => {this.setState({showNewField: 1})}} />
                         <input type='button' name='edit-notes' className='btn btn-primary m-x-1' value='Edit notes' onClick={this.handlerButtons} />
                         {(this.state.loginLevel === 3) ? <input type='button' name='remove-notes' className='btn btn-danger' value='Remove notes' onClick={this.handlerButtons} /> : ''}
@@ -131,7 +131,7 @@ class CustomerPayments extends React.Component {
                         <td><input type='text' name='id' className='form-control' disabled /></td>
                         <td><input type='text' name='codeName' className='form-control' ref={ref => {this.rNewFieldCodeName = ref}} /></td>
                         <td><NumericInput name='amount' className='form-control' ref={ref => {this.rNewFieldAmount = ref}} /></td>
-                        <td><DatePicker dateFormat='MM/DD/YYYY' value={new Date().toUTCString()} ref={ref => {this.rNewFieldDate = ref}} /></td>
+                        <td><DatePicker dateFormat='MM/DD/YYYY' value={new Date().toISOString()} ref={ref => {this.rNewFieldDate = ref}} /></td>
                         <td width='100'><select id='status' className='form-control' ref={ref => {this.rNewFieldStatus = ref}} ><option value='open' defaultValue>open</option><option value='close'>close</option></select></td>                        
                     </tr>
                     {this.state.payments.map(elem => {

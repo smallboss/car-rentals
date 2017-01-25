@@ -69,7 +69,7 @@ export class CarSingle extends Component {
 
   onChangePlateNumber(value) {
     let newCar = this.state.dispCar;
-    newCar.plateNumber = value;
+    newCar.plateNumber = value.trim();
     this.setState({dispCar: newCar});
   }
 

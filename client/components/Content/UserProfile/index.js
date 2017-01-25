@@ -18,6 +18,7 @@ class UserProfile extends React.Component {
         this.handlerButtonsEdit = this.handlerButtonsEdit.bind(this)
         this.handlerInputs = this.handlerInputs.bind(this)
         this.datePickerHandler = this.datePickerHandler.bind(this)
+        this.datePickerValidate = this.datePickerValidate.bind(this)        
     }
     componentWillReceiveProps (nextProps) {
         this.setState({user: nextProps.user, toShowLogin: (Meteor.userId()) ? 0 : 1})
@@ -81,6 +82,7 @@ class UserProfile extends React.Component {
                 this.refButtonSave.addEventListener('click', this.handlerButtonsEdit)
                 break
             case 'saveButton':
+                if(!this.datePickerValidate(_сurrentState.profile.birthDate)) return
                 delete _сurrentState._id
                 Meteor.users.update(_id, {$set: _сurrentState}, false, (err, result) => {
                     if(err) {
@@ -114,29 +116,66 @@ class UserProfile extends React.Component {
         }
         
     }
-    datePickerHandler(date) {
+    datePickerHandler(value) {
+        let newUser = this.state.user;
+        newUser.profile['birthDate'] = value.slice(0,10);
+        this.setState({user: newUser})
+    }
+    datePickerValidate(date) {
         let checkBirthYear = +date.slice(0, 4),
             checkBirthMonth = +date.slice(5, 7),
             checkBirthDay = +date.slice(8, 10),
-            _date = new Date(),
-            defaultDate = new Date().setFullYear(new Date().getFullYear() - 18),
-            user = this.state.user
-        user.profile['birthDate'] = date.slice(0,10)
+            _date = new Date()
+            // defaultDate = new Date().setFullYear(new Date().getFullYear() - 18),
+            // user = this.state.user
+        // user.profile['birthDate'] = date.slice(0,10)
         if(checkBirthYear > _date.getFullYear() - 18) {
             alert('User must be over then 18 years')
-            user.profile['birthDate'] = defaultDate
+            return false
+            // user.profile['birthDate'] = defaultDate
         } else if (checkBirthYear == _date.getFullYear() - 18) {
             if(checkBirthMonth > _date.getMonth() + 1) {
                 alert('User must be over then 18 years')
-                user.profile['birthDate'] = defaultDate
+                return false
+                // user.profile['birthDate'] = defaultDate
             } else if (checkBirthMonth == _date.getMonth() + 1) {
-                if(checkBirthDay > _date.getDay() - 1) {
+                if(checkBirthDay > _date.getDate()) {
                     alert('User must be over then 18 years')
-                    user.profile['birthDate'] = defaultDate
+                    return false
+                    // user.profile['birthDate'] = defaultDate
                 }
             }
-        }
-        this.setState({user: user})
+        } 
+        return true        
+    // else {
+        //     user.profile['birthDate'] = date.slice(0,10)
+        //     this.setState({user: user})
+        //     return true
+        // }
+
+        // this.setState({user: user})
+        // let checkBirthYear = +date.slice(0, 4),
+        //     checkBirthMonth = +date.slice(5, 7),
+        //     checkBirthDay = +date.slice(8, 10),
+        //     _date = new Date(),
+        //     defaultDate = new Date().setFullYear(new Date().getFullYear() - 18),
+        //     user = this.state.user
+        // user.profile['birthDate'] = date.slice(0,10)
+        // if(checkBirthYear > _date.getFullYear() - 18) {
+        //     alert('User must be over then 18 years')
+        //     user.profile['birthDate'] = defaultDate
+        // } else if (checkBirthYear == _date.getFullYear() - 18) {
+        //     if(checkBirthMonth > _date.getMonth() + 1) {
+        //         alert('User must be over then 18 years')
+        //         user.profile['birthDate'] = defaultDate
+        //     } else if (checkBirthMonth == _date.getMonth() + 1) {
+        //         if(checkBirthDay > _date.getDay() - 1) {
+        //             alert('User must be over then 18 years')
+        //             user.profile['birthDate'] = defaultDate
+        //         }
+        //     }
+        // }
+        // this.setState({user: user})
     }
     render () {
         if(this.state.toShowLogin) {
@@ -151,7 +190,8 @@ class UserProfile extends React.Component {
                 </div>
             )
         }
-        let editAble = (!this.state.editAble) ? 'disabled' : false;
+        // console.log(this.state.user.profile)
+        let editAble = (!this.state.editAble) ? true : false;
         let { username, emails, profile } = this.state.user || '',
             email = (emails) ? emails[0].address : '';
         let { userType, name, birthDate, phone, address, _images } = (profile) ? profile : '';
@@ -199,7 +239,7 @@ class UserProfile extends React.Component {
                             <div className='form-group'>
                                 <label htmlFor='birthdate' className='col-xs-4'>Birth Date</label>
                                 <div className='col-xs-8'>
-                                    <DatePicker dateFormat='MM/DD/YYYY' value={birthDate} name='check-picker' onChange={this.datePickerHandler} disabled={editAble} />
+                                    {(editAble) ? <input type="date" className='form-control' value={birthDate} disabled='disabled' /> : <DatePicker dateFormat='MM/DD/YYYY' value={birthDate} id="birthDate" name='check-picker' onChange={this.datePickerHandler} /> }
                                 </div>
                             </div><br />
                             <div className='form-group'>

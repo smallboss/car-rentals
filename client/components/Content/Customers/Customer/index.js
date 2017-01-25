@@ -19,7 +19,7 @@ import CustomerTolls from '../../Customers/CustomersTolls'
 import CustomerPayments from '../CustomerPayments'
 import './style.css'
 const DatePicker = require('react-bootstrap-date-picker')
-const _user = {
+var _user = {
     id: new Mongo.ObjectID(),
     username: '',
     email: '',
@@ -27,7 +27,7 @@ const _user = {
     profile: {
         userType: 'customer',
         name: '',
-        birthDate: new Date().setFullYear(new Date().getFullYear() - 18),
+        birthDate: new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().slice(0, 10),
         phone: '',
         address: '',
         carRequest: [
@@ -217,7 +217,7 @@ class Customer extends React.Component {
             checkBirthMonth = +date.slice(5, 7),
             checkBirthDay = +date.slice(8, 10),
             _date = new Date(),
-            defaultDate = new Date().setFullYear(new Date().getFullYear() - 18),
+            defaultDate = new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().slice(0, 10),
             customer = this.state.customer
         customer.profile['birthDate'] = date.slice(0,10)
         if(checkBirthYear > _date.getFullYear() - 18) {
@@ -228,7 +228,7 @@ class Customer extends React.Component {
                 alert('User must be over then 18 years')
                 customer.profile['birthDate'] = defaultDate
             } else if (checkBirthMonth == _date.getMonth() + 1) {
-                if(checkBirthDay > _date.getDay() - 1) {
+                if(checkBirthDay > _date.getDate()) {
                     alert('User must be over then 18 years')
                     customer.profile['birthDate'] = defaultDate
                 }
@@ -313,7 +313,7 @@ class Customer extends React.Component {
                         <div className='col-xs-6'>
                             <label htmlFor='birhdate' className='col-xs-2'>Birth Date</label>
                             <div className='col-xs-8 form-horizontal'>
-                                <DatePicker dateFormat='MM/DD/YYYY' value={birthDate} name='check-picker' onChange={this.datePickerHandler} disabled={editAble} />
+                                {(editAble) ? <input type="date" className='form-control' value={birthDate} disabled='disabled'/> : <DatePicker dateFormat='MM/DD/YYYY' value={birthDate} name='check-picker' onChange={this.datePickerHandler} /> }
                             </div>
                         </div>
                         <div className='col-xs-6'>
